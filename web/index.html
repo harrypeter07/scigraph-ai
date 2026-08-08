@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciGraph AI — Citation Trajectory & Impact Predictor</title>
+    <title>SciGraph AI — Impact Predictor & Live Evidence Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
     <style>
         :root {
             --bg-primary: #0a0d14;
-            --bg-card: rgba(18, 24, 38, 0.75);
+            --bg-card: rgba(18, 24, 38, 0.85);
             --border-color: rgba(255, 255, 255, 0.1);
             --accent-cyan: #00f2fe;
             --accent-blue: #4facfe;
             --accent-purple: #7f00ff;
+            --accent-yellow: #f1c40f;
             --text-main: #f0f4f8;
             --text-muted: #8a99ad;
             --shadow-glow: 0 8px 32px 0 rgba(0, 242, 254, 0.15);
@@ -34,12 +35,12 @@
 
         header {
             max-width: 1200px;
-            margin: 0 auto 2.5rem;
+            margin: 0 auto 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.5rem;
+            padding-bottom: 1.2rem;
         }
 
         .logo {
@@ -54,19 +55,37 @@
             gap: 0.6rem;
         }
 
-        .badge {
-            font-size: 0.75rem;
-            padding: 0.3rem 0.8rem;
-            border-radius: 50px;
-            background: rgba(0, 242, 254, 0.1);
-            border: 1px solid rgba(0, 242, 254, 0.3);
-            color: var(--accent-cyan);
-            font-weight: 500;
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.6rem 1.4rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .view-section { display: none; max-width: 1200px; margin: 0 auto; }
+        .view-section.active { display: block; }
+
+        .predictor-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
@@ -79,6 +98,7 @@
             border-radius: 16px;
             padding: 1.8rem;
             box-shadow: var(--shadow-glow);
+            margin-bottom: 1.5rem;
         }
 
         .card-title {
@@ -106,15 +126,9 @@
             color: white;
             font-size: 0.95rem;
             outline: none;
-            transition: all 0.3s ease;
         }
 
-        input[type="text"]:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 12px rgba(0, 242, 254, 0.2);
-        }
-
-        button {
+        button.action-btn {
             background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
             border: none;
             color: white;
@@ -122,19 +136,73 @@
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
         }
 
-        .prob-bar-container { margin-top: 1rem; }
-        .prob-row { margin-bottom: 0.8rem; }
-        .prob-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--text-muted); }
-        .prob-bar-bg { height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 5px; overflow: hidden; }
-        .prob-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); border-radius: 5px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        table.evidence-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.88rem;
+        }
+
+        table.evidence-table th, table.evidence-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table.evidence-table th {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        tr.baseline-row {
+            background: rgba(241, 196, 15, 0.08) !important;
+            border-left: 3px solid var(--accent-yellow);
+        }
+
+        .badge-correct { color: #2ecc71; font-weight: 700; }
+        .badge-incorrect { color: #e74c3c; font-weight: 700; }
+
+        .caveat-banner {
+            background: rgba(241, 196, 15, 0.12);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            border-radius: 12px;
+            padding: 1.2rem;
+            color: #f39c12;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-top: 1rem;
+        }
 
         #cy {
             width: 100%;
@@ -143,27 +211,6 @@
             background: rgba(10, 13, 20, 0.8);
             border: 1px solid var(--border-color);
         }
-
-        .impact-tag {
-            display: inline-block;
-            padding: 0.4rem 1rem;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-top: 0.5rem;
-        }
-
-        .tag-high { background: rgba(0, 242, 254, 0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }
-        .tag-medium { background: rgba(79, 172, 254, 0.15); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
-        .tag-low { background: rgba(127, 0, 255, 0.15); color: #b16cff; border: 1px solid #b16cff; }
-
-        .feature-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.6rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.9rem;
-        }
     </style>
 </head>
 <body>
@@ -171,125 +218,246 @@
     <header>
         <div class="logo">
             ⚡ SciGraph AI
-            <span class="badge">Temporal Leakage Audited</span>
+            <span style="font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 50px; background: rgba(0,242,254,0.1); border: 1px solid rgba(0,242,254,0.3); color: var(--accent-cyan);">Audited Temporal GNN</span>
         </div>
         <div style="font-size: 0.9rem; color: var(--text-muted);">
-            RCOEM Major Project (Session 2026–27)
+            RCOEM CSE Major Project (Sem VII 2026–27)
         </div>
     </header>
 
-    <main>
-        <!-- Left Panel: Search & Prediction -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('predictor')">🔍 Predictor & Graph Visualizer</button>
+        <button class="tab-btn" onclick="switchTab('evidence')">📊 Live Evidence & Data Dashboard</button>
+    </div>
+
+    <!-- View 1: Predictor & Graph Visualizer -->
+    <div id="predictorView" class="view-section active">
+        <div class="predictor-grid">
+            <section class="card">
+                <div class="card-title">🔍 Paper Impact Predictor</div>
+                <div class="search-box">
+                    <input type="text" id="paperInput" placeholder="Enter OpenAlex Paper ID..." value="W2194775991">
+                    <button class="action-btn" onclick="fetchPrediction()">Predict</button>
+                </div>
+
+                <div id="predictionResult" style="display: none;">
+                    <h3 id="paperTitle" style="font-size: 1.05rem; margin-bottom: 0.5rem; color: white;"></h3>
+                    <p id="paperMeta" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;"></p>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
+                        <div id="impactBadge" style="display: inline-block; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem; margin-top: 0.5rem; background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact</div>
+                    </div>
+
+                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">📊 Class Probabilities</div>
+                    <div style="margin-top: 0.8rem;">
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white;">70%</span></div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barHigh" style="height: 100%; width: 70%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));"></div></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-title">🕸️ Local Neighborhood Subgraph</div>
+                <div id="cy"></div>
+            </section>
+        </div>
+    </div>
+
+    <!-- View 2: Live Evidence Dashboard -->
+    <div id="evidenceView" class="view-section">
+        <!-- Live Dataset Overview Panel -->
         <section class="card">
-            <div class="card-title">🔍 Paper Impact Predictor</div>
-            
-            <div class="search-box">
-                <input type="text" id="paperInput" placeholder="Enter OpenAlex Paper ID (e.g. W4308632271)..." value="W4308632271">
-                <button onclick="fetchPrediction()">Predict</button>
+            <div class="card-title">📊 Panel 1 — Live Dataset Overview</div>
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-number" id="evPapers">50</div><div class="stat-label">Total Sample Papers</div></div>
+                <div class="stat-box"><div class="stat-number" id="evAuthors">257</div><div class="stat-label">Unique Authors</div></div>
+                <div class="stat-box"><div class="stat-number" id="evInst">215</div><div class="stat-label">Institutions</div></div>
+                <div class="stat-box"><div class="stat-number" id="evCitations">2,170</div><div class="stat-label">Fetched Citations</div></div>
             </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Year Range: <strong id="evYearRange" style="color: white;">2012 - 2021</strong> | Class Distribution: Low: <span id="evClassLow" style="color:var(--accent-cyan);">7</span>, Med: <span id="evClassMed" style="color:var(--accent-blue);">36</span>, High: <span id="evClassHigh" style="color:var(--accent-purple);">7</span></p>
+        </section>
 
-            <div id="predictionResult" style="display: none;">
-                <h3 id="paperTitle" style="font-size: 1.05rem; margin-bottom: 0.5rem; color: white;"></h3>
-                <p id="paperMeta" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;"></p>
+        <!-- Model Comparison Panel -->
+        <section class="card">
+            <div class="card-title">⚖️ Panel 2 — Model Comparison vs Majority-Class Baseline</div>
+            <table class="evidence-table">
+                <thead>
+                    <tr>
+                        <th>Model Name</th>
+                        <th>Test Accuracy (Fraction)</th>
+                        <th>Test Accuracy (%)</th>
+                        <th>Macro-F1</th>
+                        <th>Beats Majority Baseline?</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="modelComparisonBody">
+                    <tr class="baseline-row">
+                        <td><strong>MajorityClass_Baseline</strong></td>
+                        <td><strong>3 / 5</strong></td>
+                        <td><strong>60.0%</strong></td>
+                        <td>0.2500</td>
+                        <td><span style="color: var(--accent-yellow);">N/A (Trivial Baseline)</span></td>
+                        <td>Predicts Class 1 (Medium) for all test samples.</td>
+                    </tr>
+                    <tr>
+                        <td>LogisticRegression</td>
+                        <td>3 / 5</td>
+                        <td>60.0%</td>
+                        <td>0.2500</td>
+                        <td><span class="badge-incorrect">No (Tied)</span></td>
+                        <td>Defaults to majority class prediction on 5-sample test split.</td>
+                    </tr>
+                    <tr>
+                        <td>Gradient Boosting (GBDT)</td>
+                        <td>3 / 5</td>
+                        <td>60.0%</td>
+                        <td>0.2500</td>
+                        <td><span class="badge-incorrect">No (Tied)</span></td>
+                        <td>Predicts Class 2 for Paper 3, Class 1 for remainder.</td>
+                    </tr>
+                    <tr>
+                        <td>HeteroGraphSAGE</td>
+                        <td>3 / 5</td>
+                        <td>60.0%</td>
+                        <td>0.2500</td>
+                        <td><span class="badge-incorrect">No (Tied)</span></td>
+                        <td>PyTorch forward pass on cutoff-masked graph.</td>
+                    </tr>
+                    <tr>
+                        <td>HeteroGAT</td>
+                        <td>3 / 5</td>
+                        <td>60.0%</td>
+                        <td>0.2500</td>
+                        <td><span class="badge-incorrect">No (Tied)</span></td>
+                        <td>Multi-head Graph Attention Network.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
-                <div style="margin-bottom: 1.5rem;">
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
-                    <div id="impactBadge" class="impact-tag tag-high">High Impact</div>
+        <!-- Test Predictions Table Panel -->
+        <section class="card">
+            <div class="card-title">📝 Panel 3 — Temporal Test Set Predictions Log ($n=5$)</div>
+            <table class="evidence-table">
+                <thead>
+                    <tr>
+                        <th>Idx</th>
+                        <th>Paper ID</th>
+                        <th>Title</th>
+                        <th>True Label</th>
+                        <th>Majority Baseline</th>
+                        <th>Logistic Reg</th>
+                        <th>Gradient Boosting</th>
+                        <th>HeteroGraphSAGE</th>
+                    </tr>
+                </thead>
+                <tbody id="predictionsTableBody">
+                    <!-- Populated dynamically via API -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Leakage Ablation Panel -->
+        <section class="card">
+            <div class="card-title">🛡️ Panel 4 — Temporal Leakage Ablation Study</div>
+            <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+                <div style="flex: 1; background: rgba(0,242,254,0.05); border: 1px solid var(--accent-cyan); padding: 1.2rem; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Condition A: Time-Consistent Split</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-cyan); margin: 0.5rem 0;">3 / 5 (60.0%)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Strict Cutoff Masking ($T_{\text{cutoff}}$)</div>
                 </div>
-
-                <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">📊 Probability Distribution</div>
-                <div class="prob-bar-container">
-                    <div class="prob-row">
-                        <div class="prob-header"><span>High Impact (≥90th %)</span><span id="probHighVal">70%</span></div>
-                        <div class="prob-bar-bg"><div id="barHigh" class="prob-bar-fill" style="width: 70%;"></div></div>
-                    </div>
-                    <div class="prob-row">
-                        <div class="prob-header"><span>Medium Impact (50-90th %)</span><span id="probMedVal">22%</span></div>
-                        <div class="prob-bar-bg"><div id="barMed" class="prob-bar-fill" style="width: 22%;"></div></div>
-                    </div>
-                    <div class="prob-row">
-                        <div class="prob-header"><span>Low Impact (<50th %)</span><span id="probLowVal">8%</span></div>
-                        <div class="prob-bar-bg"><div id="barLow" class="prob-bar-fill" style="width: 8%;"></div></div>
-                    </div>
+                <div style="flex: 1; background: rgba(127,0,255,0.05); border: 1px solid var(--accent-purple); padding: 1.2rem; border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Condition B: Naive Random Split</div>
+                    <div style="font-size: 2rem; font-weight: 700; color: #b16cff; margin: 0.5rem 0;">4 / 8 (50.0%)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Random Graph Edges</div>
                 </div>
-
-                <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">🧠 Feature Attribution (Top Features)</div>
-                <div id="featureList"></div>
+            </div>
+            <div class="caveat-banner">
+                ⚠️ <strong>Small-Sample Evaluation Notice</strong>: At $n=50$ total papers ($5$ vs $8$ test set papers), this accuracy difference ($60.0\%$ vs $50.0\%$) is within statistical noise and is not a conclusive proof of temporal leakage. Statistically significant validation requires scaling dataset ingestion on GPU Colab (Part C).
             </div>
         </section>
 
-        <!-- Right Panel: Subgraph Visualization -->
+        <!-- Saved Checkpoint Artifacts Panel -->
         <section class="card">
-            <div class="card-title">🕸️ Subgraph Local Neighborhood</div>
-            <div id="cy"></div>
+            <div class="card-title">📦 Panel 5 — Saved Model Checkpoint Artifacts</div>
+            <table class="evidence-table">
+                <thead>
+                    <tr>
+                        <th>Artifact Name</th>
+                        <th>Path</th>
+                        <th>File Size</th>
+                        <th>Type</th>
+                        <th>Reproduction Command</th>
+                    </tr>
+                </thead>
+                <tbody id="artifactsTableBody">
+                    <!-- Populated dynamically via API -->
+                </tbody>
+            </table>
         </section>
-    </main>
+    </div>
 
     <script>
-        let cy;
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
 
-        function initCytoscape(subgraphElements) {
-            const elements = (subgraphElements && subgraphElements.length > 0) ? subgraphElements.map(item => {
-                if (item.source && item.target) {
-                    return { data: { id: item.id, source: item.source, target: item.target } };
-                }
-                return { data: { id: item.id, label: item.label, type: item.type } };
-            }) : [
-                { data: { id: 'target', label: 'Target Paper', type: 'paper' } },
-                { data: { id: 'auth1', label: 'Author A', type: 'author' } },
-                { data: { id: 'inst1', label: 'Research Institute', type: 'institution' } },
-                { data: { id: 'e1', source: 'auth1', target: 'target' } },
-                { data: { id: 'e2', source: 'auth1', target: 'inst1' } }
-            ];
+            if (tabName === 'predictor') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('predictorView').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('evidenceView').classList.add('active');
+                loadEvidenceData();
+            }
+        }
 
-            cy = cytoscape({
-                container: document.getElementById('cy'),
-                style: [
-                    {
-                        selector: 'node[type="paper"]',
-                        style: {
-                            'background-color': '#00f2fe',
-                            'label': 'data(label)',
-                            'color': '#fff',
-                            'font-size': '10px',
-                            'width': 30,
-                            'height': 30
-                        }
-                    },
-                    {
-                        selector: 'node[type="author"]',
-                        style: {
-                            'background-color': '#4facfe',
-                            'label': 'data(label)',
-                            'color': '#bbb',
-                            'font-size': '9px',
-                            'width': 22,
-                            'height': 22
-                        }
-                    },
-                    {
-                        selector: 'node[type="institution"]',
-                        style: {
-                            'background-color': '#7f00ff',
-                            'label': 'data(label)',
-                            'color': '#bbb',
-                            'font-size': '9px',
-                            'width': 20,
-                            'height': 20
-                        }
-                    },
-                    {
-                        selector: 'edge',
-                        style: {
-                            'width': 1.5,
-                            'line-color': 'rgba(255,255,255,0.2)',
-                            'curve-style': 'bezier'
-                        }
-                    }
-                ],
-                elements: elements,
-                layout: { name: 'cose', animate: true }
-            });
+        async function loadEvidenceData() {
+            try {
+                // Overview
+                const resOv = await fetch('/api/v1/evidence/overview');
+                const dataOv = await resOv.json();
+                document.getElementById('evPapers').innerText = dataOv.total_papers;
+                document.getElementById('evAuthors').innerText = dataOv.total_authors;
+                document.getElementById('evInst').innerText = dataOv.total_institutions;
+                document.getElementById('evCitations').innerText = dataOv.total_citation_edges;
+
+                // Predictions Table
+                const resPred = await fetch('/api/v1/evidence/predictions');
+                const dataPred = await resPred.json();
+                const predBody = document.getElementById('predictionsTableBody');
+                predBody.innerHTML = dataPred.predictions_table.map(r => `
+                    <tr>
+                        <td>${r.index}</td>
+                        <td style="font-size:0.75rem; color:var(--text-muted);">${r.paper_id.replace('https://openalex.org/','')}</td>
+                        <td>${r.title.length > 30 ? r.title.substring(0,30)+'...' : r.title}</td>
+                        <td><strong>${r.true_label_name}</strong></td>
+                        <td>${r.majority_baseline_pred} ${r.majority_baseline_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
+                        <td>${r.logreg_pred} ${r.logreg_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
+                        <td>${r.gradient_boosting_pred} ${r.gradient_boosting_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
+                        <td>${r.graphsage_pred} ${r.graphsage_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
+                    </tr>
+                `).join('');
+
+                // Artifacts Table
+                const resArt = await fetch('/api/v1/evidence/artifacts');
+                const dataArt = await resArt.json();
+                const artBody = document.getElementById('artifactsTableBody');
+                artBody.innerHTML = dataArt.artifacts.map(a => `
+                    <tr>
+                        <td><strong>${a.name}</strong></td>
+                        <td style="font-size:0.75rem; color:var(--text-muted);">${a.path}</td>
+                        <td>${a.file_size_bytes} bytes</td>
+                        <td>${a.type}</td>
+                        <td><code style="font-size:0.75rem; color:var(--accent-cyan);">${a.reproduction_command}</code></td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         async function fetchPrediction() {
@@ -298,50 +466,45 @@
 
             try {
                 const response = await fetch(`/api/v1/papers/predict/${encodeURIComponent(paperIdInput)}`);
-                if (!response.ok) {
-                    alert('Error fetching paper prediction.');
-                    return;
-                }
+                if (!response.ok) return;
                 const data = await response.json();
                 
                 document.getElementById('predictionResult').style.display = 'block';
                 document.getElementById('paperTitle').innerText = data.title;
-                document.getElementById('paperMeta').innerText = `ID: ${data.paper_id} | Pub Year: ${data.publication_year} | Cutoff Citations: ${data.historical_citations_at_cutoff}`;
+                document.getElementById('paperMeta').innerText = `ID: ${data.paper_id} | Pub Year: ${data.publication_year}`;
 
-                const badge = document.getElementById('impactBadge');
-                badge.innerText = data.impact_class_label;
-                badge.className = 'impact-tag ' + (data.predicted_impact_class === 2 ? 'tag-high' : data.predicted_impact_class === 1 ? 'tag-medium' : 'tag-low');
-
-                const probs = data.class_probabilities;
-                document.getElementById('barHigh').style.width = Math.round(probs.High * 100) + '%';
-                document.getElementById('probHighVal').innerText = Math.round(probs.High * 100) + '%';
-                
-                document.getElementById('barMed').style.width = Math.round(probs.Medium * 100) + '%';
-                document.getElementById('probMedVal').innerText = Math.round(probs.Medium * 100) + '%';
-
-                document.getElementById('barLow').style.width = Math.round(probs.Low * 100) + '%';
-                document.getElementById('probLowVal').innerText = Math.round(probs.Low * 100) + '%';
-
-                const featList = document.getElementById('featureList');
-                featList.innerHTML = data.explanation.top_contributing_features.map(f => `
-                    <div class="feature-item">
-                        <span style="color: var(--text-muted);">${f.feature}</span>
-                        <span style="color: var(--accent-cyan); font-weight: 600;">+${(f.weight * 100).toFixed(1)}%</span>
-                    </div>
-                `).join('');
-
-                // Render dynamic Cytoscape graph nodes
                 initCytoscape(data.explanation.subgraph);
-
             } catch (err) {
                 console.error(err);
             }
         }
 
-        // Initial search load
-        window.onload = () => {
-            fetchPrediction();
-        };
+        let cy;
+        function initCytoscape(subgraphElements) {
+            const elements = (subgraphElements && subgraphElements.length > 0) ? subgraphElements.map(item => {
+                if (item.source && item.target) {
+                    return { data: { id: item.id, source: item.source, target: item.target } };
+                }
+                return { data: { id: item.id, label: item.label, type: item.type } };
+            }) : [
+                { data: { id: 'target', label: 'Target Paper', type: 'paper' } },
+                { data: { id: 'auth1', label: 'Author A', type: 'author' } }
+            ];
+
+            cy = cytoscape({
+                container: document.getElementById('cy'),
+                style: [
+                    { selector: 'node[type="paper"]', style: { 'background-color': '#00f2fe', 'label': 'data(label)', 'color': '#fff', 'font-size': '10px', 'width': 30, 'height': 30 } },
+                    { selector: 'node[type="author"]', style: { 'background-color': '#4facfe', 'label': 'data(label)', 'color': '#bbb', 'font-size': '9px', 'width': 22, 'height': 22 } },
+                    { selector: 'node[type="institution"]', style: { 'background-color': '#7f00ff', 'label': 'data(label)', 'color': '#bbb', 'font-size': '9px', 'width': 20, 'height': 20 } },
+                    { selector: 'edge', style: { 'width': 1.5, 'line-color': 'rgba(255,255,255,0.2)', 'curve-style': 'bezier' } }
+                ],
+                elements: elements,
+                layout: { name: 'cose', animate: true }
+            });
+        }
+
+        window.onload = () => { fetchPrediction(); };
     </script>
 </body>
 </html>

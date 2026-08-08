@@ -1,4 +1,4 @@
-# SciGraph AI — Phase 9 Temporal Leakage Ablation Report
+# SciGraph AI — Phase 9 & 18 Temporal Leakage Ablation Report
 
 ```json
 {
@@ -54,6 +54,7 @@
       1
     ]
   },
-  "empirical_finding": "Time-Consistent Accuracy: 3/5 vs Naive Random Accuracy: 4/8."
+  "empirical_finding": "Time-Consistent Accuracy: 3/5 (60.0%) vs Naive Random Accuracy: 4/8 (50.0%).",
+  "small_sample_caveat": "NOTICE: At n=50 total papers (5 vs 8 test papers), this accuracy difference is within statistical noise and is not a conclusive proof of temporal leakage. Statistically significant validation requires dataset scale-up on GPU Colab (Part C)."
 }
 ```

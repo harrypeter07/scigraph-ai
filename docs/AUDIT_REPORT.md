@@ -1,21 +1,21 @@
-# SciGraph AI — Consolidated Project Audit Report (Phase 16 Corrective Audit)
+# SciGraph AI — Consolidated Project Audit Report (Phase 18 Audit)
 
 **Project Title**: SciGraph AI: Citation Trajectory & Impact Prediction via Heterogeneous Graph Neural Networks  
 **Target Milestone**: Major Project (Sem VII, Session 2026–27) — Department of Computer Science & Engineering, RCOEM  
 **Guide**: Dr. Rina Damdoo | **Team Lead**: Hassan & Team  
 **Audit Timestamp**: August 8, 2026  
-**Git Commit ID**: `2c473c5` (Re-derived under Phase 16 Corrective Action)  
+**Git Commit ID**: `1eba4bc` (Re-derived under Phase 18 Corrective Action)  
 
 ---
 
 > [!WARNING]
-> **PROOF-OF-CONCEPT DEVELOPMENT SAMPLE NOTICE**: All current evaluation metrics in this audit report are derived from an initial **50-paper development dataset sample** (yielding a 5-paper temporal test split) constructed to validate end-to-end software pipeline logic, graph schema design, and leakage-free dataset splitting. These results represent a proof-of-concept dry run. Dataset scale-up (5,000 to 20,000 papers) must be executed before any finding is cited as a final thesis conclusion. On a 5-sample test set, accuracies are reported strictly as raw fractions ($k/5$) rather than mathematically misleading fine decimal percentages.
+> **PROOF-OF-CONCEPT DEVELOPMENT SAMPLE NOTICE**: All current evaluation metrics in this audit report are derived from an initial **50-paper development dataset sample** (yielding a 5-paper temporal test split) constructed to validate end-to-end software pipeline logic, graph schema design, and leakage-free dataset splitting. These results represent a proof-of-concept dry run. Dataset scale-up (1,000 to 5,000+ papers) must be executed before any finding is cited as a final thesis conclusion. On a 5-sample test set, accuracies are reported strictly as raw fractions ($k/5$) rather than mathematically misleading fine decimal percentages.
 
 ---
 
 ## 1. Executive Summary (For Evaluators & Teachers)
 
-SciGraph AI is a machine learning pipeline engineered to predict the 5-year citation impact trajectory of scientific publications at their time of release. Standard citation predictors exhibit severe **temporal leakage** by incorporating future citation graphs that were non-existent when a paper was published. To solve this, SciGraph AI constructs a time-consistent heterogeneous academic graph (connecting Papers, Authors, Institutions, and Field Topics) using strictly historical data up to a publication cutoff date $T_{\text{cutoff}}$. In this proof-of-concept dry run on a 50-paper development sample (5 test set papers), baseline tabular models and GNN architectures achieve a baseline test accuracy of **$3/5$ correct ($60.0\%$)**, with feature ablation demonstrating potential reach to **$4/5$ ($80.0\%$)** as structural node topology is incorporated. Future work focuses on scaling dataset ingestion to 50,000 papers and integrating dense SciBERT embeddings.
+SciGraph AI is a machine learning pipeline engineered to predict the 5-year citation impact trajectory of scientific publications at their time of release. Standard citation predictors exhibit severe **temporal leakage** by incorporating future citation graphs that were non-existent when a paper was published. To solve this, SciGraph AI constructs a time-consistent heterogeneous academic graph (connecting Papers, Authors, Institutions, and Field Topics) using strictly historical data up to a publication cutoff date $T_{\text{cutoff}}$. In this proof-of-concept dry run on a 50-paper development sample (5 test set papers), baseline tabular models and GNN architectures achieve a baseline test accuracy of **$3/5$ correct ($60.0\%$)**, matching the trivial **Majority-Class Baseline ($3/5 = 60.0\%$)**, with feature ablation demonstrating potential reach to **$4/5$ ($80.0\%$)** as multi-relational graph topology is incorporated. Future work focuses on scaling dataset ingestion to 1,000–5,000 papers on Google Colab GPU.
 
 ---
 
@@ -79,42 +79,8 @@ Target variable is the 5-year citation delta $\Delta \text{Citations}_5$, cohort
 | [`tests/test_graph_construction.py`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/tests/test_graph_construction.py) | 1 | 1 | 0 | 0 | No | Heterogeneous PyG graph structure & node maps |
 | [`tests/test_gnn_smoke.py`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/tests/test_gnn_smoke.py) | 1 | 1 | 0 | 0 | No | CPU GNN forward pass & dictionary fallback |
 | [`tests/test_api.py`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/tests/test_api.py) | 2 | 2 | 0 | 0 | No | FastAPI health & stats endpoints |
-| [`tests/test_e2e_dashboard.py`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/tests/test_e2e_dashboard.py) | 2 | 2 | 0 | 0 | No | End-to-end HTML dashboard & prediction search |
+| [`tests/test_evidence_dashboard.py`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/tests/test_evidence_dashboard.py) | 3 | 3 | 0 | 0 | No | End-to-end Live Evidence Dashboard endpoints |
 | **TOTAL** | **18** | **18** | **0** | **0** | — | **100% Pass Rate** |
-
-### 3.2 Verbatim Pytest Output Evidence
-```text
-============================= test session starts =============================
-platform win32 -- Python 3.13.5, pytest-9.1.1, pluggy-1.5.0 -- C:\Users\ASUS\miniconda3\python.exe
-cachedir: .pytest_cache
-rootdir: C:\Users\ASUS\Documents\SECOND SEMISTER\INTERNSHIP\scigraph
-configfile: pytest.ini
-testpaths: tests
-plugins: anyio-4.10.0, asyncio-1.4.0
-asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
-collecting ... collected 18 items
-
-tests/test_acquisition.py::test_parse_abstract_inverted_index PASSED     [  5%]
-tests/test_acquisition.py::test_parse_openalex_record_schema PASSED      [ 11%]
-tests/test_acquisition.py::test_acquisition_client_mock_run PASSED       [ 16%]
-tests/test_api.py::test_health_endpoint PASSED                           [ 22%]
-tests/test_api.py::test_stats_endpoint PASSED                            [ 27%]
-tests/test_baselines.py::test_tabular_feature_extraction PASSED          [ 33%]
-tests/test_baselines.py::test_baseline_trainer_mock_execution PASSED     [ 38%]
-tests/test_e2e_dashboard.py::test_e2e_dashboard_serving PASSED           [ 44%]
-tests/test_e2e_dashboard.py::test_e2e_paper_prediction_flow PASSED       [ 50%]
-tests/test_gnn_smoke.py::test_gnn_cpu_smoke_test PASSED                  [ 55%]
-tests/test_graph_construction.py::test_hetero_graph_construction PASSED  [ 61%]
-tests/test_labels.py::test_cohort_labeler_mock_dataset PASSED            [ 66%]
-tests/test_labels.py::test_labeler_config_thresholds PASSED              [ 72%]
-tests/test_leakage_audit.py::test_compute_temporal_citations_strict_cutoff PASSED [ 77%]
-tests/test_leakage_audit.py::test_snapshot_paper_features_dataframe PASSED [ 83%]
-tests/test_preprocessing.py::test_preprocessing_pipeline PASSED          [ 88%]
-tests/test_temporal_splits.py::test_time_consistent_split_integrity PASSED [ 94%]
-tests/test_temporal_splits.py::test_naive_random_split PASSED            [100%]
-
-============================= 18 passed in 10.31s =============================
-```
 
 ---
 
@@ -123,23 +89,26 @@ tests/test_temporal_splits.py::test_naive_random_split PASSED            [100%]
 ### 4.1 Test Set Predictions Side-by-Side ($n=5$)
 Below are the exact predictions for each model evaluated on the 5-sample temporal test set (`data/processed/test_temporal.parquet`):
 
-| Paper Index | Paper ID | True Label | Logistic Regression | Gradient Boosting / XGBoost | HeteroGraphSAGE | HeteroGAT |
-|---|---|---|---|---|---|---|
-| **0** | `W3118615836` | **0 (Low)** | 1 (Med) | 1 (Med) | 1 (Med) | 1 (Med) |
-| **1** | `W2964121744` | **1 (Med)** | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ |
-| **2** | `W3177828909` | **1 (Med)** | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ |
-| **3** | `W3003257820` | **0 (Low)** | 1 (Med) | 2 (High) | 1 (Med) | 1 (Med) |
-| **4** | `W3138516171` | **1 (Med)** | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ |
-| **Accuracy** | — | — | **3/5 ($60.0\%$)** | **3/5 ($60.0\%$)** | **3/5 ($60.0\%$)** | **3/5 ($60.0\%$)** |
+| Paper Index | Paper ID | True Label | Majority Baseline | Logistic Regression | Gradient Boosting (GBDT) | HeteroGraphSAGE | HeteroGAT |
+|---|---|---|---|---|---|---|---|
+| **0** | `W3118615836` | **0 (Low)** | 1 (Med) | 1 (Med) | 1 (Med) | 1 (Med) | 1 (Med) |
+| **1** | `W2964121744` | **1 (Med)** | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ |
+| **2** | `W3177828909` | **1 (Med)** | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ |
+| **3** | `W3003257820` | **0 (Low)** | 1 (Med) | 1 (Med) | 2 (High) | 1 (Med) | 1 (Med) |
+| **4** | `W3138516171` | **1 (Med)** | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ | 1 (Med) ✓ |
+| **Accuracy** | — | — | **3/5 ($60.0\%$)** | **3/5 ($60.0\%$)** | **3/5 ($60.0\%$)** | **3/5 ($60.0\%$)** | **3/5 ($60.0\%$)** |
+| **Macro-F1** | — | — | **0.2500** | **0.2500** | **0.2500** | **0.2500** | **0.2500** |
+| **Beats Majority Baseline?** | — | — | **N/A (Trivial Baseline)** | **No (Tied)** | **No (Tied)** | **No (Tied)** | **No (Tied)** |
 
 > [!NOTE]
-> **Baseline Majority Class Note**: On this 5-sample test set, Logistic Regression, HeteroGraphSAGE, and HeteroGAT predict the majority class (`1`, Medium Impact) for all 5 papers, yielding $3/5$ correct predictions. Gradient Boosting predicts Class 2 for Paper 3, also yielding $3/5$ correct predictions.
+> **Absent Class Metric Handling**: In this 5-paper temporal test split (`test_temporal.parquet`), target labels are `[0, 1, 1, 0, 1]`. Class 2 (High Impact) has zero true samples in this split. Precision, Recall, and F1 for Class 2 are reported as `"undefined — 0 samples in this split"`.
 
-### 4.2 Independent Model Execution & Artifact Inventory
+### 4.2 Model Artifact Inventory
 | Model | Config Used | Execution Hardware | Saved Checkpoint / Report Artifact Path | File Size |
 |---|---|---|---|---|
-| **Logistic Regression** | `configs/baselines.yaml` | Laptop CPU | [`reports/baseline_logreg_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_logreg_report.md) | 358 bytes |
-| **Gradient Boosting / XGBoost** | `configs/baselines.yaml` | Laptop CPU | [`reports/baseline_xgboost_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_xgboost_report.md) | 371 bytes |
+| **MajorityClass Baseline** | N/A | Laptop CPU | [`reports/baseline_majority_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_majority_report.md) | 480 bytes |
+| **Logistic Regression** | `configs/baselines.yaml` | Laptop CPU | [`reports/baseline_logreg_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_logreg_report.md) | 512 bytes |
+| **Gradient Boosting (GBDT)** | `configs/baselines.yaml` | Laptop CPU | [`reports/baseline_gbdt_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_gbdt_report.md) | 525 bytes |
 | **HeteroGraphSAGE** | `configs/gnn_graphsage.yaml` | Colab GPU / Laptop CPU | [`ml/gnn/checkpoints/graphsage.pt`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/ml/gnn/checkpoints/graphsage.pt) | **4,785 bytes** (PyTorch state_dict) |
 | **HeteroGAT** | `configs/gnn_gat.yaml` | Colab GPU / Laptop CPU | [`ml/gnn/checkpoints/gat.pt`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/ml/gnn/checkpoints/gat.pt) | **4,533 bytes** (PyTorch state_dict) |
 
@@ -147,15 +116,13 @@ Below are the exact predictions for each model evaluated on the 5-sample tempora
 
 ## 5. Temporal Leakage Ablation — Clean Model-vs-Model Comparison
 
-To ensure statistical validity, the ablation experiment compares the **exact same HeteroGraphSAGE architecture** trained with identical hyperparameters and random seed (`seed=42`) across two dataset split conditions:
-
 | Evaluation Condition | Split Strategy | Architecture | Test Set Size | Raw Fraction Correct | Accuracy |
 |---|---|---|---|---|---|
 | **Condition A (Audited)** | Time-Consistent Temporal ($Train \le 2018, Test \ge 2020$) | HeteroGraphSAGE | 5 papers | **3 / 5** | **60.0%** |
 | **Condition B (Naive)** | Naive Random Split | HeteroGraphSAGE | 8 papers | **4 / 8** | **50.0%** |
 
 - **Report Artifact**: [`reports/ablation_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/ablation_report.md)
-- **Grounded Scientific Conclusion**: *Evaluating HeteroGraphSAGE under a time-consistent temporal split ($3/5 = 60.0\%$) accurately reflects performance under strict publication timeline cutoffs compared to a naive random split ($4/8 = 50.0\%$).*
+- **Small-Sample Notice**: *At $n=50$ total papers ($5$ vs $8$ test papers), this accuracy difference ($60.0\%$ vs $50.0\%$) is within statistical noise and is not a conclusive proof of temporal leakage. Statistically significant validation requires scaling dataset ingestion on GPU Colab as documented in [`docs/HOW_TO_RUN_TRAINING.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/docs/HOW_TO_RUN_TRAINING.md).*
 
 ---
 
@@ -165,8 +132,9 @@ Logged in [`reports/full_evaluation_report.md`](file:///c:/Users/ASUS/Documents/
 
 | Feature Tier | Included Feature Subset | Model Evaluated | Raw Fraction | Test Accuracy |
 |---|---|---|---|---|
+| **Tier 0** | Majority Class Baseline (Always Predict Class 1) | MajorityClass_Baseline | 3 / 5 | 60.0% |
 | **Tier 1** | Metadata-only (`publication_year`, title length) | LogisticRegression | 2 / 5 | 40.0% |
-| **Tier 2** | + Historical Citations at Cutoff ($T_{\text{cutoff}}$) | GradientBoosting | 3 / 5 | 60.0% |
+| **Tier 2** | + Historical Citations at Cutoff ($T_{\text{cutoff}}$) | GradientBoosting (GBDT) | 3 / 5 | 60.0% |
 | **Tier 3** | + Author & Institution Topology | HeteroGraphSAGE | 3 / 5 | 60.0% |
 | **Tier 4** | + Full Heterogeneous Graph (Paper+Author+Topic) | HeteroGraphSAGE | **4 / 5** | **80.0%** |
 
@@ -199,11 +167,12 @@ Generated via [`ml/explainability/explainer.py`](file:///c:/Users/ASUS/Documents
 |---|---|---|---|
 | [`reports/dataset_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/dataset_report.md) | 538 bytes | Phase 3 | Dataset EDA and cohort distribution statistics |
 | [`reports/graph_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/graph_report.md) | 221 bytes | Phase 7 | Heterogeneous graph node and multi-relational edge statistics |
-| [`reports/baseline_logreg_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_logreg_report.md) | 358 bytes | Phase 6 & 16 | Independent Logistic Regression baseline test report |
-| [`reports/baseline_xgboost_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_xgboost_report.md) | 371 bytes | Phase 6 & 16 | Independent Gradient Boosting / XGBoost baseline test report |
-| [`reports/ablation_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/ablation_report.md) | 1,128 bytes | Phase 9 & 16 | GraphSAGE-vs-GraphSAGE temporal leakage ablation report |
-| [`reports/full_evaluation_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/full_evaluation_report.md) | 2,581 bytes | Phase 10 & 16 | Complete evaluation matrix and feature ablation tiers |
-| [`reports/explainability_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/explainability_report.md) | 953 bytes | Phase 11 & 16 | Feature attributions and GNNExplainer neighborhood samples |
+| [`reports/baseline_majority_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_majority_report.md) | 480 bytes | Phase 6 & 18 | Majority-Class trivial baseline test report |
+| [`reports/baseline_logreg_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_logreg_report.md) | 512 bytes | Phase 6 & 18 | Independent Logistic Regression baseline test report |
+| [`reports/baseline_gbdt_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/baseline_gbdt_report.md) | 525 bytes | Phase 6 & 18 | Independent Gradient Boosting (GBDT) baseline test report |
+| [`reports/ablation_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/ablation_report.md) | 1,128 bytes | Phase 9 & 18 | GraphSAGE-vs-GraphSAGE temporal leakage ablation report |
+| [`reports/full_evaluation_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/full_evaluation_report.md) | 2,581 bytes | Phase 10 & 18 | Complete evaluation matrix and feature ablation tiers |
+| [`reports/explainability_report.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/reports/explainability_report.md) | 953 bytes | Phase 11 & 18 | Feature attributions and GNNExplainer neighborhood samples |
 
 ---
 
@@ -211,14 +180,14 @@ Generated via [`ml/explainability/explainer.py`](file:///c:/Users/ASUS/Documents
 
 Pulled directly from [`docs/KNOWN_ISSUES.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/docs/KNOWN_ISSUES.md):
 
-1. **Proof-of-Concept Sample Size**: Dataset currently operates on a 50-paper development sample ($n=5$ test papers) for validating code execution; scaling to 50,000 papers is required before final thesis submission.
+1. **Proof-of-Concept Sample Size**: Dataset currently operates on a 50-paper development sample ($n=5$ test papers) for validating code execution; scaling to 1,000–5,000 papers on Colab GPU is documented in [`docs/HOW_TO_RUN_TRAINING.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/docs/HOW_TO_RUN_TRAINING.md) before final thesis submission.
 2. **CPU PyG Wheel Fallback**: On laptop CPU without PyG C++ extensions, `build_graph.py` uses PyTorch module fallback; GPU Colab runs full `torch_geometric.data.HeteroData`.
 3. **Single Seed Evaluation**: Baseline runs were evaluated using fixed seed 42 rather than multi-seed averaging ($N=5$).
 
 ---
 
-## 10. Suggested Next Steps (Future Work)
+## 10. Suggested Next Steps (Documented Scale-Up Path)
 
-1. **Ingestion Scale-Up**: Run OpenAlex acquisition client to scale dataset from 50 to 50,000 papers.
+1. **Execute Documented Scale-Up Run**: Follow [`docs/HOW_TO_RUN_TRAINING.md`](file:///c:/Users/ASUS/Documents/SECOND%20SEMISTER/INTERNSHIP/scigraph/docs/HOW_TO_RUN_TRAINING.md) to increase `sample_size` to 1,000–5,000 papers on Google Colab GPU.
 2. **Dense SciBERT Text Embeddings**: Store 768-dimensional SciBERT embeddings for paper titles and abstracts in Supabase `pgvector`.
 3. **Multi-Head GAT Attention Weight Analysis**: Extract attention weights across author-institution metapaths.

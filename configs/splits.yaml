@@ -1,0 +1,18 @@
+# SciGraph AI - Temporal & Naive Splitting Configuration
+
+splits:
+  time_consistent:
+    train_years:
+      min: 2012
+      max: 2018
+    val_years:
+      min: 2019
+      max: 2019
+    test_years:
+      min: 2020
+      max: 2021
+  naive_random:
+    train_ratio: 0.70
+    val_ratio: 0.15
+    test_ratio: 0.15
+    seed: 42

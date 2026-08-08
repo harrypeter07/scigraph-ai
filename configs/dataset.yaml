@@ -1,0 +1,31 @@
+# SciGraph AI - OpenAlex Dataset Configuration
+
+acquisition:
+  source: "OpenAlex API"
+  concept_filter:
+    field: "concepts.id"
+    value: "C41008148" # Computer Science / Artificial Intelligence
+  year_range:
+    min_year: 2012
+    max_year: 2022
+  sample_size: 10000
+  rate_limit_delay_seconds: 0.1
+  batch_size: 200
+  polite_email_env_var: "OPENALEX_POLITE_EMAIL"
+
+paths:
+  raw_dir: "data/raw/openalex"
+  interim_dir: "data/interim"
+  processed_dir: "data/processed"
+
+supabase:
+  tables:
+    papers: "papers"
+    authors: "authors"
+    institutions: "institutions"
+    topics: "topics"
+    paper_citations: "paper_citations"
+    authorships: "authorships"
+    affiliations: "affiliations"
+    paper_topics: "paper_topics"
+    paper_embeddings: "paper_embeddings"

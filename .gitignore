@@ -1,0 +1,49 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Environment variables & secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Data directories (raw, interim, processed - except gitkeep)
+data/raw/*
+!data/raw/openalex/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Model checkpoints & artifacts
+ml/gnn/checkpoints/*
+!ml/gnn/checkpoints/.gitkeep
+*.pt
+*.pth
+*.onnx
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Pytest / Coverage / Linting
+scigraph_project.zip
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# OS specific
+.DS_Store
+Thumbs.db

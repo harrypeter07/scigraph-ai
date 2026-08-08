@@ -1,0 +1,14 @@
+# SciGraph AI - Cohort Labeling Configuration
+
+labeling:
+  horizon_years: 5
+  cohort_keys:
+    - "publication_year"
+    - "primary_topic"
+  thresholds:
+    low_percentile: 50.0    # Below 50th percentile => Low impact (0)
+    high_percentile: 90.0   # 50th to 90th percentile => Medium impact (1), Above 90th => High impact (2)
+  classes:
+    0: "Low"
+    1: "Medium"
+    2: "High"

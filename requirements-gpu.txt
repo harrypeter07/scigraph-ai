@@ -1,0 +1,6 @@
+# GPU Dependencies extending CPU requirements for College Lab GNN training
+-r requirements-cpu.txt
+torch>=2.1.0
+torch-geometric>=2.4.0
+torch-scatter>=2.1.2
+torch-sparse>=0.6.18

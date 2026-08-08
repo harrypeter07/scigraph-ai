@@ -1,0 +1,16 @@
+# Heterogeneous GAT Configuration
+
+model:
+  name: "HeteroGAT"
+  hidden_channels: 64
+  num_layers: 2
+  heads: 4
+  dropout: 0.2
+
+training:
+  epochs: 50
+  lr: 0.003
+  weight_decay: 1e-4
+  batch_size: 128
+  checkpoint_dir: "ml/gnn/checkpoints"
+  checkpoint_interval: 10

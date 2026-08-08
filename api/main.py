@@ -1,7 +1,10 @@
 """FastAPI Entry Point for SciGraph AI Application Server."""
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from api.routers.paper import router as paper_router
 
 app = FastAPI(
@@ -10,7 +13,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for Next.js research dashboard
+# Enable CORS for Next.js / Web research dashboard
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,3 +28,13 @@ app.include_router(paper_router)
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "SciGraph AI Service"}
+
+
+# Serve Web Dashboard at root /
+web_dir = "web"
+if os.path.exists(web_dir):
+    app.mount("/static", StaticFiles(directory=web_dir), name="static")
+
+    @app.get("/")
+    def serve_dashboard():
+        return FileResponse(os.path.join(web_dir, "index.html"))

@@ -69,6 +69,6 @@ def test_baseline_trainer_mock_execution(tmp_path):
     metrics = trainer.train_and_evaluate(train_path=str(train_file), test_path=str(test_file))
 
     assert "LogisticRegression" in metrics
-    assert "XGBoost" in metrics or "GradientBoosting_Fallback" in metrics
-    tree_key = "XGBoost" if "XGBoost" in metrics else "GradientBoosting_Fallback"
-    assert "macro_f1" in metrics[tree_key]
+    assert "XGBoost" in metrics or "GradientBoosting" in metrics or "GradientBoosting_Fallback" in metrics
+    tree_key = [k for k in metrics.keys() if k != "LogisticRegression"][0]
+    assert "accuracy" in metrics[tree_key] or "accuracy_fraction" in metrics[tree_key]

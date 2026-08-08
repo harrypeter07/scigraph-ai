@@ -2,107 +2,58 @@
 
 ```json
 {
-  "device_used": "cuda",
-  "time_consistent_metrics": {
-    "LogisticRegression": {
-      "accuracy": 0.6,
-      "macro_f1": 0.375,
-      "macro_precision": 0.3,
-      "macro_recall": 0.5,
-      "per_class_f1": [
-        0.0,
-        0.75
-      ],
-      "confusion_matrix": [
-        [
-          0,
-          2
-        ],
-        [
-          0,
-          3
-        ]
-      ]
-    },
-    "XGBoost": {
-      "accuracy": 0.4,
-      "macro_f1": 0.2857,
-      "macro_precision": 0.25,
-      "macro_recall": 0.3333,
-      "per_class_f1": [
-        0.0,
-        0.5714
-      ],
-      "confusion_matrix": [
-        [
-          0,
-          2
-        ],
-        [
-          1,
-          2
-        ]
-      ]
-    }
+  "comparison": "HeteroGraphSAGE (Condition A: Time-Consistent) vs HeteroGraphSAGE (Condition B: Naive Random)",
+  "device_used": "cpu",
+  "time_consistent_temporal_split": {
+    "model_architecture": "HeteroGraphSAGE",
+    "random_seed": 42,
+    "test_correct_count": 3,
+    "test_total_count": 5,
+    "accuracy_fraction": "3/5",
+    "accuracy": 0.6,
+    "predictions": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "ground_truth": [
+      0,
+      1,
+      1,
+      0,
+      1
+    ]
   },
-  "naive_random_metrics": {
-    "LogisticRegression": {
-      "accuracy": 0.5,
-      "macro_f1": 0.2222,
-      "macro_precision": 0.1667,
-      "macro_recall": 0.3333,
-      "per_class_f1": [
-        0.0,
-        0.6667,
-        0.0
-      ],
-      "confusion_matrix": [
-        [
-          0,
-          2,
-          0
-        ],
-        [
-          0,
-          4,
-          0
-        ],
-        [
-          0,
-          2,
-          0
-        ]
-      ]
-    },
-    "XGBoost": {
-      "accuracy": 0.5,
-      "macro_f1": 0.2222,
-      "macro_precision": 0.1667,
-      "macro_recall": 0.3333,
-      "per_class_f1": [
-        0.0,
-        0.6667,
-        0.0
-      ],
-      "confusion_matrix": [
-        [
-          0,
-          2,
-          0
-        ],
-        [
-          0,
-          4,
-          0
-        ],
-        [
-          0,
-          2,
-          0
-        ]
-      ]
-    }
+  "naive_random_split": {
+    "model_architecture": "HeteroGraphSAGE",
+    "random_seed": 42,
+    "test_correct_count": 4,
+    "test_total_count": 8,
+    "accuracy_fraction": "4/8",
+    "accuracy": 0.5,
+    "predictions": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "ground_truth": [
+      0,
+      1,
+      2,
+      2,
+      0,
+      1,
+      1,
+      1
+    ]
   },
-  "empirical_claim": "Naive random evaluation overestimates Macro-F1 accuracy compared to time-consistent evaluation."
+  "empirical_finding": "Time-Consistent Accuracy: 3/5 vs Naive Random Accuracy: 4/8."
 }
 ```

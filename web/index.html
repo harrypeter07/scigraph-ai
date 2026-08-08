@@ -16,15 +16,10 @@
             --accent-purple: #7f00ff;
             --text-main: #f0f4f8;
             --text-muted: #8a99ad;
-            --glass-bg: rgba(20, 27, 45, 0.6);
             --shadow-glow: 0 8px 32px 0 rgba(0, 242, 254, 0.15);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -135,39 +130,15 @@
             box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
         }
 
-        .prob-bar-container {
-            margin-top: 1rem;
-        }
-
-        .prob-row {
-            margin-bottom: 0.8rem;
-        }
-
-        .prob-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            margin-bottom: 0.3rem;
-            color: var(--text-muted);
-        }
-
-        .prob-bar-bg {
-            height: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .prob-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
-            border-radius: 5px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .prob-bar-container { margin-top: 1rem; }
+        .prob-row { margin-bottom: 0.8rem; }
+        .prob-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--text-muted); }
+        .prob-bar-bg { height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 5px; overflow: hidden; }
+        .prob-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); border-radius: 5px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
         #cy {
             width: 100%;
-            height: 380px;
+            height: 420px;
             border-radius: 12px;
             background: rgba(10, 13, 20, 0.8);
             border: 1px solid var(--border-color);
@@ -208,17 +179,17 @@
     </header>
 
     <main>
-        <!-- Left Panel: Lookup & Prediction -->
+        <!-- Left Panel: Search & Prediction -->
         <section class="card">
             <div class="card-title">🔍 Paper Impact Predictor</div>
             
             <div class="search-box">
-                <input type="text" id="paperInput" placeholder="Enter OpenAlex Paper ID (e.g. W2741809807)..." value="W2741809807">
+                <input type="text" id="paperInput" placeholder="Enter OpenAlex Paper ID (e.g. W4308632271)..." value="W4308632271">
                 <button onclick="fetchPrediction()">Predict</button>
             </div>
 
             <div id="predictionResult" style="display: none;">
-                <h3 id="paperTitle" style="font-size: 1.1rem; margin-bottom: 0.5rem; color: white;"></h3>
+                <h3 id="paperTitle" style="font-size: 1.05rem; margin-bottom: 0.5rem; color: white;"></h3>
                 <p id="paperMeta" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;"></p>
 
                 <div style="margin-bottom: 1.5rem;">
@@ -229,25 +200,25 @@
                 <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">📊 Probability Distribution</div>
                 <div class="prob-bar-container">
                     <div class="prob-row">
-                        <div class="prob-header"><span>High Impact (≥90th %)</span><span id="probHighVal">60%</span></div>
-                        <div class="prob-bar-bg"><div id="barHigh" class="prob-bar-fill" style="width: 60%;"></div></div>
+                        <div class="prob-header"><span>High Impact (≥90th %)</span><span id="probHighVal">70%</span></div>
+                        <div class="prob-bar-bg"><div id="barHigh" class="prob-bar-fill" style="width: 70%;"></div></div>
                     </div>
                     <div class="prob-row">
-                        <div class="prob-header"><span>Medium Impact (50-90th %)</span><span id="probMedVal">25%</span></div>
-                        <div class="prob-bar-bg"><div id="barMed" class="prob-bar-fill" style="width: 25%;"></div></div>
+                        <div class="prob-header"><span>Medium Impact (50-90th %)</span><span id="probMedVal">22%</span></div>
+                        <div class="prob-bar-bg"><div id="barMed" class="prob-bar-fill" style="width: 22%;"></div></div>
                     </div>
                     <div class="prob-row">
-                        <div class="prob-header"><span>Low Impact (<50th %)</span><span id="probLowVal">15%</span></div>
-                        <div class="prob-bar-bg"><div id="barLow" class="prob-bar-fill" style="width: 15%;"></div></div>
+                        <div class="prob-header"><span>Low Impact (<50th %)</span><span id="probLowVal">8%</span></div>
+                        <div class="prob-bar-bg"><div id="barLow" class="prob-bar-fill" style="width: 8%;"></div></div>
                     </div>
                 </div>
 
-                <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">🧠 Attribution Explanation (Top Features)</div>
+                <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">🧠 Feature Attribution (Top Features)</div>
                 <div id="featureList"></div>
             </div>
         </section>
 
-        <!-- Right Panel: Graph Neighborhood Visualization -->
+        <!-- Right Panel: Subgraph Visualization -->
         <section class="card">
             <div class="card-title">🕸️ Subgraph Local Neighborhood</div>
             <div id="cy"></div>
@@ -255,95 +226,100 @@
     </main>
 
     <script>
-        // Initialize Cytoscape Network
-        let cy = cytoscape({
-            container: document.getElementById('cy'),
-            style: [
-                {
-                    selector: 'node[type="paper"]',
-                    style: {
-                        'background-color': '#00f2fe',
-                        'label': 'data(label)',
-                        'color': '#fff',
-                        'font-size': '10px',
-                        'width': 28,
-                        'height': 28
-                    }
-                },
-                {
-                    selector: 'node[type="author"]',
-                    style: {
-                        'background-color': '#4facfe',
-                        'label': 'data(label)',
-                        'color': '#aaa',
-                        'font-size': '9px',
-                        'width': 20,
-                        'height': 20
-                    }
-                },
-                {
-                    selector: 'node[type="institution"]',
-                    style: {
-                        'background-color': '#7f00ff',
-                        'label': 'data(label)',
-                        'color': '#aaa',
-                        'font-size': '9px',
-                        'width': 18,
-                        'height': 18
-                    }
-                },
-                {
-                    selector: 'edge',
-                    style: {
-                        'width': 1.5,
-                        'line-color': 'rgba(255,255,255,0.15)',
-                        'curve-style': 'bezier'
-                    }
+        let cy;
+
+        function initCytoscape(subgraphElements) {
+            const elements = (subgraphElements && subgraphElements.length > 0) ? subgraphElements.map(item => {
+                if (item.source && item.target) {
+                    return { data: { id: item.id, source: item.source, target: item.target } };
                 }
-            ],
-            elements: [
-                { data: { id: 'p1', label: 'Target Paper', type: 'paper' } },
-                { data: { id: 'a1', label: 'Author A', type: 'author' } },
-                { data: { id: 'a2', label: 'Author B', type: 'author' } },
-                { data: { id: 'i1', label: 'University A', type: 'institution' } },
-                { data: { id: 'p2', label: 'Cited Paper 1', type: 'paper' } },
-                { data: { id: 'e1', source: 'a1', target: 'p1' } },
-                { data: { id: 'e2', source: 'a2', target: 'p1' } },
-                { data: { id: 'e3', source: 'a1', target: 'i1' } },
-                { data: { id: 'e4', source: 'p1', target: 'p2' } }
-            ],
-            layout: {
-                name: 'cose',
-                animate: true
-            }
-        });
+                return { data: { id: item.id, label: item.label, type: item.type } };
+            }) : [
+                { data: { id: 'target', label: 'Target Paper', type: 'paper' } },
+                { data: { id: 'auth1', label: 'Author A', type: 'author' } },
+                { data: { id: 'inst1', label: 'Research Institute', type: 'institution' } },
+                { data: { id: 'e1', source: 'auth1', target: 'target' } },
+                { data: { id: 'e2', source: 'auth1', target: 'inst1' } }
+            ];
+
+            cy = cytoscape({
+                container: document.getElementById('cy'),
+                style: [
+                    {
+                        selector: 'node[type="paper"]',
+                        style: {
+                            'background-color': '#00f2fe',
+                            'label': 'data(label)',
+                            'color': '#fff',
+                            'font-size': '10px',
+                            'width': 30,
+                            'height': 30
+                        }
+                    },
+                    {
+                        selector: 'node[type="author"]',
+                        style: {
+                            'background-color': '#4facfe',
+                            'label': 'data(label)',
+                            'color': '#bbb',
+                            'font-size': '9px',
+                            'width': 22,
+                            'height': 22
+                        }
+                    },
+                    {
+                        selector: 'node[type="institution"]',
+                        style: {
+                            'background-color': '#7f00ff',
+                            'label': 'data(label)',
+                            'color': '#bbb',
+                            'font-size': '9px',
+                            'width': 20,
+                            'height': 20
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1.5,
+                            'line-color': 'rgba(255,255,255,0.2)',
+                            'curve-style': 'bezier'
+                        }
+                    }
+                ],
+                elements: elements,
+                layout: { name: 'cose', animate: true }
+            });
+        }
 
         async function fetchPrediction() {
-            const paperId = document.getElementById('paperInput').value.trim();
+            const paperIdInput = document.getElementById('paperInput').value.trim();
+            if (!paperIdInput) return;
+
             try {
-                const response = await fetch(`/api/v1/papers/predict/${encodeURIComponent(paperId)}`);
+                const response = await fetch(`/api/v1/papers/predict/${encodeURIComponent(paperIdInput)}`);
                 if (!response.ok) {
-                    alert('Paper ID not found in current dataset sample. Try W2741809807.');
+                    alert('Error fetching paper prediction.');
                     return;
                 }
                 const data = await response.json();
                 
                 document.getElementById('predictionResult').style.display = 'block';
                 document.getElementById('paperTitle').innerText = data.title;
-                document.getElementById('paperMeta').innerText = `Publication Year: ${data.publication_year} | Historical Citations at Cutoff: ${data.historical_citations_at_cutoff}`;
+                document.getElementById('paperMeta').innerText = `ID: ${data.paper_id} | Pub Year: ${data.publication_year} | Cutoff Citations: ${data.historical_citations_at_cutoff}`;
 
                 const badge = document.getElementById('impactBadge');
                 badge.innerText = data.impact_class_label;
                 badge.className = 'impact-tag ' + (data.predicted_impact_class === 2 ? 'tag-high' : data.predicted_impact_class === 1 ? 'tag-medium' : 'tag-low');
 
                 const probs = data.class_probabilities;
-                document.getElementById('barHigh').style.width = (probs.High * 100) + '%';
+                document.getElementById('barHigh').style.width = Math.round(probs.High * 100) + '%';
                 document.getElementById('probHighVal').innerText = Math.round(probs.High * 100) + '%';
                 
-                document.getElementById('barMed').style.width = (probs.Medium * 100) + '%';
+                document.getElementById('barMed').style.width = Math.round(probs.Medium * 100) + '%';
                 document.getElementById('probMedVal').innerText = Math.round(probs.Medium * 100) + '%';
 
-                document.getElementById('barLow').style.width = (probs.Low * 100) + '%';
+                document.getElementById('barLow').style.width = Math.round(probs.Low * 100) + '%';
                 document.getElementById('probLowVal').innerText = Math.round(probs.Low * 100) + '%';
 
                 const featList = document.getElementById('featureList');
@@ -354,13 +330,18 @@
                     </div>
                 `).join('');
 
+                // Render dynamic Cytoscape graph nodes
+                initCytoscape(data.explanation.subgraph);
+
             } catch (err) {
                 console.error(err);
             }
         }
 
-        // Run initial load prediction
-        fetchPrediction();
+        // Initial search load
+        window.onload = () => {
+            fetchPrediction();
+        };
     </script>
 </body>
 </html>

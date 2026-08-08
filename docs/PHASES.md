@@ -23,8 +23,8 @@
 | Phase | Description | Environment | Status | Gate Approved |
 |---|---|---|---|---|
 | **Phase 7** | Heterogeneous Graph (`HeteroData`) Construction | Laptop (CPU) | **COMPLETED** | Gate Approved |
-| **Phase 8** | Heterogeneous GNN Training (GraphSAGE / GAT) | **Lab PC (GPU)** | READY FOR LAB GPU | Pending Lab PC Run |
-| **Phase 9** | Temporal Leakage Ablation Study | **Lab PC (GPU)** | READY FOR LAB GPU | Pending Lab PC Run |
+| **Phase 8** | Heterogeneous GNN Training (GraphSAGE / GAT) | **Colab GPU (Tesla T4)** | **COMPLETED** | Gate Approved |
+| **Phase 9** | Temporal Leakage Ablation Study | **Colab GPU (Tesla T4)** | **COMPLETED** | Gate Approved |
 | **Phase 10** | Full Feature & Model Evaluation Matrix | Laptop / Lab | **PREPARED** | Pending Phase 8/9 |
 | **Phase 11** | Model Explainability (GNNExplainer / Attention) | Laptop (CPU) | **PREPARED** | Pending Phase 8/9 |
 | **Phase 12** | FastAPI REST Backend Service | Laptop (CPU) | **COMPLETED** | Gate Approved |

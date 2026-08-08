@@ -1,0 +1,9 @@
+{
+  "model_name": "HeteroGraphSAGE",
+  "metrics": {
+    "accuracy": 0.72,
+    "macro_f1": 0.665,
+    "status": "TRAINING_COMPLETED"
+  },
+  "device": "cuda"
+}

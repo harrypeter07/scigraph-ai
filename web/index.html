@@ -211,6 +211,14 @@
             background: rgba(10, 13, 20, 0.8);
             border: 1px solid var(--border-color);
         }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -252,8 +260,17 @@
                     <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">📊 Class Probabilities</div>
                     <div style="margin-top: 0.8rem;">
                         <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white;">70%</span></div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barHigh" style="height: 100%; width: 70%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));"></div></div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barHigh" style="height: 100%; width: 70%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.5s;"></div></div>
+
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Medium Impact (50-90th %) <span id="probMedVal" style="float:right; color:white;">22%</span></div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barMed" style="height: 100%; width: 22%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); transition: width 0.5s;"></div></div>
+
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Low Impact (<50th %) <span id="probLowVal" style="float:right; color:white;">8%</span></div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 8%; background: linear-gradient(90deg, var(--accent-purple), #b16cff); transition: width 0.5s;"></div></div>
                     </div>
+
+                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">🧠 Feature Attributions</div>
+                    <div id="featureList"></div>
                 </div>
             </section>
 
@@ -471,8 +488,48 @@
                 
                 document.getElementById('predictionResult').style.display = 'block';
                 document.getElementById('paperTitle').innerText = data.title;
-                document.getElementById('paperMeta').innerText = `ID: ${data.paper_id} | Pub Year: ${data.publication_year}`;
+                document.getElementById('paperMeta').innerText = `ID: ${data.paper_id} | Pub Year: ${data.publication_year} | Cutoff Citations: ${data.historical_citations_at_cutoff}`;
 
+                // Update Impact Badge
+                const badge = document.getElementById('impactBadge');
+                badge.innerText = data.impact_class_label;
+                if (data.predicted_impact_class === 2) {
+                    badge.style.background = 'rgba(0,242,254,0.15)';
+                    badge.style.color = 'var(--accent-cyan)';
+                    badge.style.borderColor = 'var(--accent-cyan)';
+                } else if (data.predicted_impact_class === 1) {
+                    badge.style.background = 'rgba(79,172,254,0.15)';
+                    badge.style.color = 'var(--accent-blue)';
+                    badge.style.borderColor = 'var(--accent-blue)';
+                } else {
+                    badge.style.background = 'rgba(127,0,255,0.15)';
+                    badge.style.color = '#b16cff';
+                    badge.style.borderColor = '#b16cff';
+                }
+
+                // Update Class Probabilities
+                const probs = data.class_probabilities;
+                document.getElementById('barHigh').style.width = Math.round(probs.High * 100) + '%';
+                document.getElementById('probHighVal').innerText = Math.round(probs.High * 100) + '%';
+                
+                document.getElementById('barMed').style.width = Math.round(probs.Medium * 100) + '%';
+                document.getElementById('probMedVal').innerText = Math.round(probs.Medium * 100) + '%';
+
+                document.getElementById('barLow').style.width = Math.round(probs.Low * 100) + '%';
+                document.getElementById('probLowVal').innerText = Math.round(probs.Low * 100) + '%';
+
+                // Update Feature Attributions
+                const featList = document.getElementById('featureList');
+                if (data.explanation && data.explanation.top_contributing_features) {
+                    featList.innerHTML = data.explanation.top_contributing_features.map(f => `
+                        <div class="feature-item">
+                            <span style="color: var(--text-muted);">${f.feature}</span>
+                            <span style="color: var(--accent-cyan); font-weight: 600;">+${(f.weight * 100).toFixed(1)}%</span>
+                        </div>
+                    `).join('');
+                }
+
+                // Re-render Cytoscape Network Subgraph
                 initCytoscape(data.explanation.subgraph);
             } catch (err) {
                 console.error(err);

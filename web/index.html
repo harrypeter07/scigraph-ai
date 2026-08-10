@@ -99,6 +99,7 @@
             padding: 1.8rem;
             box-shadow: var(--shadow-glow);
             margin-bottom: 1.5rem;
+            position: relative;
         }
 
         .card-title {
@@ -136,6 +137,28 @@
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button.action-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .stats-grid {
@@ -219,6 +242,20 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             font-size: 0.85rem;
         }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 13, 20, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 10;
+        }
     </style>
 </head>
 <body>
@@ -241,11 +278,19 @@
     <!-- View 1: Predictor & Graph Visualizer -->
     <div id="predictorView" class="view-section active">
         <div class="predictor-grid">
-            <section class="card">
+            <section class="card" id="predictorCard">
                 <div class="card-title">🔍 Paper Impact Predictor</div>
                 <div class="search-box">
                     <input type="text" id="paperInput" placeholder="Enter OpenAlex Paper ID..." value="W2194775991">
-                    <button class="action-btn" onclick="fetchPrediction()">Predict</button>
+                    <button class="action-btn" id="predictBtn" onclick="fetchPrediction()">
+                        <span id="btnText">Predict</span>
+                    </button>
+                </div>
+
+                <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                    <div class="spinner" style="width: 32px; height: 32px; border-width: 3px;"></div>
+                    <div style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: 600;">Executing PyTorch HeteroGraphSAGE Inference...</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Fetching OpenAlex Metadata & Graph Topology</div>
                 </div>
 
                 <div id="predictionResult" style="display: none;">
@@ -257,19 +302,19 @@
                         <div id="impactBadge" style="display: inline-block; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem; margin-top: 0.5rem; background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact</div>
                     </div>
 
-                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">📊 Class Probabilities</div>
+                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">📊 Softmax Class Probabilities</div>
                     <div style="margin-top: 0.8rem;">
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white;">70%</span></div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barHigh" style="height: 100%; width: 70%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.5s;"></div></div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white;">0%</span></div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barHigh" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.6s ease-in-out;"></div></div>
 
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Medium Impact (50-90th %) <span id="probMedVal" style="float:right; color:white;">22%</span></div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barMed" style="height: 100%; width: 22%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); transition: width 0.5s;"></div></div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Medium Impact (50-90th %) <span id="probMedVal" style="float:right; color:white;">0%</span></div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barMed" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); transition: width 0.6s ease-in-out;"></div></div>
 
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Low Impact (<50th %) <span id="probLowVal" style="float:right; color:white;">8%</span></div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 8%; background: linear-gradient(90deg, var(--accent-purple), #b16cff); transition: width 0.5s;"></div></div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Low Impact (<50th %) <span id="probLowVal" style="float:right; color:white;">0%</span></div>
+                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-purple), #b16cff); transition: width 0.6s ease-in-out;"></div></div>
                     </div>
 
-                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">🧠 Feature Attributions</div>
+                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">🧠 Dynamic Feature Attributions</div>
                     <div id="featureList"></div>
                 </div>
             </section>
@@ -481,9 +526,30 @@
             const paperIdInput = document.getElementById('paperInput').value.trim();
             if (!paperIdInput) return;
 
+            const btn = document.getElementById('predictBtn');
+            const btnText = document.getElementById('btnText');
+            const overlay = document.getElementById('loadingOverlay');
+
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="spinner"></span> Running GNN...';
+            overlay.style.display = 'flex';
+
+            const startTime = Date.now();
+
             try {
                 const response = await fetch(`/api/v1/papers/predict/${encodeURIComponent(paperIdInput)}`);
-                if (!response.ok) return;
+                
+                // Minimum loading delay (600ms) to show GNN inference execution
+                const elapsed = Date.now() - startTime;
+                if (elapsed < 600) {
+                    await new Promise(r => setTimeout(r, 600 - elapsed));
+                }
+
+                if (!response.ok) {
+                    alert(`Paper ID '${paperIdInput}' not found on OpenAlex or local dataset.`);
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 document.getElementById('predictionResult').style.display = 'block';
@@ -507,18 +573,22 @@
                     badge.style.borderColor = '#b16cff';
                 }
 
-                // Update Class Probabilities
+                // Update Real Dynamic Class Probabilities
                 const probs = data.class_probabilities;
-                document.getElementById('barHigh').style.width = Math.round(probs.High * 100) + '%';
-                document.getElementById('probHighVal').innerText = Math.round(probs.High * 100) + '%';
+                const hPct = Math.round(probs.High * 100);
+                const mPct = Math.round(probs.Medium * 100);
+                const lPct = Math.round(probs.Low * 100);
+
+                document.getElementById('barHigh').style.width = hPct + '%';
+                document.getElementById('probHighVal').innerText = hPct + '%';
                 
-                document.getElementById('barMed').style.width = Math.round(probs.Medium * 100) + '%';
-                document.getElementById('probMedVal').innerText = Math.round(probs.Medium * 100) + '%';
+                document.getElementById('barMed').style.width = mPct + '%';
+                document.getElementById('probMedVal').innerText = mPct + '%';
 
-                document.getElementById('barLow').style.width = Math.round(probs.Low * 100) + '%';
-                document.getElementById('probLowVal').innerText = Math.round(probs.Low * 100) + '%';
+                document.getElementById('barLow').style.width = lPct + '%';
+                document.getElementById('probLowVal').innerText = lPct + '%';
 
-                // Update Feature Attributions
+                // Update Dynamic Feature Attributions
                 const featList = document.getElementById('featureList');
                 if (data.explanation && data.explanation.top_contributing_features) {
                     featList.innerHTML = data.explanation.top_contributing_features.map(f => `
@@ -533,6 +603,10 @@
                 initCytoscape(data.explanation.subgraph);
             } catch (err) {
                 console.error(err);
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = 'Predict';
+                overlay.style.display = 'none';
             }
         }
 

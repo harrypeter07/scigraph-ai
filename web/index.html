@@ -9,15 +9,17 @@
     <style>
         :root {
             --bg-primary: #0a0d14;
-            --bg-card: rgba(18, 24, 38, 0.85);
+            --bg-card: rgba(18, 24, 38, 0.88);
             --border-color: rgba(255, 255, 255, 0.1);
             --accent-cyan: #00f2fe;
             --accent-blue: #4facfe;
-            --accent-purple: #7f00ff;
+            --accent-purple: #a855f7;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
             --accent-yellow: #f1c40f;
             --text-main: #f0f4f8;
             --text-muted: #8a99ad;
-            --shadow-glow: 0 8px 32px 0 rgba(0, 242, 254, 0.15);
+            --shadow-glow: 0 8px 32px 0 rgba(0, 242, 254, 0.12);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,17 +32,17 @@
             background-image: 
                 radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.08) 0%, transparent 40%),
                 radial-gradient(circle at 85% 85%, rgba(127, 0, 255, 0.08) 0%, transparent 40%);
-            padding: 2rem;
+            padding: 1.5rem 2rem;
         }
 
         header {
-            max-width: 1400px;
-            margin: 0 auto 1.5rem;
+            max-width: 1440px;
+            margin: 0 auto 1.2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1.2rem;
+            padding-bottom: 1rem;
         }
 
         .logo {
@@ -58,8 +60,8 @@
         .nav-tabs {
             display: flex;
             gap: 1rem;
-            margin-bottom: 2rem;
-            max-width: 1400px;
+            margin-bottom: 1.5rem;
+            max-width: 1440px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -76,21 +78,39 @@
         }
 
         .tab-btn.active {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(135deg, var(--accent-blue), #7f00ff);
             color: white;
             border-color: transparent;
             box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
         }
 
-        .view-section { display: none; max-width: 1400px; margin: 0 auto; }
+        .view-section { display: none; max-width: 1440px; margin: 0 auto; }
         .view-section.active { display: block; }
 
-        /* Three-column layout: predictor | metadata | graph */
+        /* Three-column layout: predictor (340px) | metadata (420px) | graph (1fr) */
         .predictor-grid {
             display: grid;
-            grid-template-columns: 380px 1fr 420px;
-            gap: 1.5rem;
-            align-items: start;
+            grid-template-columns: 340px 420px 1fr;
+            gap: 1.4rem;
+            align-items: stretch;
+        }
+
+        @media (max-width: 1280px) {
+            .predictor-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .graph-card-wrapper {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .predictor-grid {
+                grid-template-columns: 1fr;
+            }
+            .graph-card-wrapper {
+                grid-column: span 1;
+            }
         }
 
         .card {
@@ -98,55 +118,68 @@
             backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 1.8rem;
+            padding: 1.5rem;
             box-shadow: var(--shadow-glow);
-            margin-bottom: 1.5rem;
             position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
         .card-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.2rem;
-            margin-bottom: 1.2rem;
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 0.5rem;
             color: var(--text-main);
         }
 
         .search-box {
             display: flex;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
+            gap: 0.6rem;
+            margin-bottom: 1.2rem;
         }
 
         input[type="text"] {
             flex: 1;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
-            padding: 0.8rem 1.2rem;
+            padding: 0.75rem 1rem;
             border-radius: 10px;
             color: white;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             outline: none;
         }
 
+        input[type="text"]:focus {
+            border-color: var(--accent-cyan);
+        }
+
         button.action-btn {
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            background: linear-gradient(135deg, var(--accent-blue), #7f00ff);
             border: none;
             color: white;
-            padding: 0.8rem 1.6rem;
+            padding: 0.75rem 1.4rem;
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        button.action-btn:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
         }
 
         button.action-btn:disabled {
             opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
         }
 
         .spinner {
@@ -229,20 +262,12 @@
             margin-top: 1rem;
         }
 
-        #cy {
-            width: 100%;
-            height: 420px;
-            border-radius: 12px;
-            background: rgba(10, 13, 20, 0.8);
-            border: 1px solid var(--border-color);
-        }
-
         .feature-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.5rem 0;
+            padding: 0.45rem 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.85rem;
+            font-size: 0.84rem;
         }
 
         .loading-overlay {
@@ -256,17 +281,23 @@
             align-items: center;
             justify-content: center;
             gap: 1rem;
-            z-index: 10;
+            z-index: 20;
         }
 
         /* ── Rich Metadata Panel Styles ── */
         .meta-panel {
             display: none;
+            overflow-y: auto;
+            max-height: 640px;
+            padding-right: 0.3rem;
         }
 
+        .meta-panel::-webkit-scrollbar { width: 4px; }
+        .meta-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
         .meta-section {
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0.85rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         .meta-section:last-child {
@@ -281,9 +312,9 @@
         .meta-row {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: 0.55rem;
-            font-size: 0.88rem;
-            line-height: 1.5;
+            margin-bottom: 0.45rem;
+            font-size: 0.85rem;
+            line-height: 1.45;
             align-items: flex-start;
         }
 
@@ -295,7 +326,7 @@
             font-weight: 700;
             color: var(--text-main);
             white-space: nowrap;
-            min-width: 110px;
+            min-width: 95px;
             flex-shrink: 0;
         }
 
@@ -313,36 +344,36 @@
             text-decoration: underline;
         }
 
-        .meta-value .tag {
+        .tag {
             display: inline-block;
             background: rgba(79, 172, 254, 0.12);
             border: 1px solid rgba(79, 172, 254, 0.25);
             color: var(--accent-blue);
-            padding: 0.15rem 0.55rem;
-            border-radius: 20px;
-            font-size: 0.78rem;
+            padding: 0.12rem 0.5rem;
+            border-radius: 16px;
+            font-size: 0.75rem;
             margin: 0.1rem 0.15rem 0.1rem 0;
         }
 
-        .meta-value .tag.purple {
-            background: rgba(127, 0, 255, 0.12);
-            border-color: rgba(127, 0, 255, 0.3);
-            color: #b16cff;
+        .tag.purple {
+            background: rgba(168, 85, 247, 0.12);
+            border-color: rgba(168, 85, 247, 0.3);
+            color: #c084fc;
         }
 
-        .meta-value .tag.green {
-            background: rgba(46, 204, 113, 0.12);
-            border-color: rgba(46, 204, 113, 0.3);
-            color: #2ecc71;
+        .tag.green {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--accent-green);
         }
 
-        .meta-value .tag.yellow {
-            background: rgba(241, 196, 15, 0.12);
-            border-color: rgba(241, 196, 15, 0.3);
-            color: var(--accent-yellow);
+        .tag.yellow {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.3);
+            color: var(--accent-amber);
         }
 
-        .meta-value .tag.cyan {
+        .tag.cyan {
             background: rgba(0, 242, 254, 0.1);
             border-color: rgba(0, 242, 254, 0.25);
             color: var(--accent-cyan);
@@ -350,8 +381,8 @@
 
         .meta-abstract {
             color: var(--text-muted);
-            font-size: 0.86rem;
-            line-height: 1.65;
+            font-size: 0.82rem;
+            line-height: 1.6;
         }
 
         .meta-abstract .abstract-more {
@@ -366,16 +397,16 @@
         .meta-access-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            gap: 0.35rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: 16px;
+            font-size: 0.76rem;
             font-weight: 600;
         }
 
         .metric-chips {
             display: flex;
-            gap: 1rem;
+            gap: 0.6rem;
             flex-wrap: wrap;
             margin-top: 0.25rem;
         }
@@ -386,22 +417,22 @@
             align-items: center;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 0.5rem 1rem;
-            min-width: 80px;
+            border-radius: 8px;
+            padding: 0.4rem 0.75rem;
+            min-width: 70px;
         }
 
         .metric-chip .chip-val {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--accent-cyan);
             font-family: 'Outfit', sans-serif;
         }
 
         .metric-chip .chip-label {
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             color: var(--text-muted);
-            margin-top: 0.15rem;
+            margin-top: 0.1rem;
             text-align: center;
         }
 
@@ -412,9 +443,9 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: var(--text-main);
-            padding: 0.3rem 0.9rem;
-            border-radius: 8px;
-            font-size: 0.82rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
@@ -425,19 +456,206 @@
 
         .meta-panel-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: white;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.35rem;
             line-height: 1.4;
         }
 
         .meta-panel-subtitle {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
             align-items: center;
+        }
+
+        /* ── Advanced Graph Visualizer Styling ── */
+        .graph-card-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 640px;
+        }
+
+        .graph-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .graph-btn-group {
+            display: flex;
+            gap: 0.35rem;
+            align-items: center;
+        }
+
+        .graph-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.3rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.76rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+
+        .graph-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--accent-cyan);
+            color: white;
+        }
+
+        .graph-btn.active {
+            background: rgba(0, 242, 254, 0.18);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .graph-legend-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-bottom: 0.8rem;
+            font-size: 0.74rem;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--text-muted);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        #cy {
+            width: 100%;
+            height: 380px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 50% 50%, #101624 0%, #080a10 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            cursor: grab;
+        }
+
+        #cy:active { cursor: grabbing; }
+
+        /* ── Node Inspector Panel ── */
+        .node-inspector {
+            margin-top: 0.9rem;
+            background: rgba(10, 14, 23, 0.9);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.82rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .inspector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .inspector-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 0.15rem 0.55rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .inspector-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.4rem;
+            line-height: 1.35;
+        }
+
+        .inspector-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem 0.8rem;
+            margin-top: 0.4rem;
+        }
+
+        .inspector-meta-item {
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        .inspector-meta-key {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .inspector-meta-val {
+            font-size: 0.8rem;
+            color: var(--text-main);
+            font-weight: 500;
+            margin-top: 0.1rem;
+            word-break: break-word;
+        }
+
+        .inspector-footer {
+            margin-top: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 0.5rem;
+        }
+
+        .inspector-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.78rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .inspector-link:hover { text-decoration: underline; }
+
+        .inspector-hint {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-style: italic;
         }
     </style>
 </head>
@@ -446,27 +664,29 @@
     <header>
         <div class="logo">
             ⚡ SciGraph AI
-            <span style="font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 50px; background: rgba(0,242,254,0.1); border: 1px solid rgba(0,242,254,0.3); color: var(--accent-cyan);">Audited Temporal GNN</span>
+            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(0,242,254,0.1); border: 1px solid rgba(0,242,254,0.3); color: var(--accent-cyan);">Audited Temporal GNN</span>
         </div>
-        <div style="font-size: 0.9rem; color: var(--text-muted);">
+        <div style="font-size: 0.88rem; color: var(--text-muted);">
             RCOEM CSE Major Project (Sem VII 2026–27)
         </div>
     </header>
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('predictor')">🔍 Predictor &amp; Graph Visualizer</button>
-        <button class="tab-btn" onclick="switchTab('evidence')">📊 Live Evidence &amp; Data Dashboard</button>
+        <!-- <button class="tab-btn" onclick="switchTab('evidence')">📊 Live Evidence &amp; Data Dashboard</button> -->
     </div>
 
     <!-- View 1: Predictor & Graph Visualizer -->
     <div id="predictorView" class="view-section active">
         <div class="predictor-grid">
 
-            <!-- Column 1: Predictor Controls & Results -->
+            <!-- Column 1: Predictor Controls & Softmax -->
             <section class="card" id="predictorCard">
-                <div class="card-title">🔍 Paper Impact Predictor</div>
+                <div class="card-title">
+                    <span>🔍 Impact Predictor</span>
+                </div>
                 <div class="search-box">
-                    <input type="text" id="paperInput" placeholder="Enter OpenAlex Paper ID..." value="W2194775991">
+                    <input type="text" id="paperInput" placeholder="Enter OpenAlex ID (e.g. W4385245566)..." value="W4385245566">
                     <button class="action-btn" id="predictBtn" onclick="fetchPrediction()">
                         <span id="btnText">Predict</span>
                     </button>
@@ -474,41 +694,43 @@
 
                 <div id="loadingOverlay" class="loading-overlay" style="display: none;">
                     <div class="spinner" style="width: 32px; height: 32px; border-width: 3px;"></div>
-                    <div style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: 600;">Executing PyTorch HeteroGraphSAGE Inference...</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">Fetching OpenAlex Metadata &amp; Graph Topology</div>
+                    <div style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: 600;">Executing PyTorch HeteroGraphSAGE...</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Ingesting OpenAlex Graph Topology &amp; Neighbors</div>
                 </div>
 
                 <div id="predictionResult" style="display: none;">
-                    <div style="margin-bottom: 1.5rem;">
-                        <div style="font-size: 0.85rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
-                        <div id="impactBadge" style="display: inline-block; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem; margin-top: 0.5rem; background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact</div>
+                    <div style="margin-bottom: 1.2rem;">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
+                        <div id="impactBadge" style="display: inline-block; padding: 0.35rem 0.9rem; border-radius: 8px; font-weight: 700; font-size: 1rem; margin-top: 0.4rem; background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact</div>
                     </div>
 
-                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">📊 Softmax Class Probabilities</div>
-                    <div style="margin-top: 0.8rem;">
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white;">0%</span></div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barHigh" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.6s ease-in-out;"></div></div>
+                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1rem;">📊 Softmax Class Probabilities</div>
+                    <div style="margin-top: 0.6rem;">
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white; font-weight:600;">0%</span></div>
+                        <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.7rem;"><div id="barHigh" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.6s ease-in-out;"></div></div>
 
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Medium Impact (50-90th %) <span id="probMedVal" style="float:right; color:white;">0%</span></div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barMed" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); transition: width 0.6s ease-in-out;"></div></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Medium Impact (50-90th %) <span id="probMedVal" style="float:right; color:white; font-weight:600;">0%</span></div>
+                        <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.7rem;"><div id="barMed" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), #7f00ff); transition: width 0.6s ease-in-out;"></div></div>
 
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Low Impact (&lt;50th %) <span id="probLowVal" style="float:right; color:white;">0%</span></div>
-                        <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-purple), #b16cff); transition: width 0.6s ease-in-out;"></div></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Low Impact (&lt;50th %) <span id="probLowVal" style="float:right; color:white; font-weight:600;">0%</span></div>
+                        <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 0%; background: linear-gradient(90deg, #7f00ff, #b16cff); transition: width 0.6s ease-in-out;"></div></div>
                     </div>
 
-                    <div class="card-title" style="font-size: 1rem; margin-top: 1.5rem;">🧠 Dynamic Feature Attributions</div>
+                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1.2rem;">🧠 Dynamic Feature Attributions</div>
                     <div id="featureList"></div>
                 </div>
             </section>
 
             <!-- Column 2: Rich Paper Metadata Panel -->
             <section class="card" id="metadataCard">
-                <div class="card-title">📄 Paper Metadata</div>
+                <div class="card-title">
+                    <span>📄 OpenAlex Paper Details</span>
+                </div>
 
                 <!-- Placeholder when nothing loaded yet -->
-                <div id="metaPlaceholder" style="text-align:center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem;">
-                    <div style="font-size: 2rem; margin-bottom: 0.8rem;">📑</div>
-                    Enter an OpenAlex Paper ID and click <strong style="color:white;">Predict</strong> to see full paper details here.
+                <div id="metaPlaceholder" style="text-align:center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.88rem;">
+                    <div style="font-size: 2.2rem; margin-bottom: 0.8rem;">📑</div>
+                    Enter an OpenAlex Paper ID and click <strong style="color:white;">Predict</strong> to load comprehensive paper metadata.
                 </div>
 
                 <!-- Rich metadata panel (hidden until prediction) -->
@@ -586,7 +808,7 @@
                             </div>
                             <div class="metric-chip" id="chipRelated" style="display:none;">
                                 <span class="chip-val" id="metaRelated">—</span>
-                                <span class="chip-label">Related To</span>
+                                <span class="chip-label">Related</span>
                             </div>
                         </div>
                     </div>
@@ -638,10 +860,63 @@
                 </div>
             </section>
 
-            <!-- Column 3: Graph Visualizer -->
-            <section class="card">
-                <div class="card-title">🕸️ Local Neighborhood Subgraph</div>
+            <!-- Column 3: Advanced Graph Visualizer & Interactive Inspector -->
+            <section class="card graph-card-wrapper">
+                <div class="card-title">
+                    <span>🕸️ Relational Subgraph</span>
+                    <div class="graph-btn-group">
+                        <button class="graph-btn" onclick="cyZoom(1.2)" title="Zoom In">🔍 +</button>
+                        <button class="graph-btn" onclick="cyZoom(0.8)" title="Zoom Out">🔍 −</button>
+                        <button class="graph-btn" onclick="cyFit()" title="Fit to screen">🎯 Fit</button>
+                        <button class="graph-btn" onclick="cyReLayout('cose')" title="Force Layout">🔄 Layout</button>
+                    </div>
+                </div>
+
+                <!-- Graph Toolbar & Filter Chips -->
+                <div class="graph-toolbar">
+                    <div class="graph-btn-group" id="filterGroup">
+                        <button class="graph-btn active" onclick="filterGraph('all', this)">All</button>
+                        <button class="graph-btn" onclick="filterGraph('author', this)">👤 Authors</button>
+                        <button class="graph-btn" onclick="filterGraph('institution', this)">🏛️ Institutions</button>
+                        <button class="graph-btn" onclick="filterGraph('topic', this)">🏷️ Topics</button>
+                        <button class="graph-btn" onclick="filterGraph('citation', this)">📚 Citations</button>
+                    </div>
+                    <div class="graph-btn-group">
+                        <select id="layoutSelect" onchange="cyReLayout(this.value)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.74rem; border-radius: 6px; padding: 0.25rem 0.5rem; outline:none;">
+                            <option value="cose">Force-Directed (COSE)</option>
+                            <option value="concentric">Concentric (Ego Net)</option>
+                            <option value="breadthfirst">Hierarchical</option>
+                            <option value="circle">Circular</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Visual Legend Bar -->
+                <div class="graph-legend-bar">
+                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-cyan);"></span> Target Paper</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-blue);"></span> Authors</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-purple);"></span> Institutions</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-green);"></span> Topics / Fields</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-amber);"></span> Cited Works</div>
+                </div>
+
+                <!-- Cytoscape Canvas Container -->
                 <div id="cy"></div>
+
+                <!-- Interactive Node Inspector Drawer -->
+                <div class="node-inspector" id="nodeInspector">
+                    <div class="inspector-header">
+                        <span class="inspector-badge" id="inspBadge" style="background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">TARGET PAPER</span>
+                        <span class="inspector-hint" id="inspHint">Click any node to inspect details</span>
+                    </div>
+                    <div class="inspector-title" id="inspTitle">Select any node in the graph</div>
+                    <div id="inspDesc" style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.4rem;">Click authors, institutions, topics, or references to inspect properties &amp; 1-hop connections.</div>
+                    <div class="inspector-meta-grid" id="inspGrid" style="display:none;"></div>
+                    <div class="inspector-footer" id="inspFooter" style="display:none;">
+                        <span id="inspConnectionCount" style="color: var(--text-muted); font-size: 0.75rem;"></span>
+                        <a id="inspOpenAlexLink" class="inspector-link" href="#" target="_blank">View on OpenAlex ↗</a>
+                    </div>
+                </div>
             </section>
         </div>
     </div>
@@ -649,8 +924,8 @@
     <!-- View 2: Live Evidence Dashboard -->
     <div id="evidenceView" class="view-section">
         <!-- Live Dataset Overview Panel -->
-        <section class="card">
-            <div class="card-title">📊 Panel 1 — Live Dataset Overview</div>
+        <section class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-title"><span>📊 Panel 1 — Live Dataset Overview</span></div>
             <div class="stats-grid">
                 <div class="stat-box"><div class="stat-number" id="evPapers">50</div><div class="stat-label">Total Sample Papers</div></div>
                 <div class="stat-box"><div class="stat-number" id="evAuthors">257</div><div class="stat-label">Unique Authors</div></div>
@@ -661,8 +936,8 @@
         </section>
 
         <!-- Model Comparison Panel -->
-        <section class="card">
-            <div class="card-title">⚖️ Panel 2 — Model Comparison vs Majority-Class Baseline</div>
+        <section class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-title"><span>⚖️ Panel 2 — Model Comparison vs Majority-Class Baseline</span></div>
             <table class="evidence-table">
                 <thead>
                     <tr>
@@ -720,8 +995,8 @@
         </section>
 
         <!-- Test Predictions Table Panel -->
-        <section class="card">
-            <div class="card-title">📝 Panel 3 — Temporal Test Set Predictions Log ($n=5$)</div>
+        <section class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-title"><span>📝 Panel 3 — Temporal Test Set Predictions Log ($n=5$)</span></div>
             <table class="evidence-table">
                 <thead>
                     <tr>
@@ -742,8 +1017,8 @@
         </section>
 
         <!-- Leakage Ablation Panel -->
-        <section class="card">
-            <div class="card-title">🛡️ Panel 4 — Temporal Leakage Ablation Study</div>
+        <section class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-title"><span>🛡️ Panel 4 — Temporal Leakage Ablation Study</span></div>
             <div style="display: flex; gap: 2rem; margin-top: 1rem;">
                 <div style="flex: 1; background: rgba(0,242,254,0.05); border: 1px solid var(--accent-cyan); padding: 1.2rem; border-radius: 12px; text-align: center;">
                     <div style="font-size: 0.85rem; color: var(--text-muted);">Condition A: Time-Consistent Split</div>
@@ -763,7 +1038,7 @@
 
         <!-- Saved Checkpoint Artifacts Panel -->
         <section class="card">
-            <div class="card-title">📦 Panel 5 — Saved Model Checkpoint Artifacts</div>
+            <div class="card-title"><span>📦 Panel 5 — Saved Model Checkpoint Artifacts</span></div>
             <table class="evidence-table">
                 <thead>
                     <tr>
@@ -789,6 +1064,7 @@
             if (tabName === 'predictor') {
                 document.querySelectorAll('.tab-btn')[0].classList.add('active');
                 document.getElementById('predictorView').classList.add('active');
+                if (cy) { cy.resize(); cy.fit(); }
             } else {
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 document.getElementById('evidenceView').classList.add('active');
@@ -863,12 +1139,12 @@
         // ── OA status badge ──
         function oaBadge(status) {
             const map = {
-                'gold':    { bg: 'rgba(241,196,15,0.15)',   border: 'rgba(241,196,15,0.4)',   color: '#f1c40f',  icon: '🔓', label: 'Gold OA' },
-                'green':   { bg: 'rgba(46,204,113,0.15)',   border: 'rgba(46,204,113,0.4)',   color: '#2ecc71',  icon: '🟢', label: 'Green OA' },
+                'gold':    { bg: 'rgba(245,158,11,0.15)',   border: 'rgba(245,158,11,0.4)',   color: '#f59e0b',  icon: '🔓', label: 'Gold OA' },
+                'green':   { bg: 'rgba(16,185,129,0.15)',   border: 'rgba(16,185,129,0.4)',   color: '#10b981',  icon: '🟢', label: 'Green OA' },
                 'hybrid':  { bg: 'rgba(79,172,254,0.15)',   border: 'rgba(79,172,254,0.4)',   color: '#4facfe',  icon: '🔵', label: 'Hybrid OA' },
                 'bronze':  { bg: 'rgba(205,127,50,0.15)',   border: 'rgba(205,127,50,0.4)',   color: '#cd7f32',  icon: '🥉', label: 'Bronze OA' },
-                'closed':  { bg: 'rgba(231,76,60,0.15)',    border: 'rgba(231,76,60,0.4)',    color: '#e74c3c',  icon: '🔒', label: 'Closed' },
-                'diamond': { bg: 'rgba(185,85,211,0.15)',   border: 'rgba(185,85,211,0.4)',   color: '#b955d3',  icon: '💎', label: 'Diamond OA' },
+                'closed':  { bg: 'rgba(239,68,68,0.15)',    border: 'rgba(239,68,68,0.4)',    color: '#ef4444',  icon: '🔒', label: 'Closed' },
+                'diamond': { bg: 'rgba(168,85,247,0.15)',   border: 'rgba(168,85,247,0.4)',   color: '#c084fc',  icon: '💎', label: 'Diamond OA' },
             };
             const s = (status || '').toLowerCase();
             const cfg = map[s] || { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)', color: '#8a99ad', icon: '❓', label: status || 'Unknown' };
@@ -878,7 +1154,6 @@
         // ── Populate rich metadata panel ──
         function renderMetadata(meta, title, pub_year, paper_id, hist_citations) {
             if (!meta) {
-                // Fallback: show minimal info
                 document.getElementById('metaPlaceholder').style.display = 'none';
                 document.getElementById('metaPanel').style.display = 'block';
                 document.getElementById('metaTitle').textContent = title;
@@ -898,21 +1173,26 @@
             document.getElementById('metaTitle').textContent = title;
 
             // PDF / HTML buttons
+            const pdfBtn = document.getElementById('metaPdfBtn');
             if (meta.pdf_url) {
-                const pdfBtn = document.getElementById('metaPdfBtn');
                 pdfBtn.href = meta.pdf_url;
                 pdfBtn.style.display = 'inline-flex';
+            } else {
+                pdfBtn.style.display = 'none';
             }
+
+            const htmlBtn = document.getElementById('metaHtmlBtn');
             if (meta.landing_page_url) {
-                const htmlBtn = document.getElementById('metaHtmlBtn');
                 htmlBtn.href = meta.landing_page_url;
                 htmlBtn.style.display = 'inline-flex';
+            } else {
+                htmlBtn.style.display = 'none';
             }
 
             // Abstract
             const abstract = meta.abstract || '';
+            const wrap = document.getElementById('metaAbstractWrap');
             if (abstract) {
-                const wrap = document.getElementById('metaAbstractWrap');
                 wrap.style.display = 'block';
                 const LIMIT = 200;
                 abstractExpanded = false;
@@ -927,14 +1207,16 @@
                     document.getElementById('abstractMoreBtn').style.display = 'inline';
                     document.getElementById('abstractMoreBtn').textContent = 'more';
                 }
+            } else {
+                wrap.style.display = 'none';
             }
 
             // Basic info
             document.getElementById('metaYear').textContent = pub_year;
             document.getElementById('metaType').textContent = meta.type || '—';
 
+            const srcRow = document.getElementById('metaSourceRow');
             if (meta.source_name) {
-                const srcRow = document.getElementById('metaSourceRow');
                 srcRow.style.display = 'flex';
                 const srcEl = document.getElementById('metaSource');
                 if (meta.source_url) {
@@ -942,41 +1224,54 @@
                 } else {
                     srcEl.textContent = meta.source_name;
                 }
+            } else {
+                srcRow.style.display = 'none';
             }
 
+            const langRow = document.getElementById('metaLangRow');
             if (meta.language) {
-                document.getElementById('metaLangRow').style.display = 'flex';
+                langRow.style.display = 'flex';
                 document.getElementById('metaLang').textContent = meta.language.toUpperCase();
+            } else {
+                langRow.style.display = 'none';
             }
 
             // Authors
             const authors = meta.all_authors || [];
+            const authRow = document.getElementById('metaAuthorsRow');
             if (authors.length > 0) {
-                document.getElementById('metaAuthorsRow').style.display = 'flex';
+                authRow.style.display = 'flex';
                 const SHOW_AUTHORS = 5;
                 let authHtml = authors.slice(0, SHOW_AUTHORS).map(a => `<span class="tag">${a}</span>`).join('');
                 if (authors.length > SHOW_AUTHORS) {
                     authHtml += `<span class="tag purple">+${authors.length - SHOW_AUTHORS} more</span>`;
                 }
                 document.getElementById('metaAuthors').innerHTML = authHtml;
+            } else {
+                authRow.style.display = 'none';
             }
 
             // Institutions
             const insts = meta.all_institutions || [];
+            const instRow = document.getElementById('metaInstRow');
             if (insts.length > 0) {
-                document.getElementById('metaInstRow').style.display = 'flex';
+                instRow.style.display = 'flex';
                 const SHOW_INST = 4;
                 let instHtml = insts.slice(0, SHOW_INST).map(i => `<span class="tag cyan">${i}</span>`).join('');
                 if (insts.length > SHOW_INST) {
                     instHtml += `<span class="tag purple">+${insts.length - SHOW_INST} more</span>`;
                 }
                 document.getElementById('metaInstitutions').innerHTML = instHtml;
+            } else {
+                instRow.style.display = 'none';
             }
 
             // Metrics
             if (meta.fwci != null) {
                 document.getElementById('chipFwci').style.display = 'flex';
-                document.getElementById('metaFwci').textContent = Number(meta.fwci).toFixed(3);
+                document.getElementById('metaFwci').textContent = Number(meta.fwci).toFixed(2);
+            } else {
+                document.getElementById('chipFwci').style.display = 'none';
             }
             document.getElementById('metaCitedBy').textContent = (meta.cited_by_count ?? hist_citations).toLocaleString();
 
@@ -991,12 +1286,16 @@
 
             // Topic classification
             const hasTopics = meta.topic || meta.subfield || meta.field || meta.domain || meta.sdg;
+            const topicSec = document.getElementById('metaTopicSection');
             if (hasTopics) {
-                document.getElementById('metaTopicSection').style.display = 'block';
+                topicSec.style.display = 'block';
                 const setTopicRow = (rowId, valId, val, cls) => {
+                    const row = document.getElementById(rowId);
                     if (val) {
-                        document.getElementById(rowId).style.display = 'flex';
+                        row.style.display = 'flex';
                         document.getElementById(valId).innerHTML = `<span class="tag ${cls}">${val}</span>`;
+                    } else {
+                        row.style.display = 'none';
                     }
                 };
                 setTopicRow('metaTopicRow',    'metaTopic',    meta.topic,    'cyan');
@@ -1004,31 +1303,42 @@
                 setTopicRow('metaFieldRow',    'metaField',    meta.field,    '');
                 setTopicRow('metaDomainRow',   'metaDomain',   meta.domain,   '');
                 setTopicRow('metaSdgRow',      'metaSdg',      meta.sdg,      'green');
+            } else {
+                topicSec.style.display = 'none';
             }
 
             // Open Access
+            const oaRow = document.getElementById('metaOaRow');
             if (meta.oa_status) {
-                document.getElementById('metaOaRow').style.display = 'flex';
+                oaRow.style.display = 'flex';
                 document.getElementById('metaOa').innerHTML = oaBadge(meta.oa_status);
+            } else {
+                oaRow.style.display = 'none';
             }
 
             // Funders
             const funders = meta.funders || [];
+            const fundRow = document.getElementById('metaFundersRow');
             if (funders.length > 0) {
-                document.getElementById('metaFundersRow').style.display = 'flex';
+                fundRow.style.display = 'flex';
                 document.getElementById('metaFunders').innerHTML = funders.map(f => `<span class="tag">${f}</span>`).join('');
+            } else {
+                fundRow.style.display = 'none';
             }
 
             // Awards
             const awards = meta.awards || [];
+            const awRow = document.getElementById('metaAwardsRow');
             if (awards.length > 0) {
-                document.getElementById('metaAwardsRow').style.display = 'flex';
+                awRow.style.display = 'flex';
                 const SHOW_AWARDS = 5;
                 let awHtml = awards.slice(0, SHOW_AWARDS).map(a => `<span class="tag yellow">${a}</span>`).join('');
                 if (awards.length > SHOW_AWARDS) {
                     awHtml += `<span class="tag purple">+${awards.length - SHOW_AWARDS} more</span>`;
                 }
                 document.getElementById('metaAwards').innerHTML = awHtml;
+            } else {
+                awRow.style.display = 'none';
             }
 
             // OpenAlex ID
@@ -1047,7 +1357,7 @@
             const overlay = document.getElementById('loadingOverlay');
 
             btn.disabled = true;
-            btnText.innerHTML = '<span class="spinner"></span> Running GNN...';
+            btnText.innerHTML = '<span class="spinner"></span> Predicting...';
             overlay.style.display = 'flex';
 
             const startTime = Date.now();
@@ -1055,15 +1365,14 @@
             try {
                 const response = await fetch(`/api/v1/papers/predict/${encodeURIComponent(paperIdInput)}`);
 
-                // Minimum loading delay (600ms) to show GNN inference execution
                 const elapsed = Date.now() - startTime;
-                if (elapsed < 600) {
-                    await new Promise(r => setTimeout(r, 600 - elapsed));
+                if (elapsed < 500) {
+                    await new Promise(r => setTimeout(r, 500 - elapsed));
                 }
 
                 if (!response.ok) {
                     const errData = await response.json().catch(() => ({}));
-                    alert(errData.detail || `Paper ID '${paperIdInput}' not found on OpenAlex or local dataset. Please pick a valid paper ID.`);
+                    alert(errData.detail || `Paper ID '${paperIdInput}' not found.`);
                     return;
                 }
 
@@ -1083,9 +1392,9 @@
                     badge.style.color = 'var(--accent-blue)';
                     badge.style.borderColor = 'var(--accent-blue)';
                 } else {
-                    badge.style.background = 'rgba(127,0,255,0.15)';
-                    badge.style.color = '#b16cff';
-                    badge.style.borderColor = '#b16cff';
+                    badge.style.background = 'rgba(168,85,247,0.15)';
+                    badge.style.color = '#c084fc';
+                    badge.style.borderColor = '#c084fc';
                 }
 
                 // Update Real Dynamic Class Probabilities
@@ -1123,8 +1432,9 @@
                     data.historical_citations_at_cutoff
                 );
 
-                // Re-render Cytoscape Network Subgraph
-                initCytoscape(data.explanation.subgraph);
+                // Render Advanced Cytoscape Network Subgraph
+                initCytoscape(data.explanation.subgraph, data);
+
             } catch (err) {
                 console.error(err);
                 alert("Error running prediction: " + err.message);
@@ -1135,29 +1445,422 @@
             }
         }
 
+        // ── Cytoscape Graph Engine & Interactive Node Inspector ──
         let cy;
-        function initCytoscape(subgraphElements) {
-            const elements = (subgraphElements && subgraphElements.length > 0) ? subgraphElements.map(item => {
-                if (item.source && item.target) {
-                    return { data: { id: item.id, source: item.source, target: item.target } };
-                }
-                return { data: { id: item.id, label: item.label, type: item.type } };
-            }) : [
-                { data: { id: 'target', label: 'Target Paper', type: 'paper' } },
-                { data: { id: 'auth1', label: 'Author A', type: 'author' } }
+        let currentGraphData = null;
+        let currentFilter = 'all';
+
+        function initCytoscape(subgraphElements, predictionData) {
+            currentGraphData = { subgraphElements, predictionData };
+            
+            const rawElements = (subgraphElements && subgraphElements.length > 0) ? subgraphElements : [
+                { id: 'target', label: 'Target Paper', type: 'paper', size: 50, badge: 'TARGET PAPER' },
+                { id: 'auth_0', label: 'Lead Author', type: 'author', size: 34, badge: 'AUTHOR' },
+                { id: 'e_a_0', source: 'auth_0', target: 'target', relation: 'AUTHORED_BY' }
             ];
+
+            const elements = rawElements.map(item => {
+                if (item.source && item.target) {
+                    return {
+                        data: {
+                            id: item.id,
+                            source: item.source,
+                            target: item.target,
+                            relation: item.relation || 'RELATED',
+                            label: item.label || ''
+                        }
+                    };
+                }
+                return {
+                    data: {
+                        id: item.id,
+                        label: item.label || item.full_title || item.id,
+                        full_name: item.full_name || item.full_title || item.label,
+                        type: item.type || 'paper',
+                        sub_type: item.sub_type || '',
+                        size: item.size || 30,
+                        badge: item.badge || item.type.toUpperCase(),
+                        description: item.description || '',
+                        openalex_id: item.openalex_id || '',
+                        orcid: item.orcid || '',
+                        ror: item.ror || '',
+                        position: item.position || '',
+                        institutions: item.institutions || [],
+                        affiliated_authors: item.affiliated_authors || [],
+                        country_code: item.country_code || '',
+                        field: item.field || '',
+                        subfield: item.subfield || '',
+                        citations: item.citations || item.cutoff_citations || 0,
+                        year: item.year || ''
+                    }
+                };
+            });
+
+            if (cy) {
+                cy.destroy();
+            }
 
             cy = cytoscape({
                 container: document.getElementById('cy'),
                 style: [
-                    { selector: 'node[type="paper"]', style: { 'background-color': '#00f2fe', 'label': 'data(label)', 'color': '#fff', 'font-size': '10px', 'width': 30, 'height': 30 } },
-                    { selector: 'node[type="author"]', style: { 'background-color': '#4facfe', 'label': 'data(label)', 'color': '#bbb', 'font-size': '9px', 'width': 22, 'height': 22 } },
-                    { selector: 'node[type="institution"]', style: { 'background-color': '#7f00ff', 'label': 'data(label)', 'color': '#bbb', 'font-size': '9px', 'width': 20, 'height': 20 } },
-                    { selector: 'edge', style: { 'width': 1.5, 'line-color': 'rgba(255,255,255,0.2)', 'curve-style': 'bezier' } }
+                    // Base Node Style
+                    {
+                        selector: 'node',
+                        style: {
+                            'label': 'data(label)',
+                            'color': '#f0f4f8',
+                            'font-family': 'Inter, sans-serif',
+                            'font-size': '10px',
+                            'font-weight': 500,
+                            'text-valign': 'bottom',
+                            'text-margin-y': 5,
+                            'text-outline-color': '#0a0d14',
+                            'text-outline-width': 2.5,
+                            'width': 'data(size)',
+                            'height': 'data(size)',
+                            'border-width': 1.5,
+                            'border-color': 'rgba(255,255,255,0.4)',
+                            'transition-property': 'background-color, border-color, width, height, opacity',
+                            'transition-duration': '0.2s'
+                        }
+                    },
+                    // Target Paper Node
+                    {
+                        selector: 'node[type="paper"]',
+                        style: {
+                            'shape': 'hexagon',
+                            'background-color': '#00f2fe',
+                            'border-color': '#fff',
+                            'border-width': 2.5,
+                            'font-size': '11px',
+                            'font-weight': 700,
+                            'color': '#00f2fe',
+                            'text-outline-color': '#061320',
+                            'text-outline-width': 3
+                        }
+                    },
+                    // Author Nodes
+                    {
+                        selector: 'node[type="author"]',
+                        style: {
+                            'shape': 'ellipse',
+                            'background-color': '#4facfe',
+                            'border-color': 'rgba(79,172,254,0.6)',
+                            'color': '#e0f2fe'
+                        }
+                    },
+                    // Lead / Corresponding Author highlight
+                    {
+                        selector: 'node[type="author"][size >= 35]',
+                        style: {
+                            'border-width': 2.5,
+                            'border-color': '#ffffff',
+                            'background-color': '#38bdf8'
+                        }
+                    },
+                    // Institution Nodes
+                    {
+                        selector: 'node[type="institution"]',
+                        style: {
+                            'shape': 'diamond',
+                            'background-color': '#a855f7',
+                            'border-color': 'rgba(168,85,247,0.7)',
+                            'color': '#f3e8ff'
+                        }
+                    },
+                    // Topic / Field Nodes
+                    {
+                        selector: 'node[type="topic"]',
+                        style: {
+                            'shape': 'round-rectangle',
+                            'background-color': '#10b981',
+                            'border-color': 'rgba(16,185,129,0.7)',
+                            'color': '#d1fae5'
+                        }
+                    },
+                    // Cited Paper Reference Nodes
+                    {
+                        selector: 'node[type="citation"]',
+                        style: {
+                            'shape': 'round-rectangle',
+                            'background-color': '#f59e0b',
+                            'border-color': 'rgba(245,158,11,0.7)',
+                            'color': '#fef3c7'
+                        }
+                    },
+                    // Edge Base Style
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 1.5,
+                            'curve-style': 'bezier',
+                            'line-color': 'rgba(255, 255, 255, 0.18)',
+                            'target-arrow-shape': 'triangle',
+                            'target-arrow-color': 'rgba(255, 255, 255, 0.3)',
+                            'arrow-scale': 0.8,
+                            'opacity': 0.7,
+                            'transition-property': 'line-color, target-arrow-color, width, opacity',
+                            'transition-duration': '0.2s'
+                        }
+                    },
+                    // Edge Specific Relations
+                    {
+                        selector: 'edge[relation="AUTHORED_BY"]',
+                        style: {
+                            'line-color': 'rgba(79, 172, 254, 0.35)',
+                            'target-arrow-color': 'rgba(79, 172, 254, 0.6)'
+                        }
+                    },
+                    {
+                        selector: 'edge[relation="AFFILIATED_WITH"]',
+                        style: {
+                            'line-color': 'rgba(168, 85, 247, 0.35)',
+                            'target-arrow-color': 'rgba(168, 85, 247, 0.6)'
+                        }
+                    },
+                    {
+                        selector: 'edge[relation="TOPIC_OF"]',
+                        style: {
+                            'line-color': 'rgba(16, 185, 129, 0.4)',
+                            'target-arrow-color': 'rgba(16, 185, 129, 0.7)',
+                            'line-style': 'dashed'
+                        }
+                    },
+                    {
+                        selector: 'edge[relation="CITES"]',
+                        style: {
+                            'line-color': 'rgba(245, 158, 11, 0.35)',
+                            'target-arrow-color': 'rgba(245, 158, 11, 0.6)'
+                        }
+                    },
+                    // Highlighted & Dimmed States
+                    {
+                        selector: '.faded',
+                        style: {
+                            'opacity': 0.12,
+                            'text-opacity': 0
+                        }
+                    },
+                    {
+                        selector: '.highlighted',
+                        style: {
+                            'opacity': 1,
+                            'text-opacity': 1,
+                            'border-width': 3.5,
+                            'border-color': '#00f2fe',
+                            'line-color': '#00f2fe',
+                            'target-arrow-color': '#00f2fe',
+                            'width': 2.5,
+                            'z-index': 999
+                        }
+                    }
                 ],
                 elements: elements,
-                layout: { name: 'cose', animate: true }
+                layout: {
+                    name: 'cose',
+                    animate: true,
+                    animationDuration: 600,
+                    randomize: false,
+                    nodeRepulsion: 450000,
+                    nodeOverlap: 20,
+                    idealEdgeLength: 60,
+                    edgeElasticity: 100,
+                    nestingFactor: 5,
+                    gravity: 80,
+                    numIter: 1000
+                }
             });
+
+            // Set default inspection to target paper
+            const targetNode = cy.$('#target');
+            if (targetNode.length > 0) {
+                inspectNode(targetNode[0]);
+            }
+
+            // Click listener for node inspection & 1-hop neighborhood highlighting
+            cy.on('tap', 'node', function(evt) {
+                const node = evt.target;
+                highlightNeighborhood(node);
+                inspectNode(node);
+            });
+
+            // Tap background: reset highlighting and show target paper
+            cy.on('tap', function(evt) {
+                if (evt.target === cy) {
+                    cy.elements().removeClass('faded highlighted');
+                    if (targetNode.length > 0) {
+                        inspectNode(targetNode[0]);
+                    }
+                }
+            });
+        }
+
+        function highlightNeighborhood(node) {
+            cy.elements().removeClass('faded highlighted');
+            
+            const neighborhood = node.closedNeighborhood();
+            cy.elements().not(neighborhood).addClass('faded');
+            neighborhood.addClass('highlighted');
+            node.addClass('highlighted');
+        }
+
+        // ── Node Inspector Logic ──
+        function inspectNode(node) {
+            const data = node.data();
+            const badge = document.getElementById('inspBadge');
+            const title = document.getElementById('inspTitle');
+            const desc = document.getElementById('inspDesc');
+            const grid = document.getElementById('inspGrid');
+            const footer = document.getElementById('inspFooter');
+            const link = document.getElementById('inspOpenAlexLink');
+            const connCount = document.getElementById('inspConnectionCount');
+            const hint = document.getElementById('inspHint');
+
+            hint.textContent = 'Node Selected';
+            title.textContent = data.full_name || data.label || 'Node Details';
+            badge.textContent = data.badge || data.type.toUpperCase();
+
+            // Set badge styling based on type
+            const typeConfig = {
+                'paper':       { bg: 'rgba(0,242,254,0.15)',   color: 'var(--accent-cyan)',   border: 'var(--accent-cyan)' },
+                'author':      { bg: 'rgba(79,172,254,0.15)',   color: 'var(--accent-blue)',   border: 'var(--accent-blue)' },
+                'institution': { bg: 'rgba(168,85,247,0.15)',  color: '#c084fc',              border: '#c084fc' },
+                'topic':       { bg: 'rgba(16,185,129,0.15)',  color: 'var(--accent-green)',  border: 'var(--accent-green)' },
+                'citation':    { bg: 'rgba(245,158,11,0.15)',  color: 'var(--accent-amber)',  border: 'var(--accent-amber)' }
+            };
+
+            const cfg = typeConfig[data.type] || typeConfig['paper'];
+            badge.style.background = cfg.bg;
+            badge.style.color = cfg.color;
+            badge.style.borderColor = cfg.border;
+
+            // Generate metadata attributes
+            let items = [];
+
+            if (data.type === 'paper') {
+                desc.textContent = data.description || 'Target Paper for GNN Impact Trajectory Prediction.';
+                if (data.year) items.push({ k: 'Publication Year', v: data.year });
+                if (data.citations !== undefined) items.push({ k: 'Citations', v: data.citations.toLocaleString() });
+                if (data.fwci) items.push({ k: 'FWCI', v: Number(data.fwci).toFixed(2) });
+                if (data.doi) items.push({ k: 'DOI', v: data.doi });
+            } else if (data.type === 'author') {
+                desc.textContent = data.description || 'Author connected to target paper.';
+                if (data.position) items.push({ k: 'Authorship Position', v: data.position });
+                if (data.institutions && data.institutions.length > 0) {
+                    items.push({ k: 'Affiliation', v: data.institutions.join(', ') });
+                }
+                if (data.orcid) items.push({ k: 'ORCID', v: data.orcid.replace('https://orcid.org/', '') });
+            } else if (data.type === 'institution') {
+                desc.textContent = data.description || 'Academic / Research Institution.';
+                if (data.country_code) items.push({ k: 'Country', v: data.country_code });
+                if (data.inst_type) items.push({ k: 'Type', v: data.inst_type });
+                if (data.affiliated_authors && data.affiliated_authors.length > 0) {
+                    items.push({ k: 'Affiliated Authors', v: data.affiliated_authors.join(', ') });
+                }
+            } else if (data.type === 'topic') {
+                desc.textContent = data.description || 'Research Classification & Field.';
+                if (data.field) items.push({ k: 'Main Field', v: data.field });
+                if (data.subfield) items.push({ k: 'Subfield', v: data.subfield });
+                if (data.domain) items.push({ k: 'Domain', v: data.domain });
+            } else if (data.type === 'citation') {
+                desc.textContent = data.description || 'Referenced academic work in paper bibliography.';
+                if (data.openalex_id) items.push({ k: 'Reference ID', v: data.openalex_id.split('/').pop() });
+            }
+
+            if (items.length > 0) {
+                grid.style.display = 'grid';
+                grid.innerHTML = items.map(it => `
+                    <div class="inspector-meta-item">
+                        <span class="inspector-meta-key">${it.k}</span>
+                        <span class="inspector-meta-val">${it.v}</span>
+                    </div>
+                `).join('');
+            } else {
+                grid.style.display = 'none';
+            }
+
+            // Footer / OpenAlex URL
+            const degree = node.degree();
+            connCount.textContent = `🔗 ${degree} connection${degree === 1 ? '' : 's'}`;
+
+            if (data.openalex_id || data.ror || data.orcid) {
+                footer.style.display = 'flex';
+                const targetUrl = data.openalex_id || data.ror || data.orcid;
+                link.href = targetUrl;
+                link.textContent = data.ror ? 'View on ROR ↗' : (data.orcid ? 'View ORCID ↗' : 'View on OpenAlex ↗');
+            } else {
+                footer.style.display = 'none';
+            }
+        }
+
+        // ── Graph Controls (Zoom, Fit, Layout, Filter) ──
+        function cyZoom(factor) {
+            if (!cy) return;
+            cy.zoom({
+                level: cy.zoom() * factor,
+                renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 }
+            });
+        }
+
+        function cyFit() {
+            if (!cy) return;
+            cy.elements().removeClass('faded highlighted');
+            cy.fit(null, 30);
+        }
+
+        function cyReLayout(layoutName) {
+            if (!cy) return;
+            const options = {
+                name: layoutName,
+                animate: true,
+                animationDuration: 500,
+                fit: true,
+                padding: 30
+            };
+            if (layoutName === 'cose') {
+                options.nodeRepulsion = 450000;
+                options.idealEdgeLength = 60;
+            } else if (layoutName === 'concentric') {
+                options.concentric = function(node) {
+                    return node.id() === 'target' ? 10 : (node.data('type') === 'author' ? 7 : 4);
+                };
+                options.levelWidth = function() { return 2; };
+            }
+            cy.layout(options).run();
+        }
+
+        function filterGraph(type, btn) {
+            if (!cy) return;
+            currentFilter = type;
+            
+            document.querySelectorAll('#filterGroup .graph-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (type === 'all') {
+                cy.elements().style('display', 'element');
+                cyFit();
+                return;
+            }
+
+            // Always show target paper + the selected type + connecting edges
+            cy.batch(() => {
+                cy.elements().style('display', 'none');
+                cy.$('#target').style('display', 'element');
+                
+                const targetTypeNodes = cy.$(`node[type="${type}"]`);
+                targetTypeNodes.style('display', 'element');
+                
+                // Show edges connecting visible nodes
+                targetTypeNodes.connectedEdges().forEach(edge => {
+                    const src = edge.source();
+                    const tgt = edge.target();
+                    if (src.style('display') === 'element' && tgt.style('display') === 'element') {
+                        edge.style('display', 'element');
+                    }
+                });
+            });
+
+            cyFit();
         }
 
         window.onload = () => { fetchPrediction(); };

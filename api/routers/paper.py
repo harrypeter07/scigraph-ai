@@ -2,7 +2,6 @@
 
 import os
 import json
-import zlib
 import torch
 import requests
 import pandas as pd
@@ -16,34 +15,57 @@ router = APIRouter(prefix="/api/v1/papers", tags=["Paper Predictions"])
 
 # Load trained HeteroGraphSAGE PyTorch model checkpoint if available
 MODEL_PATH = "ml/gnn/checkpoints/graphsage.pt"
-gnn_model = HeteroGraphSAGE(in_channels=5, hidden_channels=32, out_channels=3)
+gnn_model = HeteroGraphSAGE(in_channels=5, hidden_channels=64, out_channels=3)
 if os.path.exists(MODEL_PATH):
     try:
-        gnn_model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device("cpu")))
+        state_dict = torch.load(MODEL_PATH, map_location=torch.device("cpu"))
+        if "fc1.weight" in state_dict:
+            chk_hidden = state_dict["fc1.weight"].shape[0]
+            if chk_hidden != 64:
+                gnn_model = HeteroGraphSAGE(in_channels=5, hidden_channels=chk_hidden, out_channels=3)
+        gnn_model.load_state_dict(state_dict)
         gnn_model.eval()
     except Exception:
         pass
 
 
+def _reconstruct_abstract(inverted_index: dict) -> str:
+    """Reconstruct abstract text from OpenAlex inverted index format."""
+    if not inverted_index:
+        return ""
+    try:
+        positions = []
+        for word, pos_list in inverted_index.items():
+            for pos in pos_list:
+                positions.append((pos, word))
+        positions.sort(key=lambda x: x[0])
+        return " ".join(word for _, word in positions)
+    except Exception:
+        return ""
+
+
 def fetch_openalex_live(work_id: str) -> Dict[str, Any]:
-    """Fetch live paper details and metadata directly from OpenAlex REST API."""
+    """Fetch live paper details and full metadata directly from OpenAlex REST API."""
     clean_id = work_id.replace("https://openalex.org/", "").strip()
     url = f"https://api.openalex.org/works/{clean_id}"
 
     try:
-        res = requests.get(url, params={"mailto": "hassan@rcoem.edu"}, timeout=8)
+        res = requests.get(url, params={"mailto": "hassan@rcoem.edu"}, timeout=10)
         if res.status_code == 200:
             raw = res.json()
-            title = raw.get("title") or f"Research Paper {clean_id}"
-            pub_year = raw.get("publication_year") or 2020
+            title = raw.get("title")
+            if not title:
+                return {}
 
+            pub_year = raw.get("publication_year") or 2020
             cutoff_year = pub_year + 2
             counts_by_year = raw.get("counts_by_year", [])
             hist_citations = sum(item.get("cited_by_count", 0) for item in counts_by_year if item.get("year", 9999) <= cutoff_year)
 
             authorships = raw.get("authorships", [])
-            subgraph = [{"id": "target", "label": title[:30] + ("..." if len(title) > 30 else ""), "type": "paper"}]
 
+            # Build subgraph for visualization
+            subgraph = [{"id": "target", "label": title[:30] + ("..." if len(title) > 30 else ""), "type": "paper"}]
             for i, auth in enumerate(authorships[:3]):
                 author_obj = auth.get("author") or {}
                 aname = author_obj.get("display_name", f"Author {i+1}")
@@ -64,6 +86,94 @@ def fetch_openalex_live(work_id: str) -> Dict[str, Any]:
                 subgraph.append({"id": cid, "label": f"Cited {ref.split('/')[-1][:10]}", "type": "paper"})
                 subgraph.append({"id": f"e_c_{j}", "source": "target", "target": cid})
 
+            # --- Extract all rich metadata ---
+
+            # Abstract
+            abstract = _reconstruct_abstract(raw.get("abstract_inverted_index") or {})
+
+            # All authors with overflow count
+            all_authors = []
+            for auth in authorships:
+                aobj = auth.get("author") or {}
+                aname = aobj.get("display_name", "")
+                if aname:
+                    all_authors.append(aname)
+
+            # All unique institutions
+            seen_inst = set()
+            all_institutions = []
+            for auth in authorships:
+                for inst in auth.get("institutions", []):
+                    iname = inst.get("display_name", "")
+                    if iname and iname not in seen_inst:
+                        seen_inst.add(iname)
+                        all_institutions.append(iname)
+
+            # Source / primary location
+            primary_location = raw.get("primary_location") or {}
+            source_obj = primary_location.get("source") or {}
+            source_name = source_obj.get("display_name", "")
+            source_url = source_obj.get("homepage_url", "")
+            pdf_url = primary_location.get("pdf_url", "")
+            landing_page_url = primary_location.get("landing_page_url", "")
+
+            # Language
+            language = raw.get("language", "")
+
+            # Citation metrics
+            fwci = raw.get("fwci")
+            cited_by_count = raw.get("cited_by_count", 0)
+            related_works_count = len(raw.get("related_works", []))
+            cites_count = len(raw.get("referenced_works", []))
+
+            # Topic classification
+            primary_topic = raw.get("primary_topic") or {}
+            topic_name = primary_topic.get("display_name", "")
+            subfield_name = (primary_topic.get("subfield") or {}).get("display_name", "")
+            field_name = (primary_topic.get("field") or {}).get("display_name", "")
+            domain_name = (primary_topic.get("domain") or {}).get("display_name", "")
+
+            # SDG
+            sdg_list = raw.get("sustainable_development_goals") or []
+            sdg_name = sdg_list[0].get("display_name", "") if sdg_list else ""
+
+            # Open Access
+            open_access = raw.get("open_access") or {}
+            oa_status = open_access.get("oa_status", "")
+
+            # Funders & Awards
+            grants = raw.get("grants") or []
+            funders = list({g.get("funder_display_name", "") for g in grants if g.get("funder_display_name")})
+            awards = [g.get("award_id", "") for g in grants if g.get("award_id")]
+
+            # Paper type
+            paper_type = raw.get("type", "")
+
+            paper_metadata = {
+                "abstract": abstract,
+                "type": paper_type,
+                "source_name": source_name,
+                "source_url": source_url,
+                "pdf_url": pdf_url,
+                "landing_page_url": landing_page_url,
+                "all_authors": all_authors,
+                "all_institutions": all_institutions,
+                "language": language,
+                "fwci": fwci,
+                "cited_by_count": cited_by_count,
+                "cites_count": cites_count,
+                "related_works_count": related_works_count,
+                "topic": topic_name,
+                "subfield": subfield_name,
+                "field": field_name,
+                "domain": domain_name,
+                "sdg": sdg_name,
+                "oa_status": oa_status,
+                "funders": funders,
+                "awards": awards,
+                "openalex_id": f"https://openalex.org/{clean_id}",
+            }
+
             return {
                 "id": f"https://openalex.org/{clean_id}",
                 "title": title,
@@ -71,7 +181,8 @@ def fetch_openalex_live(work_id: str) -> Dict[str, Any]:
                 "historical_citations_at_cutoff": hist_citations,
                 "subgraph": subgraph,
                 "num_authors": max(1, len(authorships)),
-                "title_length": max(1, len(title.split()))
+                "title_length": max(1, len(title.split())),
+                "paper_metadata": paper_metadata,
             }
     except Exception:
         pass
@@ -198,6 +309,8 @@ def predict_paper_impact(paper_id: str):
         if not match.empty:
             row = match.iloc[0].to_dict()
 
+    paper_metadata = None
+
     if row:
         target_id = str(row["id"])
         title = str(row.get("title", f"Research Paper {clean_id}"))
@@ -206,10 +319,14 @@ def predict_paper_impact(paper_id: str):
         num_authors = 3
         title_length = len(title.split())
         subgraph = get_real_paper_subgraph(target_id, title)
+        # Fetch rich metadata even for local dataset papers
+        live_data = fetch_openalex_live(clean_id)
+        if live_data:
+            paper_metadata = live_data.get("paper_metadata")
     else:
         # Try fetching live paper metadata directly from OpenAlex REST API
         live_data = fetch_openalex_live(clean_id)
-        if live_data:
+        if live_data and live_data.get("title"):
             target_id = live_data["id"]
             title = live_data["title"]
             pub_year = live_data["publication_year"]
@@ -217,26 +334,12 @@ def predict_paper_impact(paper_id: str):
             num_authors = live_data["num_authors"]
             title_length = live_data["title_length"]
             subgraph = live_data["subgraph"]
+            paper_metadata = live_data.get("paper_metadata")
         else:
-            # Hash-derived feature synthesis for custom or non-OpenAlex paper inputs
-            hash_val = zlib.crc32(clean_id.encode("utf-8"))
-            target_id = f"https://openalex.org/{clean_id}"
-            title = f"AI Research Paper {clean_id}"
-            pub_year = 2014 + (hash_val % 8)
-            hist_citations = 10 + (hash_val % 450)
-            num_authors = 1 + (hash_val % 5)
-            title_length = 5 + (hash_val % 10)
-            subgraph = [
-                {"id": "target", "label": title[:30] + "...", "type": "paper"},
-                {"id": "auth1", "label": f"Author {clean_id}-A", "type": "author"},
-                {"id": "auth2", "label": f"Author {clean_id}-B", "type": "author"},
-                {"id": "inst1", "label": f"Univ of {clean_id[:6]}", "type": "institution"},
-                {"id": "cit1", "label": "Prior Literature", "type": "paper"},
-                {"id": "e1", "source": "auth1", "target": "target"},
-                {"id": "e2", "source": "auth2", "target": "target"},
-                {"id": "e3", "source": "auth1", "target": "inst1"},
-                {"id": "e4", "source": "target", "target": "cit1"}
-            ]
+            raise HTTPException(
+                status_code=404,
+                detail=f"Paper ID '{clean_id}' does not exist in local dataset or OpenAlex database. Please enter a valid OpenAlex ID (e.g. W2194775991, W3118615836, W3177828909)."
+            )
 
     # Execute real PyTorch HeteroGraphSAGE model forward pass
     inference_res = run_model_inference(pub_year, hist_citations, num_authors, title_length)
@@ -255,5 +358,6 @@ def predict_paper_impact(paper_id: str):
         "explanation": {
             "top_contributing_features": inference_res["top_contributing_features"],
             "subgraph": subgraph
-        }
+        },
+        "paper_metadata": paper_metadata,
     }

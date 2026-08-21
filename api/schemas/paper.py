@@ -13,6 +13,7 @@ class PaperPredictionResponse(BaseModel):
     class_probabilities: Dict[str, float]
     historical_citations_at_cutoff: int
     explanation: Dict[str, Any]
+    paper_metadata: Optional[Dict[str, Any]] = None
 
 
 class DatasetStatsResponse(BaseModel):

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciGraph AI — Impact Predictor & Live Evidence Dashboard</title>
+    <title>SciGraph AI — Impact Predictor &amp; Live Evidence Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
     <style>
@@ -34,7 +34,7 @@
         }
 
         header {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto 1.5rem;
             display: flex;
             justify-content: space-between;
@@ -59,7 +59,7 @@
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
-            max-width: 1200px;
+            max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -82,13 +82,15 @@
             box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
         }
 
-        .view-section { display: none; max-width: 1200px; margin: 0 auto; }
+        .view-section { display: none; max-width: 1400px; margin: 0 auto; }
         .view-section.active { display: block; }
 
+        /* Three-column layout: predictor | metadata | graph */
         .predictor-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: 380px 1fr 420px;
+            gap: 1.5rem;
+            align-items: start;
         }
 
         .card {
@@ -256,6 +258,187 @@
             gap: 1rem;
             z-index: 10;
         }
+
+        /* ── Rich Metadata Panel Styles ── */
+        .meta-panel {
+            display: none;
+        }
+
+        .meta-section {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .meta-section:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .meta-section:first-child {
+            padding-top: 0;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.55rem;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            align-items: flex-start;
+        }
+
+        .meta-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .meta-label {
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            min-width: 110px;
+            flex-shrink: 0;
+        }
+
+        .meta-value {
+            color: var(--text-muted);
+            word-break: break-word;
+        }
+
+        .meta-value a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        .meta-value a:hover {
+            text-decoration: underline;
+        }
+
+        .meta-value .tag {
+            display: inline-block;
+            background: rgba(79, 172, 254, 0.12);
+            border: 1px solid rgba(79, 172, 254, 0.25);
+            color: var(--accent-blue);
+            padding: 0.15rem 0.55rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            margin: 0.1rem 0.15rem 0.1rem 0;
+        }
+
+        .meta-value .tag.purple {
+            background: rgba(127, 0, 255, 0.12);
+            border-color: rgba(127, 0, 255, 0.3);
+            color: #b16cff;
+        }
+
+        .meta-value .tag.green {
+            background: rgba(46, 204, 113, 0.12);
+            border-color: rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+        }
+
+        .meta-value .tag.yellow {
+            background: rgba(241, 196, 15, 0.12);
+            border-color: rgba(241, 196, 15, 0.3);
+            color: var(--accent-yellow);
+        }
+
+        .meta-value .tag.cyan {
+            background: rgba(0, 242, 254, 0.1);
+            border-color: rgba(0, 242, 254, 0.25);
+            color: var(--accent-cyan);
+        }
+
+        .meta-abstract {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            line-height: 1.65;
+        }
+
+        .meta-abstract .abstract-more {
+            color: var(--accent-blue);
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 0.3rem;
+        }
+
+        .abstract-full { display: none; }
+
+        .meta-access-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .metric-chips {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 0.25rem;
+        }
+
+        .metric-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            min-width: 80px;
+        }
+
+        .metric-chip .chip-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .metric-chip .chip-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+            text-align: center;
+        }
+
+        .pdf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            padding: 0.3rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .pdf-btn:hover { background: rgba(255,255,255,0.13); }
+
+        .meta-panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.4rem;
+            line-height: 1.4;
+        }
+
+        .meta-panel-subtitle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -271,13 +454,15 @@
     </header>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('predictor')">🔍 Predictor & Graph Visualizer</button>
-        <button class="tab-btn" onclick="switchTab('evidence')">📊 Live Evidence & Data Dashboard</button>
+        <button class="tab-btn active" onclick="switchTab('predictor')">🔍 Predictor &amp; Graph Visualizer</button>
+        <button class="tab-btn" onclick="switchTab('evidence')">📊 Live Evidence &amp; Data Dashboard</button>
     </div>
 
     <!-- View 1: Predictor & Graph Visualizer -->
     <div id="predictorView" class="view-section active">
         <div class="predictor-grid">
+
+            <!-- Column 1: Predictor Controls & Results -->
             <section class="card" id="predictorCard">
                 <div class="card-title">🔍 Paper Impact Predictor</div>
                 <div class="search-box">
@@ -290,13 +475,10 @@
                 <div id="loadingOverlay" class="loading-overlay" style="display: none;">
                     <div class="spinner" style="width: 32px; height: 32px; border-width: 3px;"></div>
                     <div style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: 600;">Executing PyTorch HeteroGraphSAGE Inference...</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">Fetching OpenAlex Metadata & Graph Topology</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">Fetching OpenAlex Metadata &amp; Graph Topology</div>
                 </div>
 
                 <div id="predictionResult" style="display: none;">
-                    <h3 id="paperTitle" style="font-size: 1.05rem; margin-bottom: 0.5rem; color: white;"></h3>
-                    <p id="paperMeta" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;"></p>
-
                     <div style="margin-bottom: 1.5rem;">
                         <div style="font-size: 0.85rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
                         <div id="impactBadge" style="display: inline-block; padding: 0.4rem 1rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem; margin-top: 0.5rem; background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact</div>
@@ -310,7 +492,7 @@
                         <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Medium Impact (50-90th %) <span id="probMedVal" style="float:right; color:white;">0%</span></div>
                         <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.8rem;"><div id="barMed" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); transition: width 0.6s ease-in-out;"></div></div>
 
-                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Low Impact (<50th %) <span id="probLowVal" style="float:right; color:white;">0%</span></div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem;">Low Impact (&lt;50th %) <span id="probLowVal" style="float:right; color:white;">0%</span></div>
                         <div style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-purple), #b16cff); transition: width 0.6s ease-in-out;"></div></div>
                     </div>
 
@@ -319,6 +501,144 @@
                 </div>
             </section>
 
+            <!-- Column 2: Rich Paper Metadata Panel -->
+            <section class="card" id="metadataCard">
+                <div class="card-title">📄 Paper Metadata</div>
+
+                <!-- Placeholder when nothing loaded yet -->
+                <div id="metaPlaceholder" style="text-align:center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                    <div style="font-size: 2rem; margin-bottom: 0.8rem;">📑</div>
+                    Enter an OpenAlex Paper ID and click <strong style="color:white;">Predict</strong> to see full paper details here.
+                </div>
+
+                <!-- Rich metadata panel (hidden until prediction) -->
+                <div class="meta-panel" id="metaPanel">
+
+                    <!-- Title & access buttons -->
+                    <div class="meta-section">
+                        <div class="meta-panel-title" id="metaTitle"></div>
+                        <div class="meta-panel-subtitle">
+                            <a id="metaPdfBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">📄 PDF</a>
+                            <a id="metaHtmlBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">🌐 HTML</a>
+                        </div>
+                        <!-- Abstract -->
+                        <div id="metaAbstractWrap" style="display:none;">
+                            <div class="meta-row">
+                                <span class="meta-label">Abstract:</span>
+                            </div>
+                            <div class="meta-abstract">
+                                <span id="metaAbstractShort"></span>
+                                <span class="abstract-full" id="metaAbstractFull"></span>
+                                <span class="abstract-more" id="abstractMoreBtn" onclick="toggleAbstract()">more</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Basic info: Year, Type, Source -->
+                    <div class="meta-section">
+                        <div class="meta-row">
+                            <span class="meta-label">Year:</span>
+                            <span class="meta-value" id="metaYear"></span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Type:</span>
+                            <span class="meta-value" id="metaType"></span>
+                        </div>
+                        <div class="meta-row" id="metaSourceRow" style="display:none;">
+                            <span class="meta-label">Source:</span>
+                            <span class="meta-value" id="metaSource"></span>
+                        </div>
+                        <div class="meta-row" id="metaLangRow" style="display:none;">
+                            <span class="meta-label">Language:</span>
+                            <span class="meta-value" id="metaLang"></span>
+                        </div>
+                    </div>
+
+                    <!-- Authors & Institutions -->
+                    <div class="meta-section">
+                        <div class="meta-row" id="metaAuthorsRow" style="display:none;">
+                            <span class="meta-label">Authors:</span>
+                            <span class="meta-value" id="metaAuthors"></span>
+                        </div>
+                        <div class="meta-row" id="metaInstRow" style="display:none;">
+                            <span class="meta-label">Institutions:</span>
+                            <span class="meta-value" id="metaInstitutions"></span>
+                        </div>
+                    </div>
+
+                    <!-- Citation Metrics -->
+                    <div class="meta-section">
+                        <div class="meta-row">
+                            <span class="meta-label">Metrics:</span>
+                        </div>
+                        <div class="metric-chips">
+                            <div class="metric-chip" id="chipFwci" style="display:none;">
+                                <span class="chip-val" id="metaFwci">—</span>
+                                <span class="chip-label">FWCI</span>
+                            </div>
+                            <div class="metric-chip">
+                                <span class="chip-val" id="metaCitedBy">—</span>
+                                <span class="chip-label">Cited By</span>
+                            </div>
+                            <div class="metric-chip" id="chipCites" style="display:none;">
+                                <span class="chip-val" id="metaCites">—</span>
+                                <span class="chip-label">Cites</span>
+                            </div>
+                            <div class="metric-chip" id="chipRelated" style="display:none;">
+                                <span class="chip-val" id="metaRelated">—</span>
+                                <span class="chip-label">Related To</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic Classification -->
+                    <div class="meta-section" id="metaTopicSection" style="display:none;">
+                        <div class="meta-row" id="metaTopicRow" style="display:none;">
+                            <span class="meta-label">Topic:</span>
+                            <span class="meta-value" id="metaTopic"></span>
+                        </div>
+                        <div class="meta-row" id="metaSubfieldRow" style="display:none;">
+                            <span class="meta-label">Subfield:</span>
+                            <span class="meta-value" id="metaSubfield"></span>
+                        </div>
+                        <div class="meta-row" id="metaFieldRow" style="display:none;">
+                            <span class="meta-label">Field:</span>
+                            <span class="meta-value" id="metaField"></span>
+                        </div>
+                        <div class="meta-row" id="metaDomainRow" style="display:none;">
+                            <span class="meta-label">Domain:</span>
+                            <span class="meta-value" id="metaDomain"></span>
+                        </div>
+                        <div class="meta-row" id="metaSdgRow" style="display:none;">
+                            <span class="meta-label">SDG:</span>
+                            <span class="meta-value" id="metaSdg"></span>
+                        </div>
+                    </div>
+
+                    <!-- Open Access & Funders -->
+                    <div class="meta-section">
+                        <div class="meta-row" id="metaOaRow" style="display:none;">
+                            <span class="meta-label">Open Access:</span>
+                            <span class="meta-value" id="metaOa"></span>
+                        </div>
+                        <div class="meta-row" id="metaFundersRow" style="display:none;">
+                            <span class="meta-label">Funders:</span>
+                            <span class="meta-value" id="metaFunders"></span>
+                        </div>
+                        <div class="meta-row" id="metaAwardsRow" style="display:none;">
+                            <span class="meta-label">Awards:</span>
+                            <span class="meta-value" id="metaAwards"></span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">OpenAlex ID:</span>
+                            <span class="meta-value"><a id="metaOaId" href="#" target="_blank" style="color:var(--accent-blue);"></a></span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Column 3: Graph Visualizer -->
             <section class="card">
                 <div class="card-title">🕸️ Local Neighborhood Subgraph</div>
                 <div id="cy"></div>
@@ -522,6 +842,202 @@
             }
         }
 
+        // ── Abstract toggle ──
+        let abstractExpanded = false;
+        function toggleAbstract() {
+            abstractExpanded = !abstractExpanded;
+            const full = document.getElementById('metaAbstractFull');
+            const btn = document.getElementById('abstractMoreBtn');
+            const short = document.getElementById('metaAbstractShort');
+            if (abstractExpanded) {
+                full.style.display = 'inline';
+                short.style.display = 'none';
+                btn.textContent = 'less';
+            } else {
+                full.style.display = 'none';
+                short.style.display = 'inline';
+                btn.textContent = 'more';
+            }
+        }
+
+        // ── OA status badge ──
+        function oaBadge(status) {
+            const map = {
+                'gold':    { bg: 'rgba(241,196,15,0.15)',   border: 'rgba(241,196,15,0.4)',   color: '#f1c40f',  icon: '🔓', label: 'Gold OA' },
+                'green':   { bg: 'rgba(46,204,113,0.15)',   border: 'rgba(46,204,113,0.4)',   color: '#2ecc71',  icon: '🟢', label: 'Green OA' },
+                'hybrid':  { bg: 'rgba(79,172,254,0.15)',   border: 'rgba(79,172,254,0.4)',   color: '#4facfe',  icon: '🔵', label: 'Hybrid OA' },
+                'bronze':  { bg: 'rgba(205,127,50,0.15)',   border: 'rgba(205,127,50,0.4)',   color: '#cd7f32',  icon: '🥉', label: 'Bronze OA' },
+                'closed':  { bg: 'rgba(231,76,60,0.15)',    border: 'rgba(231,76,60,0.4)',    color: '#e74c3c',  icon: '🔒', label: 'Closed' },
+                'diamond': { bg: 'rgba(185,85,211,0.15)',   border: 'rgba(185,85,211,0.4)',   color: '#b955d3',  icon: '💎', label: 'Diamond OA' },
+            };
+            const s = (status || '').toLowerCase();
+            const cfg = map[s] || { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)', color: '#8a99ad', icon: '❓', label: status || 'Unknown' };
+            return `<span class="meta-access-badge" style="background:${cfg.bg}; border:1px solid ${cfg.border}; color:${cfg.color};">${cfg.icon} ${cfg.label}</span>`;
+        }
+
+        // ── Populate rich metadata panel ──
+        function renderMetadata(meta, title, pub_year, paper_id, hist_citations) {
+            if (!meta) {
+                // Fallback: show minimal info
+                document.getElementById('metaPlaceholder').style.display = 'none';
+                document.getElementById('metaPanel').style.display = 'block';
+                document.getElementById('metaTitle').textContent = title;
+                document.getElementById('metaYear').textContent = pub_year;
+                document.getElementById('metaType').textContent = '—';
+                document.getElementById('metaCitedBy').textContent = hist_citations.toLocaleString();
+                const oaIdEl = document.getElementById('metaOaId');
+                oaIdEl.textContent = paper_id.replace('https://openalex.org/', '');
+                oaIdEl.href = paper_id;
+                return;
+            }
+
+            document.getElementById('metaPlaceholder').style.display = 'none';
+            document.getElementById('metaPanel').style.display = 'block';
+
+            // Title
+            document.getElementById('metaTitle').textContent = title;
+
+            // PDF / HTML buttons
+            if (meta.pdf_url) {
+                const pdfBtn = document.getElementById('metaPdfBtn');
+                pdfBtn.href = meta.pdf_url;
+                pdfBtn.style.display = 'inline-flex';
+            }
+            if (meta.landing_page_url) {
+                const htmlBtn = document.getElementById('metaHtmlBtn');
+                htmlBtn.href = meta.landing_page_url;
+                htmlBtn.style.display = 'inline-flex';
+            }
+
+            // Abstract
+            const abstract = meta.abstract || '';
+            if (abstract) {
+                const wrap = document.getElementById('metaAbstractWrap');
+                wrap.style.display = 'block';
+                const LIMIT = 200;
+                abstractExpanded = false;
+                if (abstract.length <= LIMIT) {
+                    document.getElementById('metaAbstractShort').textContent = abstract;
+                    document.getElementById('metaAbstractFull').textContent = '';
+                    document.getElementById('abstractMoreBtn').style.display = 'none';
+                } else {
+                    document.getElementById('metaAbstractShort').textContent = abstract.substring(0, LIMIT) + '... ';
+                    document.getElementById('metaAbstractFull').textContent = abstract.substring(LIMIT);
+                    document.getElementById('metaAbstractFull').style.display = 'none';
+                    document.getElementById('abstractMoreBtn').style.display = 'inline';
+                    document.getElementById('abstractMoreBtn').textContent = 'more';
+                }
+            }
+
+            // Basic info
+            document.getElementById('metaYear').textContent = pub_year;
+            document.getElementById('metaType').textContent = meta.type || '—';
+
+            if (meta.source_name) {
+                const srcRow = document.getElementById('metaSourceRow');
+                srcRow.style.display = 'flex';
+                const srcEl = document.getElementById('metaSource');
+                if (meta.source_url) {
+                    srcEl.innerHTML = `<a href="${meta.source_url}" target="_blank">${meta.source_name}</a>`;
+                } else {
+                    srcEl.textContent = meta.source_name;
+                }
+            }
+
+            if (meta.language) {
+                document.getElementById('metaLangRow').style.display = 'flex';
+                document.getElementById('metaLang').textContent = meta.language.toUpperCase();
+            }
+
+            // Authors
+            const authors = meta.all_authors || [];
+            if (authors.length > 0) {
+                document.getElementById('metaAuthorsRow').style.display = 'flex';
+                const SHOW_AUTHORS = 5;
+                let authHtml = authors.slice(0, SHOW_AUTHORS).map(a => `<span class="tag">${a}</span>`).join('');
+                if (authors.length > SHOW_AUTHORS) {
+                    authHtml += `<span class="tag purple">+${authors.length - SHOW_AUTHORS} more</span>`;
+                }
+                document.getElementById('metaAuthors').innerHTML = authHtml;
+            }
+
+            // Institutions
+            const insts = meta.all_institutions || [];
+            if (insts.length > 0) {
+                document.getElementById('metaInstRow').style.display = 'flex';
+                const SHOW_INST = 4;
+                let instHtml = insts.slice(0, SHOW_INST).map(i => `<span class="tag cyan">${i}</span>`).join('');
+                if (insts.length > SHOW_INST) {
+                    instHtml += `<span class="tag purple">+${insts.length - SHOW_INST} more</span>`;
+                }
+                document.getElementById('metaInstitutions').innerHTML = instHtml;
+            }
+
+            // Metrics
+            if (meta.fwci != null) {
+                document.getElementById('chipFwci').style.display = 'flex';
+                document.getElementById('metaFwci').textContent = Number(meta.fwci).toFixed(3);
+            }
+            document.getElementById('metaCitedBy').textContent = (meta.cited_by_count ?? hist_citations).toLocaleString();
+
+            if (meta.cites_count != null) {
+                document.getElementById('chipCites').style.display = 'flex';
+                document.getElementById('metaCites').textContent = meta.cites_count.toLocaleString();
+            }
+            if (meta.related_works_count != null && meta.related_works_count > 0) {
+                document.getElementById('chipRelated').style.display = 'flex';
+                document.getElementById('metaRelated').textContent = meta.related_works_count.toLocaleString();
+            }
+
+            // Topic classification
+            const hasTopics = meta.topic || meta.subfield || meta.field || meta.domain || meta.sdg;
+            if (hasTopics) {
+                document.getElementById('metaTopicSection').style.display = 'block';
+                const setTopicRow = (rowId, valId, val, cls) => {
+                    if (val) {
+                        document.getElementById(rowId).style.display = 'flex';
+                        document.getElementById(valId).innerHTML = `<span class="tag ${cls}">${val}</span>`;
+                    }
+                };
+                setTopicRow('metaTopicRow',    'metaTopic',    meta.topic,    'cyan');
+                setTopicRow('metaSubfieldRow', 'metaSubfield', meta.subfield, 'blue');
+                setTopicRow('metaFieldRow',    'metaField',    meta.field,    '');
+                setTopicRow('metaDomainRow',   'metaDomain',   meta.domain,   '');
+                setTopicRow('metaSdgRow',      'metaSdg',      meta.sdg,      'green');
+            }
+
+            // Open Access
+            if (meta.oa_status) {
+                document.getElementById('metaOaRow').style.display = 'flex';
+                document.getElementById('metaOa').innerHTML = oaBadge(meta.oa_status);
+            }
+
+            // Funders
+            const funders = meta.funders || [];
+            if (funders.length > 0) {
+                document.getElementById('metaFundersRow').style.display = 'flex';
+                document.getElementById('metaFunders').innerHTML = funders.map(f => `<span class="tag">${f}</span>`).join('');
+            }
+
+            // Awards
+            const awards = meta.awards || [];
+            if (awards.length > 0) {
+                document.getElementById('metaAwardsRow').style.display = 'flex';
+                const SHOW_AWARDS = 5;
+                let awHtml = awards.slice(0, SHOW_AWARDS).map(a => `<span class="tag yellow">${a}</span>`).join('');
+                if (awards.length > SHOW_AWARDS) {
+                    awHtml += `<span class="tag purple">+${awards.length - SHOW_AWARDS} more</span>`;
+                }
+                document.getElementById('metaAwards').innerHTML = awHtml;
+            }
+
+            // OpenAlex ID
+            const oaIdEl = document.getElementById('metaOaId');
+            const pid = meta.openalex_id || paper_id;
+            oaIdEl.textContent = pid.replace('https://openalex.org/', '');
+            oaIdEl.href = pid;
+        }
+
         async function fetchPrediction() {
             const paperIdInput = document.getElementById('paperInput').value.trim();
             if (!paperIdInput) return;
@@ -538,7 +1054,7 @@
 
             try {
                 const response = await fetch(`/api/v1/papers/predict/${encodeURIComponent(paperIdInput)}`);
-                
+
                 // Minimum loading delay (600ms) to show GNN inference execution
                 const elapsed = Date.now() - startTime;
                 if (elapsed < 600) {
@@ -546,15 +1062,14 @@
                 }
 
                 if (!response.ok) {
-                    alert(`Paper ID '${paperIdInput}' not found on OpenAlex or local dataset.`);
+                    const errData = await response.json().catch(() => ({}));
+                    alert(errData.detail || `Paper ID '${paperIdInput}' not found on OpenAlex or local dataset. Please pick a valid paper ID.`);
                     return;
                 }
-                
+
                 const data = await response.json();
-                
+
                 document.getElementById('predictionResult').style.display = 'block';
-                document.getElementById('paperTitle').innerText = data.title;
-                document.getElementById('paperMeta').innerText = `ID: ${data.paper_id} | Pub Year: ${data.publication_year} | Cutoff Citations: ${data.historical_citations_at_cutoff}`;
 
                 // Update Impact Badge
                 const badge = document.getElementById('impactBadge');
@@ -581,7 +1096,7 @@
 
                 document.getElementById('barHigh').style.width = hPct + '%';
                 document.getElementById('probHighVal').innerText = hPct + '%';
-                
+
                 document.getElementById('barMed').style.width = mPct + '%';
                 document.getElementById('probMedVal').innerText = mPct + '%';
 
@@ -599,10 +1114,20 @@
                     `).join('');
                 }
 
+                // Render rich metadata panel
+                renderMetadata(
+                    data.paper_metadata,
+                    data.title,
+                    data.publication_year,
+                    data.paper_id,
+                    data.historical_citations_at_cutoff
+                );
+
                 // Re-render Cytoscape Network Subgraph
                 initCytoscape(data.explanation.subgraph);
             } catch (err) {
                 console.error(err);
+                alert("Error running prediction: " + err.message);
             } finally {
                 btn.disabled = false;
                 btnText.innerText = 'Predict';

@@ -2,31 +2,33 @@
 
 ```json
 {
-  "test_correct_count": 4,
-  "test_total_count": 10,
+  "model_name": "MajorityClass_Baseline",
+  "majority_class_id": 0,
+  "majority_class_name": "Low Impact",
+  "rule_description": "Always predict training majority class (0) for all samples",
+  "test_sample_count": 10,
+  "correct_count": 4,
   "accuracy_fraction": "4/10",
   "accuracy": 0.4,
+  "accuracy_percentage": "40.0%",
   "macro_f1": 0.1905,
-  "per_class_metrics": {
-    "class_0": {
-      "sample_count": 4,
-      "precision": 0.4,
-      "recall": 1.0,
-      "f1": 0.5714
-    },
-    "class_1": {
-      "sample_count": 3,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0
-    },
-    "class_2": {
-      "sample_count": 3,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0
-    }
-  },
+  "confusion_matrix": [
+    [
+      4,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      0
+    ]
+  ],
   "predictions": [
     0,
     0,
@@ -38,21 +40,6 @@
     0,
     0,
     0
-  ],
-  "ground_truth": [
-    0,
-    1,
-    2,
-    0,
-    1,
-    2,
-    0,
-    1,
-    2,
-    0
-  ],
-  "model_name": "MajorityClass_Baseline",
-  "most_frequent_training_class": 0,
-  "note": "Predicts most frequent training class (Class 1, Medium) for all test samples."
+  ]
 }
 ```

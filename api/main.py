@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from api.routers.paper import router as paper_router
 from api.routers.evidence import router as evidence_router
+from api.routers.verification import router as verification_router
 
 app = FastAPI(
     title="SciGraph AI REST Service",
@@ -25,6 +26,7 @@ app.add_middleware(
 
 app.include_router(paper_router)
 app.include_router(evidence_router)
+app.include_router(verification_router)
 
 
 @app.get("/health")

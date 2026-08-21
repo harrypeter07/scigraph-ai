@@ -42,6 +42,8 @@
     "LogisticRegression": {
       "model_name": "LogisticRegression",
       "device": "cpu",
+      "accuracy": 0.6,
+      "macro_f1": 0.375,
       "evaluation_summary": {
         "test_sample_count": 5,
         "correct_count": 3,
@@ -116,6 +118,8 @@
     "GradientBoosting": {
       "model_name": "GradientBoostingClassifier",
       "device": "cpu",
+      "accuracy": 0.6,
+      "macro_f1": 0.4286,
       "evaluation_summary": {
         "test_sample_count": 5,
         "correct_count": 3,
@@ -190,22 +194,24 @@
     "HeteroGraphSAGE": {
       "model_name": "HeteroGraphSAGE",
       "device": "cpu",
+      "accuracy": 0.6,
+      "macro_f1": 0.5833,
       "evaluation_summary": {
         "test_sample_count": 5,
         "correct_count": 3,
         "accuracy_fraction": "3/5",
         "accuracy": 0.6,
         "accuracy_percentage": "60.0%",
-        "macro_f1": 0.375,
+        "macro_f1": 0.5833,
         "confusion_matrix": [
           [
-            0,
-            2,
+            1,
+            1,
             0
           ],
           [
-            0,
-            3,
+            1,
+            2,
             0
           ],
           [
@@ -218,16 +224,16 @@
           "class_0": {
             "class_name": "Low",
             "true_samples": 2,
-            "precision": 0.0,
-            "recall": 0.0,
-            "f1": 0.0
+            "precision": 0.5,
+            "recall": 0.5,
+            "f1": 0.5
           },
           "class_1": {
             "class_name": "Medium",
             "true_samples": 3,
-            "precision": 0.6,
-            "recall": 1.0,
-            "f1": 0.75
+            "precision": 0.6667,
+            "recall": 0.6667,
+            "f1": 0.6667
           },
           "class_2": {
             "class_name": "High",
@@ -247,8 +253,8 @@
         "plain_language_verdict": "tied with majority baseline at 60.0% (n=5 sample test split)"
       },
       "predictions": [
-        1,
-        1,
+        0,
+        0,
         1,
         1,
         1
@@ -266,6 +272,8 @@
     "HeteroGAT": {
       "model_name": "HeteroGAT",
       "device": "cpu",
+      "accuracy": 0.6,
+      "macro_f1": 0.375,
       "evaluation_summary": {
         "test_sample_count": 5,
         "correct_count": 3,

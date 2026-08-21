@@ -270,6 +270,19 @@
             font-size: 0.84rem;
         }
 
+        /* ── Dark Dropdown Select & Option Styling ── */
+        select {
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
+            cursor: pointer;
+        }
+
+        select option {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+            padding: 8px 12px;
+        }
+
         .loading-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -879,11 +892,11 @@
                         <button class="graph-btn" onclick="filterGraph('citation', this)">📚 Citations</button>
                     </div>
                     <div class="graph-btn-group">
-                        <select id="layoutSelect" onchange="cyReLayout(this.value)" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-main); font-size: 0.74rem; border-radius: 6px; padding: 0.25rem 0.5rem; outline:none;">
-                            <option value="cose">Force-Directed (COSE)</option>
-                            <option value="concentric">Concentric (Ego Net)</option>
-                            <option value="breadthfirst">Hierarchical</option>
-                            <option value="circle">Circular</option>
+                        <select id="layoutSelect" onchange="cyReLayout(this.value)" style="background: #1e293b; border: 1px solid var(--border-color); color: #f8fafc; font-size: 0.74rem; border-radius: 6px; padding: 0.25rem 0.5rem; outline:none; font-weight: 500;">
+                            <option value="cose" style="background:#0f172a; color:#f8fafc;">Force-Directed (COSE)</option>
+                            <option value="concentric" style="background:#0f172a; color:#f8fafc;">Concentric (Ego Net)</option>
+                            <option value="breadthfirst" style="background:#0f172a; color:#f8fafc;">Hierarchical</option>
+                            <option value="circle" style="background:#0f172a; color:#f8fafc;">Circular</option>
                         </select>
                     </div>
                 </div>

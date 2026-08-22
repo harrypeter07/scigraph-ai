@@ -42,3 +42,9 @@ if os.path.exists(web_dir):
     @app.get("/")
     def serve_dashboard():
         return FileResponse(os.path.join(web_dir, "index.html"))
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("api.main:app", host="0.0.0.0", port=port)

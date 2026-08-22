@@ -38,15 +38,14 @@ class ReceptiveFieldExplainer:
         self.institutions_df = pd.read_parquet(institutions_path) if os.path.exists(institutions_path) else pd.DataFrame()
         self.citations_df = pd.read_parquet(citations_path) if os.path.exists(citations_path) else pd.DataFrame()
 
-        # Load GNN Model (hidden_channels=64 matching config)
-        self.model = HeteroGraphSAGE(in_channels=5, hidden_channels=64, out_channels=3)
+        # Load GNN Model
+        self.model = HeteroGraphSAGE(in_channels=5, hidden_channels=32, out_channels=3)
         if os.path.exists(checkpoint_path):
             try:
-                state_dict = torch.load(checkpoint_path, map_location=torch.device("cpu"))
-                if "fc1.weight" in state_dict:
-                    chk_hidden = state_dict["fc1.weight"].shape[0]
-                    if chk_hidden != 64:
-                        self.model = HeteroGraphSAGE(in_channels=5, hidden_channels=chk_hidden, out_channels=3)
+                state_dict = torch.load(checkpoint_path, map_location=torch.device("cpu"), weights_only=True)
+                if "sage_conv1.weight" in state_dict:
+                    chk_hidden = state_dict["sage_conv1.weight"].shape[0]
+                    self.model = HeteroGraphSAGE(in_channels=5, hidden_channels=chk_hidden, out_channels=3)
                 self.model.load_state_dict(state_dict)
                 self.model.eval()
             except Exception as e:

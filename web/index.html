@@ -3,36 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciGraph AI — Impact Predictor &amp; Live Evidence Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+    <title>SciGraph AI — Scientific Impact Trajectory & Graph Neural Network</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
     <style>
         :root {
-            --bg-primary: #0a0d14;
-            --bg-card: rgba(18, 24, 38, 0.88);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --accent-cyan: #00f2fe;
-            --accent-blue: #4facfe;
+            --bg-primary: #090d16;
+            --bg-card: rgba(15, 23, 42, 0.82);
+            --bg-card-hover: rgba(30, 41, 59, 0.9);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(56, 189, 248, 0.35);
+            --accent-cyan: #38bdf8;
+            --accent-blue: #60a5fa;
             --accent-purple: #a855f7;
-            --accent-green: #10b981;
-            --accent-amber: #f59e0b;
-            --accent-yellow: #f1c40f;
-            --text-main: #f0f4f8;
-            --text-muted: #8a99ad;
-            --shadow-glow: 0 8px 32px 0 rgba(0, 242, 254, 0.12);
+            --accent-green: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-yellow: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --font-code: 'JetBrains Mono', monospace;
+            --shadow-glow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-main);
             min-height: 100vh;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(127, 0, 255, 0.08) 0%, transparent 40%);
+                radial-gradient(ellipse at 15% 10%, rgba(56, 189, 248, 0.06) 0%, transparent 45%),
+                radial-gradient(ellipse at 85% 90%, rgba(168, 85, 247, 0.05) 0%, transparent 45%);
             padding: 1.5rem 2rem;
+            -webkit-font-smoothing: antialiased;
         }
 
         header {
@@ -676,14 +680,19 @@
 
     <header>
         <div class="logo">
-            ⚡ SciGraph AI
-            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(0,242,254,0.1); border: 1px solid rgba(0,242,254,0.3); color: var(--accent-cyan);">Audited Temporal GNN</span>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M3 12h3m12 0h3M12 3v3m0 12v3"></path>
+                <path d="m4.93 4.93 2.12 2.12m9.9 9.9 2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9 2.12-2.12"></path>
+            </svg>
+            SciGraph AI
+            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600; letter-spacing: 0.02em;">Audited Temporal GNN</span>
         </div>
     </header>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('predictor')">🔍 Predictor &amp; Graph Visualizer</button>
-        <!-- <button class="tab-btn" onclick="switchTab('evidence')">📊 Live Evidence &amp; Data Dashboard</button> -->
+        <button class="tab-btn active" onclick="switchTab('predictor')">Predictor &amp; Knowledge Graph</button>
+        <!-- <button class="tab-btn" onclick="switchTab('evidence')">Evidence &amp; Benchmark Metrics</button> -->
     </div>
 
     <!-- View 1: Predictor & Graph Visualizer -->
@@ -693,10 +702,10 @@
             <!-- Column 1: Predictor Controls & Softmax -->
             <section class="card" id="predictorCard">
                 <div class="card-title">
-                    <span>🔍 Impact Predictor</span>
+                    <span>Impact Predictor</span>
                 </div>
                 <div class="search-box">
-                    <input type="text" id="paperInput" placeholder="Enter OpenAlex ID (e.g. W4385245566)..." value="W4385245566">
+                    <input type="text" id="paperInput" placeholder="Enter OpenAlex ID (e.g. W2194775991, W4385245566)..." value="W2194775991">
                     <button class="action-btn" id="predictBtn" onclick="fetchPrediction()">
                         <span id="btnText">Predict</span>
                     </button>
@@ -711,10 +720,10 @@
                 <div id="predictionResult" style="display: none;">
                     <div style="margin-bottom: 1.2rem;">
                         <div style="font-size: 0.8rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
-                        <div id="impactBadge" style="display: inline-block; padding: 0.35rem 0.9rem; border-radius: 8px; font-weight: 700; font-size: 1rem; margin-top: 0.4rem; background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact</div>
+                        <div id="impactBadge" style="display: inline-block; padding: 0.35rem 0.9rem; border-radius: 8px; font-weight: 700; font-size: 1rem; margin-top: 0.4rem; background: rgba(56,189,248,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact (≥90%)</div>
                     </div>
 
-                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1rem;">📊 Softmax Class Probabilities</div>
+                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1rem;">Softmax Class Probabilities</div>
                     <div style="margin-top: 0.6rem;">
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white; font-weight:600;">0%</span></div>
                         <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.7rem;"><div id="barHigh" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.6s ease-in-out;"></div></div>
@@ -726,7 +735,7 @@
                         <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 0%; background: linear-gradient(90deg, #7f00ff, #b16cff); transition: width 0.6s ease-in-out;"></div></div>
                     </div>
 
-                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1.2rem;">🧠 Dynamic Feature Attributions</div>
+                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1.2rem;">Dynamic Feature Attributions</div>
                     <div id="featureList"></div>
                 </div>
             </section>
@@ -734,12 +743,20 @@
             <!-- Column 2: Rich Paper Metadata Panel -->
             <section class="card" id="metadataCard">
                 <div class="card-title">
-                    <span>📄 OpenAlex Paper Details</span>
+                    <span>Paper Details &amp; Scientometrics</span>
                 </div>
 
                 <!-- Placeholder when nothing loaded yet -->
                 <div id="metaPlaceholder" style="text-align:center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.88rem;">
-                    <div style="font-size: 2.2rem; margin-bottom: 0.8rem;">📑</div>
+                    <div style="display:flex; justify-content:center; margin-bottom: 0.8rem;">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted);">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
                     Enter an OpenAlex Paper ID and click <strong style="color:white;">Predict</strong> to load comprehensive paper metadata.
                 </div>
 
@@ -750,8 +767,8 @@
                     <div class="meta-section">
                         <div class="meta-panel-title" id="metaTitle"></div>
                         <div class="meta-panel-subtitle">
-                            <a id="metaPdfBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">📄 PDF</a>
-                            <a id="metaHtmlBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">🌐 HTML</a>
+                            <a id="metaPdfBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">PDF Document</a>
+                            <a id="metaHtmlBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">HTML Publisher</a>
                         </div>
                         <!-- Abstract -->
                         <div id="metaAbstractWrap" style="display:none;">
@@ -873,12 +890,12 @@
             <!-- Column 3: Advanced Graph Visualizer & Interactive Inspector -->
             <section class="card graph-card-wrapper">
                 <div class="card-title">
-                    <span>🕸️ Relational Subgraph</span>
+                    <span>Relational Knowledge Subgraph</span>
                     <div class="graph-btn-group">
-                        <button class="graph-btn" onclick="cyZoom(1.2)" title="Zoom In">🔍 +</button>
-                        <button class="graph-btn" onclick="cyZoom(0.8)" title="Zoom Out">🔍 −</button>
-                        <button class="graph-btn" onclick="cyFit()" title="Fit to screen">🎯 Fit</button>
-                        <button class="graph-btn" onclick="cyReLayout('cose')" title="Force Layout">🔄 Layout</button>
+                        <button class="graph-btn" onclick="cyZoom(1.2)" title="Zoom In">+</button>
+                        <button class="graph-btn" onclick="cyZoom(0.8)" title="Zoom Out">−</button>
+                        <button class="graph-btn" onclick="cyFit()" title="Fit to screen">Fit View</button>
+                        <button class="graph-btn" onclick="cyReLayout('cose')" title="Force Layout">Re-Layout</button>
                     </div>
                 </div>
 
@@ -886,10 +903,10 @@
                 <div class="graph-toolbar">
                     <div class="graph-btn-group" id="filterGroup">
                         <button class="graph-btn active" onclick="filterGraph('all', this)">All</button>
-                        <button class="graph-btn" onclick="filterGraph('author', this)">👤 Authors</button>
-                        <button class="graph-btn" onclick="filterGraph('institution', this)">🏛️ Institutions</button>
-                        <button class="graph-btn" onclick="filterGraph('topic', this)">🏷️ Topics</button>
-                        <button class="graph-btn" onclick="filterGraph('citation', this)">📚 Citations</button>
+                        <button class="graph-btn" onclick="filterGraph('author', this)">Authors</button>
+                        <button class="graph-btn" onclick="filterGraph('institution', this)">Institutions</button>
+                        <button class="graph-btn" onclick="filterGraph('topic', this)">Topics</button>
+                        <button class="graph-btn" onclick="filterGraph('citation', this)">Citations</button>
                     </div>
                     <div class="graph-btn-group">
                         <select id="layoutSelect" onchange="cyReLayout(this.value)" style="background: #1e293b; border: 1px solid var(--border-color); color: #f8fafc; font-size: 0.74rem; border-radius: 6px; padding: 0.25rem 0.5rem; outline:none; font-weight: 500;">
@@ -916,7 +933,7 @@
                 <!-- Interactive Node Inspector Drawer -->
                 <div class="node-inspector" id="nodeInspector">
                     <div class="inspector-header">
-                        <span class="inspector-badge" id="inspBadge" style="background: rgba(0,242,254,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">TARGET PAPER</span>
+                        <span class="inspector-badge" id="inspBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">TARGET PAPER</span>
                         <span class="inspector-hint" id="inspHint">Click any node to inspect details</span>
                     </div>
                     <div class="inspector-title" id="inspTitle">Select any node in the graph</div>
@@ -935,7 +952,7 @@
     <div id="evidenceView" class="view-section">
         <!-- Live Dataset Overview Panel -->
         <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>📊 Panel 1 — Live Dataset Overview</span></div>
+            <div class="card-title"><span>Panel 1: Dataset Distribution &amp; Corpus Metrics</span></div>
             <div class="stats-grid">
                 <div class="stat-box"><div class="stat-number" id="evPapers">50</div><div class="stat-label">Total Sample Papers</div></div>
                 <div class="stat-box"><div class="stat-number" id="evAuthors">257</div><div class="stat-label">Unique Authors</div></div>
@@ -947,7 +964,7 @@
 
         <!-- Model Comparison Panel -->
         <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>⚖️ Panel 2 — Model Comparison vs Majority-Class Baseline</span></div>
+            <div class="card-title"><span>Panel 2: Model Benchmark vs. Majority-Class Baseline</span></div>
             <table class="evidence-table">
                 <thead>
                     <tr>
@@ -1006,7 +1023,7 @@
 
         <!-- Test Predictions Table Panel -->
         <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>📝 Panel 3 — Temporal Test Set Predictions Log ($n=5$)</span></div>
+            <div class="card-title"><span>Panel 3: Temporal Test Set Prediction Log (n=5)</span></div>
             <table class="evidence-table">
                 <thead>
                     <tr>
@@ -1028,27 +1045,27 @@
 
         <!-- Leakage Ablation Panel -->
         <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>🛡️ Panel 4 — Temporal Leakage Ablation Study</span></div>
+            <div class="card-title"><span>Panel 4: Temporal Leakage Ablation Matrix</span></div>
             <div style="display: flex; gap: 2rem; margin-top: 1rem;">
-                <div style="flex: 1; background: rgba(0,242,254,0.05); border: 1px solid var(--accent-cyan); padding: 1.2rem; border-radius: 12px; text-align: center;">
+                <div style="flex: 1; background: rgba(56,189,248,0.05); border: 1px solid var(--accent-cyan); padding: 1.2rem; border-radius: 12px; text-align: center;">
                     <div style="font-size: 0.85rem; color: var(--text-muted);">Condition A: Time-Consistent Split</div>
                     <div style="font-size: 2rem; font-weight: 700; color: var(--accent-cyan); margin: 0.5rem 0;">3 / 5 (60.0%)</div>
                     <div style="font-size: 0.8rem; color: var(--text-muted);">Strict Cutoff Masking ($T_{\text{cutoff}}$)</div>
                 </div>
-                <div style="flex: 1; background: rgba(127,0,255,0.05); border: 1px solid var(--accent-purple); padding: 1.2rem; border-radius: 12px; text-align: center;">
+                <div style="flex: 1; background: rgba(168,85,247,0.05); border: 1px solid var(--accent-purple); padding: 1.2rem; border-radius: 12px; text-align: center;">
                     <div style="font-size: 0.85rem; color: var(--text-muted);">Condition B: Naive Random Split</div>
                     <div style="font-size: 2rem; font-weight: 700; color: #b16cff; margin: 0.5rem 0;">4 / 8 (50.0%)</div>
                     <div style="font-size: 0.8rem; color: var(--text-muted);">Random Graph Edges</div>
                 </div>
             </div>
             <div class="caveat-banner">
-                ⚠️ <strong>Small-Sample Evaluation Notice</strong>: At $n=50$ total papers ($5$ vs $8$ test set papers), this accuracy difference ($60.0\%$ vs $50.0\%$) is within statistical noise and is not a conclusive proof of temporal leakage. Statistically significant validation requires scaling dataset ingestion on GPU Colab (Part C).
+                <strong>Notice</strong>: At $n=50$ total papers ($5$ vs $8$ test set papers), this accuracy difference ($60.0\%$ vs $50.0\%$) is within statistical noise and is not a conclusive proof of temporal leakage. Statistically significant validation requires scaling dataset ingestion on GPU Colab (Part C).
             </div>
         </section>
 
         <!-- Saved Checkpoint Artifacts Panel -->
         <section class="card">
-            <div class="card-title"><span>📦 Panel 5 — Saved Model Checkpoint Artifacts</span></div>
+            <div class="card-title"><span>Panel 5: Model Checkpoint Artifacts</span></div>
             <table class="evidence-table">
                 <thead>
                     <tr>
@@ -1149,16 +1166,16 @@
         // ── OA status badge ──
         function oaBadge(status) {
             const map = {
-                'gold':    { bg: 'rgba(245,158,11,0.15)',   border: 'rgba(245,158,11,0.4)',   color: '#f59e0b',  icon: '🔓', label: 'Gold OA' },
-                'green':   { bg: 'rgba(16,185,129,0.15)',   border: 'rgba(16,185,129,0.4)',   color: '#10b981',  icon: '🟢', label: 'Green OA' },
-                'hybrid':  { bg: 'rgba(79,172,254,0.15)',   border: 'rgba(79,172,254,0.4)',   color: '#4facfe',  icon: '🔵', label: 'Hybrid OA' },
-                'bronze':  { bg: 'rgba(205,127,50,0.15)',   border: 'rgba(205,127,50,0.4)',   color: '#cd7f32',  icon: '🥉', label: 'Bronze OA' },
-                'closed':  { bg: 'rgba(239,68,68,0.15)',    border: 'rgba(239,68,68,0.4)',    color: '#ef4444',  icon: '🔒', label: 'Closed' },
-                'diamond': { bg: 'rgba(168,85,247,0.15)',   border: 'rgba(168,85,247,0.4)',   color: '#c084fc',  icon: '💎', label: 'Diamond OA' },
+                'gold':    { bg: 'rgba(245,158,11,0.15)',   border: 'rgba(245,158,11,0.4)',   color: '#f59e0b',  label: 'Gold OA' },
+                'green':   { bg: 'rgba(16,185,129,0.15)',   border: 'rgba(16,185,129,0.4)',   color: '#10b981',  label: 'Green OA' },
+                'hybrid':  { bg: 'rgba(79,172,254,0.15)',   border: 'rgba(79,172,254,0.4)',   color: '#4facfe',  label: 'Hybrid OA' },
+                'bronze':  { bg: 'rgba(205,127,50,0.15)',   border: 'rgba(205,127,50,0.4)',   color: '#cd7f32',  label: 'Bronze OA' },
+                'closed':  { bg: 'rgba(239,68,68,0.15)',    border: 'rgba(239,68,68,0.4)',    color: '#ef4444',  label: 'Closed Access' },
+                'diamond': { bg: 'rgba(168,85,247,0.15)',   border: 'rgba(168,85,247,0.4)',   color: '#c084fc',  label: 'Diamond OA' },
             };
             const s = (status || '').toLowerCase();
-            const cfg = map[s] || { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)', color: '#8a99ad', icon: '❓', label: status || 'Unknown' };
-            return `<span class="meta-access-badge" style="background:${cfg.bg}; border:1px solid ${cfg.border}; color:${cfg.color};">${cfg.icon} ${cfg.label}</span>`;
+            const cfg = map[s] || { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)', color: '#8a99ad', label: status || 'Unknown' };
+            return `<span class="meta-access-badge" style="background:${cfg.bg}; border:1px solid ${cfg.border}; color:${cfg.color}; font-weight:600;">${cfg.label}</span>`;
         }
 
         // ── Populate rich metadata panel ──
@@ -1750,31 +1767,37 @@
             if (data.type === 'paper') {
                 desc.textContent = data.description || 'Target Paper for GNN Impact Trajectory Prediction.';
                 if (data.year) items.push({ k: 'Publication Year', v: data.year });
-                if (data.citations !== undefined) items.push({ k: 'Citations', v: data.citations.toLocaleString() });
-                if (data.fwci) items.push({ k: 'FWCI', v: Number(data.fwci).toFixed(2) });
-                if (data.doi) items.push({ k: 'DOI', v: data.doi });
+                if (data.citations !== undefined) items.push({ k: 'Historical Citations', v: Number(data.citations).toLocaleString() });
+                if (data.fwci) items.push({ k: 'FWCI (Impact Score)', v: Number(data.fwci).toFixed(2) });
+                if (data.doi) items.push({ k: 'DOI Link', v: data.doi });
             } else if (data.type === 'author') {
-                desc.textContent = data.description || 'Author connected to target paper.';
-                if (data.position) items.push({ k: 'Authorship Position', v: data.position });
+                desc.textContent = data.description || 'Author connected to target paper in heterogeneous knowledge graph.';
+                if (data.h_index) items.push({ k: 'Scientometric h-index', v: `<strong style="color:var(--accent-cyan); font-size:0.95rem;">${data.h_index}</strong>` });
+                if (data.position) items.push({ k: 'Authorship Role', v: data.position });
+                if (data.estimated_works) items.push({ k: 'Estimated Publications', v: `${data.estimated_works}+ Works` });
+                if (data.total_author_cits) items.push({ k: 'Cumulative Citations', v: `${Number(data.total_author_cits).toLocaleString()}+` });
                 if (data.institutions && data.institutions.length > 0) {
-                    items.push({ k: 'Affiliation', v: data.institutions.join(', ') });
+                    items.push({ k: 'Primary Affiliation', v: data.institutions.join(', ') });
                 }
-                if (data.orcid) items.push({ k: 'ORCID', v: data.orcid.replace('https://orcid.org/', '') });
+                if (data.orcid) items.push({ k: 'ORCID Identifier', v: data.orcid.replace('https://orcid.org/', '') });
             } else if (data.type === 'institution') {
-                desc.textContent = data.description || 'Academic / Research Institution.';
-                if (data.country_code) items.push({ k: 'Country', v: data.country_code });
-                if (data.inst_type) items.push({ k: 'Type', v: data.inst_type });
+                desc.textContent = data.description || 'Academic or Corporate Research Institution.';
+                if (data.prestige_tier) items.push({ k: 'Prestige Classification', v: `<strong style="color:#c084fc;">${data.prestige_tier}</strong>` });
+                if (data.country_code) items.push({ k: 'Jurisdiction / Country', v: data.country_code });
+                if (data.inst_type) items.push({ k: 'Institution Category', v: data.inst_type });
                 if (data.affiliated_authors && data.affiliated_authors.length > 0) {
-                    items.push({ k: 'Affiliated Authors', v: data.affiliated_authors.join(', ') });
+                    items.push({ k: 'Collaborating Authors', v: data.affiliated_authors.join(', ') });
                 }
             } else if (data.type === 'topic') {
-                desc.textContent = data.description || 'Research Classification & Field.';
-                if (data.field) items.push({ k: 'Main Field', v: data.field });
-                if (data.subfield) items.push({ k: 'Subfield', v: data.subfield });
-                if (data.domain) items.push({ k: 'Domain', v: data.domain });
+                desc.textContent = data.description || 'Research Classification, Domain & Field.';
+                if (data.subfield_velocity) items.push({ k: 'Topic Citation Velocity', v: `<strong style="color:var(--accent-green);">${data.subfield_velocity}</strong>` });
+                if (data.field) items.push({ k: 'Primary Field', v: data.field });
+                if (data.subfield) items.push({ k: 'Academic Subfield', v: data.subfield });
+                if (data.domain) items.push({ k: 'Scientific Domain', v: data.domain });
             } else if (data.type === 'citation') {
-                desc.textContent = data.description || 'Referenced academic work in paper bibliography.';
-                if (data.openalex_id) items.push({ k: 'Reference ID', v: data.openalex_id.split('/').pop() });
+                desc.textContent = data.description || 'Prior academic literature referenced in paper bibliography.';
+                if (data.reference_type) items.push({ k: 'Graph Relation', v: data.reference_type });
+                if (data.openalex_id) items.push({ k: 'OpenAlex Work ID', v: data.openalex_id.split('/').pop() });
             }
 
             if (items.length > 0) {
@@ -1791,7 +1814,7 @@
 
             // Footer / OpenAlex URL
             const degree = node.degree();
-            connCount.textContent = `🔗 ${degree} connection${degree === 1 ? '' : 's'}`;
+            connCount.textContent = `${degree} direct connection${degree === 1 ? '' : 's'}`;
 
             if (data.openalex_id || data.ror || data.orcid) {
                 footer.style.display = 'flex';

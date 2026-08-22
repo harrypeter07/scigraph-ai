@@ -16,7 +16,7 @@ def test_e2e_dashboard_serving():
 
 def test_e2e_paper_prediction_flow():
     """Verify paper prediction endpoint returns structured probabilities and explanation."""
-    response = client.get("/api/v1/papers/predict/W2741809807")
+    response = client.get("/api/v1/papers/predict/W2194775991")
     assert response.status_code == 200
     data = response.json()
 

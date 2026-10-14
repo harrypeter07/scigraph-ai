@@ -14,6 +14,9 @@ class PaperPredictionResponse(BaseModel):
     historical_citations_at_cutoff: int
     explanation: Dict[str, Any]
     paper_metadata: Optional[Dict[str, Any]] = None
+    venue_quartile: Optional[Dict[str, Any]] = None
+    access_economics: Optional[Dict[str, Any]] = None
+    bidirectional_lineage: Optional[Dict[str, Any]] = None
 
 
 class DatasetStatsResponse(BaseModel):

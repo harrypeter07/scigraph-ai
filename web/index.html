@@ -421,6 +421,130 @@
             font-weight: 600;
         }
 
+        .badge-quartile {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .badge-quartile.q1 {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+        }
+        .badge-quartile.q2 {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+        }
+        .badge-quartile.q3 {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #c084fc;
+        }
+        .badge-quartile.preprint {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+        }
+
+        .badge-economics {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 6px;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+        .badge-economics.unpaid {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+        }
+        .badge-economics.paid {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+
+        .lineage-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
+            margin-top: 0.5rem;
+        }
+        .lineage-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .lineage-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+        .lineage-lbl {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 0.15rem;
+            text-align: center;
+        }
+        .lineage-arrow {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            opacity: 0.6;
+        }
+        .downstream-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        .downstream-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 0.35rem 0.6rem;
+            font-size: 0.74rem;
+        }
+        .downstream-title {
+            color: #e2e8f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 230px;
+            text-decoration: none;
+        }
+        .downstream-title:hover {
+            color: var(--accent-cyan);
+        }
+        .downstream-cits {
+            font-weight: 600;
+            color: var(--accent-green);
+            white-space: nowrap;
+            margin-left: 0.5rem;
+            font-family: var(--font-code);
+        }
+
         .metric-chips {
             display: flex;
             gap: 0.6rem;
@@ -803,6 +927,78 @@
                         </div>
                     </div>
 
+                    <!-- 1. Journal / Conference Prestige Quartiles -->
+                    <div class="meta-section" id="metaVenueQuartileSection" style="display:none;">
+                        <div class="meta-row">
+                            <span class="meta-label">Prestige Quartile:</span>
+                            <span class="meta-value" id="metaQuartileBadge"></span>
+                        </div>
+                        <div class="meta-row" id="metaVenuePublisherRow" style="display:none;">
+                            <span class="meta-label">Publisher / Host:</span>
+                            <span class="meta-value" id="metaVenuePublisher"></span>
+                        </div>
+                        <div class="meta-row" id="metaVenueIssnRow" style="display:none;">
+                            <span class="meta-label">ISSN:</span>
+                            <span class="meta-value" id="metaVenueIssn" style="font-family: var(--font-code);"></span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Percentile Tier:</span>
+                            <span class="meta-value" id="metaVenuePercentile" style="color: var(--text-muted); font-size: 0.78rem;"></span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Access Economics (Paid vs Unpaid) -->
+                    <div class="meta-section" id="metaEconomicsSection" style="display:none;">
+                        <div class="meta-row">
+                            <span class="meta-label">Access Model:</span>
+                            <span class="meta-value" id="metaAccessTypeBadge"></span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Reader Fee:</span>
+                            <span class="meta-value" id="metaReaderFee" style="font-weight: 600;"></span>
+                        </div>
+                        <div class="meta-row" id="metaOaTypeRow">
+                            <span class="meta-label">OA Status:</span>
+                            <span class="meta-value" id="metaOaStatusBadge"></span>
+                        </div>
+                        <div class="meta-row">
+                            <span class="meta-label">Dissemination Boost:</span>
+                            <span class="meta-value" id="metaOaBoost" style="color: var(--accent-green); font-weight: 600;"></span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Bidirectional Citation Lineage (Inflow ⇄ Outflow) -->
+                    <div class="meta-section" id="metaLineageSection" style="display:none;">
+                        <div class="meta-row" style="justify-content: space-between;">
+                            <span class="meta-label">Citation Lineage:</span>
+                            <span id="metaLineageBadge" class="tag green" style="font-size:0.7rem;">Dual Lineage Active</span>
+                        </div>
+                        <div class="lineage-flow">
+                            <div class="lineage-col">
+                                <span class="lineage-val" id="metaLineageInflow" style="color: #60a5fa;">0</span>
+                                <span class="lineage-lbl">Inflow (Precursors)</span>
+                            </div>
+                            <span class="lineage-arrow">⇄</span>
+                            <div class="lineage-col">
+                                <span class="lineage-val" id="metaLineageRatio" style="color: var(--accent-cyan);">1.0x</span>
+                                <span class="lineage-lbl">Export Ratio</span>
+                            </div>
+                            <span class="lineage-arrow">⇄</span>
+                            <div class="lineage-col">
+                                <span class="lineage-val" id="metaLineageOutflow" style="color: var(--accent-green);">0</span>
+                                <span class="lineage-lbl">Outflow (Adopters)</span>
+                            </div>
+                        </div>
+                        <div class="meta-row" style="margin-top: 0.5rem;">
+                            <span class="meta-label">Lineage Role:</span>
+                            <span class="meta-value" id="metaLineageClass" style="font-weight: 600; color: white;"></span>
+                        </div>
+                        <div id="metaDownstreamWrap" style="margin-top: 0.4rem; display:none;">
+                            <span class="meta-label" style="font-size:0.72rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Landmark Downstream Adopters:</span>
+                            <div class="downstream-list" id="metaDownstreamList"></div>
+                        </div>
+                    </div>
+
                     <!-- Authors & Institutions -->
                     <div class="meta-section">
                         <div class="meta-row" id="metaAuthorsRow" style="display:none;">
@@ -906,7 +1102,8 @@
                         <button class="graph-btn" onclick="filterGraph('author', this)">Authors</button>
                         <button class="graph-btn" onclick="filterGraph('institution', this)">Institutions</button>
                         <button class="graph-btn" onclick="filterGraph('topic', this)">Topics</button>
-                        <button class="graph-btn" onclick="filterGraph('citation', this)">Citations</button>
+                        <button class="graph-btn" onclick="filterGraph('lineage', this)">Dual Lineage (Inflow ⇄ Outflow)</button>
+                        <button class="graph-btn" onclick="filterGraph('venue', this)">Venue (Q1-Q4)</button>
                     </div>
                     <div class="graph-btn-group">
                         <select id="layoutSelect" onchange="cyReLayout(this.value)" style="background: #1e293b; border: 1px solid var(--border-color); color: #f8fafc; font-size: 0.74rem; border-radius: 6px; padding: 0.25rem 0.5rem; outline:none; font-weight: 500;">
@@ -920,11 +1117,13 @@
 
                 <!-- Visual Legend Bar -->
                 <div class="graph-legend-bar">
-                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-cyan);"></span> Target Paper</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-cyan);"></span> Target</div>
                     <div class="legend-item"><span class="legend-dot" style="background: var(--accent-blue);"></span> Authors</div>
                     <div class="legend-item"><span class="legend-dot" style="background: var(--accent-purple);"></span> Institutions</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-green);"></span> Topics / Fields</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-amber);"></span> Cited Works</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-green);"></span> Topics</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> Venue (Quartile)</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #2563eb;"></span> Inflow Precursor</div>
+                    <div class="legend-item"><span class="legend-dot" style="background: #059669;"></span> Outflow Adopter</div>
                 </div>
 
                 <!-- Cytoscape Canvas Container -->
@@ -1179,7 +1378,7 @@
         }
 
         // ── Populate rich metadata panel ──
-        function renderMetadata(meta, title, pub_year, paper_id, hist_citations) {
+        function renderMetadata(meta, title, pub_year, paper_id, hist_citations, rootData) {
             if (!meta) {
                 document.getElementById('metaPlaceholder').style.display = 'none';
                 document.getElementById('metaPanel').style.display = 'block';
@@ -1261,6 +1460,91 @@
                 document.getElementById('metaLang').textContent = meta.language.toUpperCase();
             } else {
                 langRow.style.display = 'none';
+            }
+
+            // 1. Journal / Conference Quartile Prestige
+            const vq = (meta && meta.venue_quartile) || (rootData && rootData.venue_quartile);
+            const vqSec = document.getElementById('metaVenueQuartileSection');
+            if (vq && vq.quartile) {
+                vqSec.style.display = 'block';
+                const qClass = (vq.quartile || 'q1').toLowerCase();
+                const qBadge = document.getElementById('metaQuartileBadge');
+                qBadge.className = `badge-quartile ${qClass}`;
+                qBadge.textContent = vq.quartile_badge || `${vq.quartile} TIER`;
+                
+                const pubRow = document.getElementById('metaVenuePublisherRow');
+                if (vq.publisher) {
+                    pubRow.style.display = 'flex';
+                    document.getElementById('metaVenuePublisher').textContent = vq.publisher;
+                } else {
+                    pubRow.style.display = 'none';
+                }
+
+                const issnRow = document.getElementById('metaVenueIssnRow');
+                if (vq.issn) {
+                    issnRow.style.display = 'flex';
+                    document.getElementById('metaVenueIssn').textContent = vq.issn;
+                } else {
+                    issnRow.style.display = 'none';
+                }
+
+                document.getElementById('metaVenuePercentile').textContent = vq.percentile_tier || 'Top 25% CiteScore / SJR Prestige Tier';
+            } else {
+                vqSec.style.display = 'none';
+            }
+
+            // 2. Access Economics (Paid vs Unpaid)
+            const econ = (meta && meta.access_economics) || (rootData && rootData.access_economics);
+            const econSec = document.getElementById('metaEconomicsSection');
+            if (econ) {
+                econSec.style.display = 'block';
+                const isPaid = econ.is_paid || !econ.is_open_access;
+                const econBadge = document.getElementById('metaAccessTypeBadge');
+                econBadge.className = `badge-economics ${isPaid ? 'paid' : 'unpaid'}`;
+                econBadge.textContent = isPaid ? 'Paid (Subscription / Paywalled)' : 'Unpaid (Public Open Access)';
+
+                document.getElementById('metaReaderFee').textContent = econ.reader_fee || (isPaid ? '$35.00+ / paper' : '$0.00 (Public Access)');
+                document.getElementById('metaOaStatusBadge').innerHTML = oaBadge(econ.oa_status || (meta && meta.oa_status) || 'closed');
+                
+                const boost = econ.oa_citation_boost_pct != null ? econ.oa_citation_boost_pct : (isPaid ? 0.0 : 31.2);
+                document.getElementById('metaOaBoost').textContent = boost > 0 ? `+${boost}% Citation Dissemination Boost` : 'Baseline Dissemination';
+            } else {
+                econSec.style.display = 'none';
+            }
+
+            // 3. Bidirectional Citation Lineage (Inflow ⇄ Outflow)
+            const lineage = (meta && meta.bidirectional_lineage) || (rootData && rootData.bidirectional_lineage);
+            const linSec = document.getElementById('metaLineageSection');
+            if (lineage) {
+                linSec.style.display = 'block';
+                const inflowCount = lineage.precursor_inflow_count != null ? lineage.precursor_inflow_count : (meta && meta.cites_count ? meta.cites_count : 0);
+                const outflowCount = lineage.downstream_outflow_count != null ? lineage.downstream_outflow_count : (meta && meta.cited_by_count != null ? meta.cited_by_count : hist_citations);
+                const ratio = lineage.knowledge_flow_ratio != null ? lineage.knowledge_flow_ratio : (inflowCount > 0 ? (outflowCount / inflowCount).toFixed(1) : 1.0);
+                
+                document.getElementById('metaLineageInflow').textContent = Number(inflowCount).toLocaleString();
+                document.getElementById('metaLineageOutflow').textContent = Number(outflowCount).toLocaleString();
+                document.getElementById('metaLineageRatio').textContent = `${Number(ratio).toFixed(1)}x`;
+                document.getElementById('metaLineageClass').textContent = lineage.classification || (ratio >= 5.0 ? 'Foundational Knowledge Exporter' : 'Knowledge Synthesizer');
+
+                // Render top downstream landmark citing works
+                const downstreamWrap = document.getElementById('metaDownstreamWrap');
+                const downstreamList = document.getElementById('metaDownstreamList');
+                const topWorks = lineage.top_downstream_works || [];
+                if (topWorks.length > 0) {
+                    downstreamWrap.style.display = 'block';
+                    downstreamList.innerHTML = topWorks.map(w => `
+                        <div class="downstream-item">
+                            <a class="downstream-title" href="${w.id || '#'}" target="_blank" title="${w.title}">
+                                ${w.title}
+                            </a>
+                            <span class="downstream-cits">${Number(w.cited_by_count).toLocaleString()} cits (${w.publication_year || '—'})</span>
+                        </div>
+                    `).join('');
+                } else {
+                    downstreamWrap.style.display = 'none';
+                }
+            } else {
+                linSec.style.display = 'none';
             }
 
             // Authors
@@ -1456,7 +1740,8 @@
                     data.title,
                     data.publication_year,
                     data.paper_id,
-                    data.historical_citations_at_cutoff
+                    data.historical_citations_at_cutoff,
+                    data
                 );
 
                 // Render Advanced Cytoscape Network Subgraph
@@ -1605,14 +1890,34 @@
                             'color': '#d1fae5'
                         }
                     },
-                    // Cited Paper Reference Nodes
+                    // Venue / Journal / Conference Node
                     {
-                        selector: 'node[type="citation"]',
+                        selector: 'node[type="venue"]',
+                        style: {
+                            'shape': 'diamond',
+                            'background-color': '#f59e0b',
+                            'border-color': 'rgba(245, 158, 11, 0.85)',
+                            'color': '#fef3c7'
+                        }
+                    },
+                    // Inflow Precursor Foundation Nodes
+                    {
+                        selector: 'node[type="citation_inflow"], node[type="citation"]',
                         style: {
                             'shape': 'round-rectangle',
-                            'background-color': '#f59e0b',
-                            'border-color': 'rgba(245,158,11,0.7)',
-                            'color': '#fef3c7'
+                            'background-color': '#2563eb',
+                            'border-color': 'rgba(96, 165, 250, 0.85)',
+                            'color': '#dbeafe'
+                        }
+                    },
+                    // Outflow Downstream Landmark Adopter Nodes
+                    {
+                        selector: 'node[type="citation_outflow"]',
+                        style: {
+                            'shape': 'round-rectangle',
+                            'background-color': '#059669',
+                            'border-color': 'rgba(52, 211, 153, 0.85)',
+                            'color': '#d1fae5'
                         }
                     },
                     // Edge Base Style
@@ -1654,10 +1959,33 @@
                         }
                     },
                     {
-                        selector: 'edge[relation="CITES"]',
+                        selector: 'edge[relation="PUBLISHED_IN"]',
                         style: {
-                            'line-color': 'rgba(245, 158, 11, 0.35)',
-                            'target-arrow-color': 'rgba(245, 158, 11, 0.6)'
+                            'line-color': 'rgba(245, 158, 11, 0.45)',
+                            'target-arrow-color': 'rgba(245, 158, 11, 0.85)',
+                            'line-style': 'dashed'
+                        }
+                    },
+                    {
+                        selector: 'edge[relation="CITES_PRECURSOR"], edge[relation="CITES"]',
+                        style: {
+                            'line-color': 'rgba(59, 130, 246, 0.45)',
+                            'target-arrow-color': 'rgba(59, 130, 246, 0.85)'
+                        }
+                    },
+                    {
+                        selector: 'edge[relation="CITED_BY_DOWNSTREAM"]',
+                        style: {
+                            'line-color': 'rgba(16, 185, 129, 0.45)',
+                            'target-arrow-color': 'rgba(16, 185, 129, 0.85)'
+                        }
+                    },
+                    {
+                        selector: 'edge[relation="CO_AUTHORED_WITH"]',
+                        style: {
+                            'line-color': 'rgba(168, 85, 247, 0.35)',
+                            'target-arrow-shape': 'none',
+                            'line-style': 'dotted'
                         }
                     },
                     // Highlighted & Dimmed States
@@ -1749,11 +2077,14 @@
 
             // Set badge styling based on type
             const typeConfig = {
-                'paper':       { bg: 'rgba(0,242,254,0.15)',   color: 'var(--accent-cyan)',   border: 'var(--accent-cyan)' },
-                'author':      { bg: 'rgba(79,172,254,0.15)',   color: 'var(--accent-blue)',   border: 'var(--accent-blue)' },
-                'institution': { bg: 'rgba(168,85,247,0.15)',  color: '#c084fc',              border: '#c084fc' },
-                'topic':       { bg: 'rgba(16,185,129,0.15)',  color: 'var(--accent-green)',  border: 'var(--accent-green)' },
-                'citation':    { bg: 'rgba(245,158,11,0.15)',  color: 'var(--accent-amber)',  border: 'var(--accent-amber)' }
+                'paper':            { bg: 'rgba(0,242,254,0.15)',   color: 'var(--accent-cyan)',   border: 'var(--accent-cyan)' },
+                'author':           { bg: 'rgba(79,172,254,0.15)',   color: 'var(--accent-blue)',   border: 'var(--accent-blue)' },
+                'institution':      { bg: 'rgba(168,85,247,0.15)',  color: '#c084fc',              border: '#c084fc' },
+                'topic':            { bg: 'rgba(16,185,129,0.15)',  color: 'var(--accent-green)',  border: 'var(--accent-green)' },
+                'venue':            { bg: 'rgba(245,158,11,0.15)',  color: '#fbbf24',              border: '#fbbf24' },
+                'citation_inflow':  { bg: 'rgba(59,130,246,0.15)',  color: '#60a5fa',              border: '#60a5fa' },
+                'citation_outflow': { bg: 'rgba(16,185,129,0.15)',  color: '#34d399',              border: '#34d399' },
+                'citation':         { bg: 'rgba(59,130,246,0.15)',  color: '#60a5fa',              border: '#60a5fa' }
             };
 
             const cfg = typeConfig[data.type] || typeConfig['paper'];
@@ -1794,6 +2125,24 @@
                 if (data.field) items.push({ k: 'Primary Field', v: data.field });
                 if (data.subfield) items.push({ k: 'Academic Subfield', v: data.subfield });
                 if (data.domain) items.push({ k: 'Scientific Domain', v: data.domain });
+            } else if (data.type === 'venue') {
+                desc.textContent = data.description || 'Publication venue, conference proceedings, or peer-reviewed journal.';
+                if (data.quartile) items.push({ k: 'Prestige Quartile', v: `<strong style="color:#fbbf24;">${data.quartile}</strong>` });
+                if (data.percentile_tier) items.push({ k: 'Percentile Tier', v: data.percentile_tier });
+                if (data.publisher) items.push({ k: 'Host Publisher', v: data.publisher });
+                if (data.issn) items.push({ k: 'ISSN Identifier', v: data.issn });
+            } else if (data.type === 'citation_inflow') {
+                desc.textContent = data.description || 'Precursor foundation referenced in target paper bibliography.';
+                if (data.year) items.push({ k: 'Publication Year', v: data.year });
+                if (data.citations !== undefined) items.push({ k: 'Prior Citations', v: Number(data.citations).toLocaleString() });
+                if (data.lineage_direction) items.push({ k: 'Lineage Vector', v: `<strong style="color:#60a5fa;">${data.lineage_direction}</strong>` });
+                if (data.openalex_id) items.push({ k: 'OpenAlex Work ID', v: data.openalex_id.split('/').pop() });
+            } else if (data.type === 'citation_outflow') {
+                desc.textContent = data.description || 'Landmark downstream work adopting and citing this research.';
+                if (data.year) items.push({ k: 'Publication Year', v: data.year });
+                if (data.citations !== undefined) items.push({ k: 'Downstream Citations', v: `<strong style="color:var(--accent-green); font-size:0.95rem;">${Number(data.citations).toLocaleString()}</strong>` });
+                if (data.lineage_direction) items.push({ k: 'Lineage Vector', v: `<strong style="color:#34d399;">${data.lineage_direction}</strong>` });
+                if (data.openalex_id) items.push({ k: 'OpenAlex Work ID', v: data.openalex_id.split('/').pop() });
             } else if (data.type === 'citation') {
                 desc.textContent = data.description || 'Prior academic literature referenced in paper bibliography.';
                 if (data.reference_type) items.push({ k: 'Graph Relation', v: data.reference_type });
@@ -1880,7 +2229,10 @@
                 cy.elements().style('display', 'none');
                 cy.$('#target').style('display', 'element');
                 
-                const targetTypeNodes = cy.$(`node[type="${type}"]`);
+                const targetTypeNodes = (type === 'lineage')
+                    ? cy.$('node[type="citation_inflow"], node[type="citation_outflow"], node[type="citation"]')
+                    : cy.$(`node[type="${type}"]`);
+                
                 targetTypeNodes.style('display', 'element');
                 
                 // Show edges connecting visible nodes

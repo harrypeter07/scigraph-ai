@@ -94,6 +94,8 @@ class FeatureAttribution(BaseModel):
     raw_value: Optional[float] = None
     importance_score: float
     direction: Literal["positive", "negative", "neutral"]
+    delta_probability: Optional[float] = None
+    delta_percentage_points: Optional[float] = None
     provenance: Literal["model | lightgbm", "model | shap | lightgbm", "model | gnn", "model | local_occlusion", "model | permutation"] = "model | local_occlusion"
 
 

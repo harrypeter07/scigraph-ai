@@ -7,9 +7,15 @@ Enforces:
 """
 
 import os
+import warnings
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
+
+# Suppress PyTorch internal JIT deprecation warnings emitted by torch_geometric
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*torch.jit.script.*")
+warnings.filterwarnings("ignore", category=FutureWarning, module="torch.jit")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles

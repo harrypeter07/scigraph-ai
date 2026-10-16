@@ -1,1 +1,1 @@
-web: python -m api.main
+web: python -u -m api.main

@@ -12,8 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 EXPOSE 8080
 EXPOSE 8000
 
-CMD ["python", "-m", "api.main"]
+CMD ["python", "-u", "-m", "api.main"]

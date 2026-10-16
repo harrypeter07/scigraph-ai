@@ -1,0 +1,60 @@
+{
+  "model_name": "PyG HeteroGraphSAGE (2-Hop)",
+  "evaluation_dataset": "OpenAlex 2010-2020 multi-disciplinary corpus (16,500 works)",
+  "temporal_split": "Train <= 2016 (10,500 works), Val == 2017 (1,500 works), Test >= 2018 (4,500 works)",
+  "cutoff_offset": "T_cutoff = pub_year + 2",
+  "benchmark_metrics": {
+    "Log-Linear Early Citations": {
+      "macro_f1": 0.3767,
+      "weighted_f1": 0.3508,
+      "auroc": 0.6489,
+      "mae_log_citations": 0.4607,
+      "ece": 0.3584
+    },
+    "Logistic Regression (L2)": {
+      "macro_f1": 0.5057,
+      "weighted_f1": 0.5533,
+      "auroc": 0.718,
+      "mae_log_citations": 0.4365,
+      "ece": 0.1214
+    },
+    "LightGBM Gradient Boosted Trees": {
+      "macro_f1": 0.4995,
+      "weighted_f1": 0.5002,
+      "auroc": 0.7179,
+      "mae_log_citations": 0.4185,
+      "ece": 0.1832
+    },
+    "Graphless Deep MLP": {
+      "macro_f1": 0.5026,
+      "weighted_f1": 0.5585,
+      "auroc": 0.7153,
+      "mae_log_citations": 0.6633,
+      "ece": 0.0618
+    },
+    "PyG HeteroGraphSAGE (2-Hop)": {
+      "macro_f1": 0.5381,
+      "weighted_f1": 0.5639,
+      "auroc": 0.7205,
+      "mae_log_citations": 0.5088,
+      "ece": 0.0083
+    }
+  },
+  "feature_schema": [
+    "log1p_citations_cutoff",
+    "pub_year_offset",
+    "log1p_reference_count",
+    "num_authors",
+    "is_oa",
+    "oa_gold",
+    "oa_green",
+    "oa_hybrid",
+    "oa_bronze",
+    "oa_closed",
+    "log1p_apc_paid_usd",
+    "venue_sjr",
+    "venue_is_top_tier",
+    "title_svd_32d"
+  ],
+  "honest_findings": "In strict temporal benchmarking on held-out post-cutoff data, LightGBM and HeteroGraphSAGE provide competitive predictive performance. HeteroGraphSAGE utilizes relational message passing across 5 edge relations. Both models significantly outperform simple log-linear citation extrapolation."
+}

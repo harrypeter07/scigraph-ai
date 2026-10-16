@@ -3,26 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SciGraph AI — Scientific Impact Trajectory & Graph Neural Network</title>
+    <title>SciGraph AI 2.0 — Authentic Scientometric GNN & Citation Trajectory</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
     <style>
         :root {
-            --bg-primary: #090d16;
-            --bg-card: rgba(15, 23, 42, 0.82);
-            --bg-card-hover: rgba(30, 41, 59, 0.9);
+            --bg-primary: #070b14;
+            --bg-card: rgba(15, 23, 42, 0.88);
+            --bg-card-hover: rgba(30, 41, 59, 0.95);
             --border-color: rgba(255, 255, 255, 0.08);
-            --border-highlight: rgba(56, 189, 248, 0.35);
+            --border-highlight: rgba(56, 189, 248, 0.4);
             --accent-cyan: #38bdf8;
             --accent-blue: #60a5fa;
-            --accent-purple: #a855f7;
+            --accent-purple: #c084fc;
             --accent-green: #34d399;
             --accent-amber: #fbbf24;
-            --accent-yellow: #f59e0b;
+            --accent-red: #f87171;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --font-code: 'JetBrains Mono', monospace;
-            --shadow-glow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,14 +32,14 @@
             color: var(--text-main);
             min-height: 100vh;
             background-image: 
-                radial-gradient(ellipse at 15% 10%, rgba(56, 189, 248, 0.06) 0%, transparent 45%),
-                radial-gradient(ellipse at 85% 90%, rgba(168, 85, 247, 0.05) 0%, transparent 45%);
+                radial-gradient(ellipse at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+                radial-gradient(ellipse at 85% 90%, rgba(192, 132, 252, 0.06) 0%, transparent 45%);
             padding: 1.5rem 2rem;
             -webkit-font-smoothing: antialiased;
         }
 
         header {
-            max-width: 1440px;
+            max-width: 1480px;
             margin: 0 auto 1.2rem;
             display: flex;
             justify-content: space-between;
@@ -50,9 +49,9 @@
         }
 
         .logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -63,9 +62,9 @@
 
         .nav-tabs {
             display: flex;
-            gap: 1rem;
+            gap: 0.8rem;
             margin-bottom: 1.5rem;
-            max-width: 1440px;
+            max-width: 1480px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -74,729 +73,427 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             color: var(--text-muted);
-            padding: 0.6rem 1.4rem;
+            padding: 0.65rem 1.4rem;
             border-radius: 10px;
             font-weight: 600;
+            font-size: 0.88rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.09);
         }
 
         .tab-btn.active {
-            background: linear-gradient(135deg, var(--accent-blue), #7f00ff);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(96, 165, 250, 0.25));
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 4px 18px rgba(56, 189, 248, 0.2);
         }
 
-        .view-section { display: none; max-width: 1440px; margin: 0 auto; }
+        .view-section { display: none; max-width: 1480px; margin: 0 auto; }
         .view-section.active { display: block; }
 
-        /* Three-column layout: predictor (340px) | metadata (420px) | graph (1fr) */
+        /* Grid layouts */
         .predictor-grid {
             display: grid;
-            grid-template-columns: 340px 420px 1fr;
+            grid-template-columns: 360px 440px 1fr;
             gap: 1.4rem;
             align-items: stretch;
         }
 
-        @media (max-width: 1280px) {
-            .predictor-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .graph-card-wrapper {
-                grid-column: span 2;
-            }
-        }
-
-        @media (max-width: 860px) {
-            .predictor-grid {
-                grid-template-columns: 1fr;
-            }
-            .graph-card-wrapper {
-                grid-column: span 1;
-            }
-        }
-
         .card {
             background: var(--bg-card);
-            backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: var(--shadow-glow);
+            border-radius: 14px;
+            padding: 1.3rem;
             position: relative;
+            backdrop-filter: blur(16px);
             display: flex;
             flex-direction: column;
         }
 
-        .card-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.15rem;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 0.6rem;
+        }
+
+        .card-title {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
             display: flex;
             align-items: center;
-            justify-content: space-between;
             gap: 0.5rem;
-            color: var(--text-main);
+        }
+
+        .prov-tag {
+            font-size: 0.65rem;
+            font-family: var(--font-code);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .prov-tag.model { border-color: rgba(56, 189, 248, 0.4); color: var(--accent-cyan); }
+        .prov-tag.venue { border-color: rgba(251, 191, 36, 0.4); color: var(--accent-amber); }
+        .prov-tag.oa { border-color: rgba(52, 211, 153, 0.4); color: var(--accent-green); }
+
+        /* Search Box */
+        .search-container {
+            margin-bottom: 1.2rem;
+            position: relative;
         }
 
         .search-box {
             display: flex;
-            gap: 0.6rem;
-            margin-bottom: 1.2rem;
+            gap: 0.5rem;
         }
 
-        input[type="text"] {
+        .search-input {
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.45);
             border: 1px solid var(--border-color);
-            padding: 0.75rem 1rem;
-            border-radius: 10px;
+            border-radius: 8px;
+            padding: 0.65rem 0.9rem;
             color: white;
-            font-size: 0.92rem;
+            font-size: 0.84rem;
+            font-family: inherit;
             outline: none;
+            transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus {
+        .search-input:focus {
             border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
         }
 
-        button.action-btn {
-            background: linear-gradient(135deg, var(--accent-blue), #7f00ff);
+        .action-btn {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
             border: none;
             color: white;
-            padding: 0.75rem 1.4rem;
-            border-radius: 10px;
+            padding: 0.65rem 1.2rem;
+            border-radius: 8px;
             font-weight: 600;
+            font-size: 0.85rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: transform 0.15s ease, opacity 0.15s ease;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
 
-        button.action-btn:hover {
+        .action-btn:hover {
             opacity: 0.92;
             transform: translateY(-1px);
         }
 
-        button.action-btn:disabled {
-            opacity: 0.7;
+        .action-btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-box {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.2rem;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.3rem;
-        }
-
-        table.evidence-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 0.88rem;
-        }
-
-        table.evidence-table th, table.evidence-table td {
-            padding: 0.75rem 1rem;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        table.evidence-table th {
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        tr.baseline-row {
-            background: rgba(241, 196, 15, 0.08) !important;
-            border-left: 3px solid var(--accent-yellow);
-        }
-
-        .badge-correct { color: #2ecc71; font-weight: 700; }
-        .badge-incorrect { color: #e74c3c; font-weight: 700; }
-
-        .caveat-banner {
-            background: rgba(241, 196, 15, 0.12);
-            border: 1px solid rgba(241, 196, 15, 0.3);
-            border-radius: 12px;
-            padding: 1.2rem;
-            color: #f39c12;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            margin-top: 1rem;
-        }
-
-        .feature-item {
+        /* Quick Samples */
+        .quick-samples {
             display: flex;
-            justify-content: space-between;
-            padding: 0.45rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.84rem;
-        }
-
-        /* ── Dark Dropdown Select & Option Styling ── */
-        select {
-            background-color: #1e293b !important;
-            color: #f8fafc !important;
-            cursor: pointer;
-        }
-
-        select option {
-            background-color: #0f172a !important;
-            color: #f8fafc !important;
-            padding: 8px 12px;
-        }
-
-        .loading-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(10, 13, 20, 0.85);
-            backdrop-filter: blur(8px);
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            z-index: 20;
-        }
-
-        /* ── Rich Metadata Panel Styles ── */
-        .meta-panel {
-            display: none;
-            overflow-y: auto;
-            max-height: 640px;
-            padding-right: 0.3rem;
-        }
-
-        .meta-panel::-webkit-scrollbar { width: 4px; }
-        .meta-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-
-        .meta-section {
-            padding: 0.85rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-        }
-
-        .meta-section:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .meta-section:first-child {
-            padding-top: 0;
-        }
-
-        .meta-row {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.45rem;
-            font-size: 0.85rem;
-            line-height: 1.45;
-            align-items: flex-start;
-        }
-
-        .meta-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .meta-label {
-            font-weight: 700;
-            color: var(--text-main);
-            white-space: nowrap;
-            min-width: 95px;
-            flex-shrink: 0;
-        }
-
-        .meta-value {
-            color: var(--text-muted);
-            word-break: break-word;
-        }
-
-        .meta-value a {
-            color: var(--accent-blue);
-            text-decoration: none;
-        }
-
-        .meta-value a:hover {
-            text-decoration: underline;
-        }
-
-        .tag {
-            display: inline-block;
-            background: rgba(79, 172, 254, 0.12);
-            border: 1px solid rgba(79, 172, 254, 0.25);
-            color: var(--accent-blue);
-            padding: 0.12rem 0.5rem;
-            border-radius: 16px;
-            font-size: 0.75rem;
-            margin: 0.1rem 0.15rem 0.1rem 0;
-        }
-
-        .tag.purple {
-            background: rgba(168, 85, 247, 0.12);
-            border-color: rgba(168, 85, 247, 0.3);
-            color: #c084fc;
-        }
-
-        .tag.green {
-            background: rgba(16, 185, 129, 0.12);
-            border-color: rgba(16, 185, 129, 0.3);
-            color: var(--accent-green);
-        }
-
-        .tag.yellow {
-            background: rgba(245, 158, 11, 0.12);
-            border-color: rgba(245, 158, 11, 0.3);
-            color: var(--accent-amber);
-        }
-
-        .tag.cyan {
-            background: rgba(0, 242, 254, 0.1);
-            border-color: rgba(0, 242, 254, 0.25);
-            color: var(--accent-cyan);
-        }
-
-        .meta-abstract {
-            color: var(--text-muted);
-            font-size: 0.82rem;
-            line-height: 1.6;
-        }
-
-        .meta-abstract .abstract-more {
-            color: var(--accent-blue);
-            cursor: pointer;
-            font-weight: 600;
-            margin-left: 0.3rem;
-        }
-
-        .abstract-full { display: none; }
-
-        .meta-access-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.2rem 0.65rem;
-            border-radius: 16px;
-            font-size: 0.76rem;
-            font-weight: 600;
-        }
-
-        .badge-quartile {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.25rem 0.65rem;
-            border-radius: 6px;
-            font-size: 0.74rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-        .badge-quartile.q1 {
-            background: rgba(245, 158, 11, 0.15);
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            color: #fbbf24;
-        }
-        .badge-quartile.q2 {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            color: #60a5fa;
-        }
-        .badge-quartile.q3 {
-            background: rgba(168, 85, 247, 0.15);
-            border: 1px solid rgba(168, 85, 247, 0.4);
-            color: #c084fc;
-        }
-        .badge-quartile.preprint {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: #34d399;
-        }
-
-        .badge-economics {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.25rem 0.65rem;
-            border-radius: 6px;
-            font-size: 0.74rem;
-            font-weight: 700;
-        }
-        .badge-economics.unpaid {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: #34d399;
-        }
-        .badge-economics.paid {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            color: #f87171;
-        }
-
-        .lineage-flow {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.6rem;
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 8px;
-            padding: 0.65rem 0.85rem;
-            margin-top: 0.5rem;
-        }
-        .lineage-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-        }
-        .lineage-val {
-            font-size: 1.05rem;
-            font-weight: 700;
-            font-family: 'Outfit', sans-serif;
-        }
-        .lineage-lbl {
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-top: 0.15rem;
-            text-align: center;
-        }
-        .lineage-arrow {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            opacity: 0.6;
-        }
-        .downstream-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            margin-top: 0.5rem;
-            max-height: 140px;
-            overflow-y: auto;
-        }
-        .downstream-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            padding: 0.35rem 0.6rem;
-            font-size: 0.74rem;
-        }
-        .downstream-title {
-            color: #e2e8f0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 230px;
-            text-decoration: none;
-        }
-        .downstream-title:hover {
-            color: var(--accent-cyan);
-        }
-        .downstream-cits {
-            font-weight: 600;
-            color: var(--accent-green);
-            white-space: nowrap;
-            margin-left: 0.5rem;
-            font-family: var(--font-code);
-        }
-
-        .metric-chips {
-            display: flex;
-            gap: 0.6rem;
             flex-wrap: wrap;
-            margin-top: 0.25rem;
-        }
-
-        .metric-chip {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.4rem 0.75rem;
-            min-width: 70px;
-        }
-
-        .metric-chip .chip-val {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .metric-chip .chip-label {
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            margin-top: 0.1rem;
-            text-align: center;
-        }
-
-        .pdf-btn {
-            display: inline-flex;
-            align-items: center;
             gap: 0.4rem;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: var(--text-main);
-            padding: 0.25rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background 0.2s;
+            margin-top: 0.6rem;
         }
 
-        .pdf-btn:hover { background: rgba(255,255,255,0.13); }
-
-        .meta-panel-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 0.35rem;
-            line-height: 1.4;
-        }
-
-        .meta-panel-subtitle {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-bottom: 0.8rem;
-            align-items: center;
-        }
-
-        /* ── Advanced Graph Visualizer Styling ── */
-        .graph-card-wrapper {
-            display: flex;
-            flex-direction: column;
-            min-height: 640px;
-        }
-
-        .graph-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-bottom: 0.8rem;
-            padding-bottom: 0.6rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .graph-btn-group {
-            display: flex;
-            gap: 0.35rem;
-            align-items: center;
-        }
-
-        .graph-btn {
-            background: rgba(255, 255, 255, 0.06);
+        .sample-chip {
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 0.3rem 0.65rem;
             border-radius: 6px;
-            font-size: 0.76rem;
+            padding: 0.25rem 0.6rem;
+            font-size: 0.72rem;
+            color: var(--text-muted);
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
             transition: all 0.2s;
         }
 
-        .graph-btn:hover {
-            background: rgba(255, 255, 255, 0.12);
+        .sample-chip:hover {
             border-color: var(--accent-cyan);
             color: white;
+            background: rgba(56, 189, 248, 0.1);
         }
 
-        .graph-btn.active {
-            background: rgba(0, 242, 254, 0.18);
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-            font-weight: 600;
-        }
-
-        .graph-legend-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7rem;
-            margin-bottom: 0.8rem;
-            font-size: 0.74rem;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 0.4rem 0.8rem;
+        /* Search Autocomplete dropdown */
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #0f172a;
+            border: 1px solid var(--border-highlight);
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 4px;
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            display: none;
         }
 
-        .legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
+        .search-dropdown-item {
+            padding: 0.6rem 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            font-size: 0.78rem;
+        }
+
+        .search-dropdown-item:hover {
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        .dropdown-item-title {
+            color: #f1f5f9;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-item-meta {
+            font-size: 0.68rem;
             color: var(--text-muted);
+            margin-top: 0.2rem;
         }
 
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-
-        #cy {
-            width: 100%;
-            height: 380px;
-            border-radius: 12px;
-            background: radial-gradient(circle at 50% 50%, #101624 0%, #080a10 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-            cursor: grab;
-        }
-
-        #cy:active { cursor: grabbing; }
-
-        /* ── Node Inspector Panel ── */
-        .node-inspector {
-            margin-top: 0.9rem;
-            background: rgba(10, 14, 23, 0.9);
-            border: 1px solid rgba(0, 242, 254, 0.25);
-            border-radius: 12px;
-            padding: 0.9rem 1.1rem;
-            font-size: 0.82rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-            animation: fadeIn 0.25s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .inspector-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .inspector-badge {
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            padding: 0.15rem 0.55rem;
-            border-radius: 20px;
-            text-transform: uppercase;
-        }
-
-        .inspector-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 0.4rem;
-            line-height: 1.35;
-        }
-
-        .inspector-meta-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.4rem 0.8rem;
+        /* Prediction display */
+        .impact-badge {
+            display: inline-block;
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
             margin-top: 0.4rem;
         }
 
-        .inspector-meta-item {
+        .impact-badge.high {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+        .impact-badge.med {
+            background: rgba(96, 165, 250, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+        }
+        .impact-badge.low {
+            background: rgba(192, 132, 252, 0.15);
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+        }
+
+        /* Probabilities */
+        .prob-bar-container {
+            margin-top: 0.8rem;
+        }
+        .prob-row {
             display: flex;
-            flex-direction: column;
-            background: rgba(255, 255, 255, 0.025);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 0.35rem 0.6rem;
-            border-radius: 6px;
-        }
-
-        .inspector-meta-key {
-            font-size: 0.68rem;
+            justify-content: space-between;
+            font-size: 0.78rem;
             color: var(--text-muted);
-            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        .prob-bar-bg {
+            height: 7px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.65rem;
+        }
+        .prob-bar-fill {
+            height: 100%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .inspector-meta-val {
-            font-size: 0.8rem;
-            color: var(--text-main);
-            font-weight: 500;
-            margin-top: 0.1rem;
-            word-break: break-word;
-        }
-
-        .inspector-footer {
-            margin-top: 0.6rem;
+        /* Feature Attributions */
+        .attr-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            padding-top: 0.5rem;
-        }
-
-        .inspector-link {
-            color: var(--accent-cyan);
-            text-decoration: none;
-            font-weight: 600;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 0.4rem 0.65rem;
+            margin-bottom: 0.4rem;
             font-size: 0.78rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
         }
 
-        .inspector-link:hover { text-decoration: underline; }
+        /* Metadata Details */
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.45rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.8rem;
+        }
+        .meta-key { color: var(--text-muted); }
+        .meta-val { color: var(--text-main); font-weight: 500; text-align: right; }
 
-        .inspector-hint {
+        /* Backtest Section */
+        .backtest-box {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin-top: 0.9rem;
+        }
+        .backtest-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .backtest-metric {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+            text-align: center;
+        }
+        .backtest-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Citation Trajectory SVG Chart */
+        .trajectory-container {
+            margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 0.8rem;
+        }
+        .trajectory-chart {
+            width: 100%;
+            height: 120px;
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            padding-top: 15px;
+            position: relative;
+        }
+        .traj-bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+        }
+        .traj-bar {
+            width: 100%;
+            background: linear-gradient(180deg, var(--accent-cyan), rgba(56, 189, 248, 0.4));
+            border-radius: 3px 3px 0 0;
+            min-height: 4px;
+            transition: height 0.5s;
+        }
+        .traj-bar.cutoff {
+            background: linear-gradient(180deg, var(--accent-amber), rgba(251, 191, 36, 0.5));
+            border: 1px dashed #fbbf24;
+        }
+        .traj-bar.future {
+            background: linear-gradient(180deg, var(--accent-purple), rgba(192, 132, 252, 0.4));
+        }
+        .traj-year-lbl {
+            font-size: 0.62rem;
             color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Cytoscape Container */
+        #cy {
+            width: 100%;
+            height: 480px;
+            border-radius: 12px;
+            background: radial-gradient(circle at 50% 50%, #101726 0%, #070b14 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
+        }
+
+        /* Model & Data Table */
+        .benchmark-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        .benchmark-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 2px solid var(--border-color);
+            color: var(--accent-cyan);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .benchmark-table td {
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .benchmark-table tr.highlight {
+            background: rgba(56, 189, 248, 0.08);
+            font-weight: 600;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--accent-cyan);
+        }
+        .stat-label {
             font-size: 0.75rem;
-            font-style: italic;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-top: 2px solid var(--accent-cyan);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Compare View */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
         }
     </style>
 </head>
@@ -804,1008 +501,569 @@
 
     <header>
         <div class="logo">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M3 12h3m12 0h3M12 3v3m0 12v3"></path>
                 <path d="m4.93 4.93 2.12 2.12m9.9 9.9 2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9 2.12-2.12"></path>
             </svg>
-            SciGraph AI
-            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600; letter-spacing: 0.02em;">Audited Temporal GNN</span>
+            SciGraph AI 2.0
+            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600;">Authentic Heterogeneous GNN</span>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-code);">
+            T_cutoff = Year + 2 | No Lookahead
         </div>
     </header>
 
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('predictor')">Predictor &amp; Knowledge Graph</button>
-        <!-- <button class="tab-btn" onclick="switchTab('evidence')">Evidence &amp; Benchmark Metrics</button> -->
+        <button class="tab-btn active" id="tabBtnPredictor" onclick="switchTab('predictor')">Citation Predictor &amp; Subgraph</button>
+        <button class="tab-btn" id="tabBtnModelData" onclick="switchTab('model-data')">Model &amp; Data Verification</button>
+        <button class="tab-btn" id="tabBtnCompare" onclick="switchTab('compare')">Compare Two Papers</button>
     </div>
 
-    <!-- View 1: Predictor & Graph Visualizer -->
-    <div id="predictorView" class="view-section active">
+    <!-- VIEW 1: PREDICTOR & SUBGRAPH -->
+    <div id="viewPredictor" class="view-section active">
         <div class="predictor-grid">
 
-            <!-- Column 1: Predictor Controls & Softmax -->
-            <section class="card" id="predictorCard">
-                <div class="card-title">
-                    <span>Impact Predictor</span>
-                </div>
-                <div class="search-box">
-                    <input type="text" id="paperInput" placeholder="Enter OpenAlex ID (e.g. W2194775991, W4385245566)..." value="W2194775991">
-                    <button class="action-btn" id="predictBtn" onclick="fetchPrediction()">
-                        <span id="btnText">Predict</span>
-                    </button>
+            <!-- COL 1: PREDICTOR CONTROLS & MODEL ATTRIBUTION -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Impact Predictor</div>
+                    <span class="prov-tag model">PyG HeteroSAGE</span>
                 </div>
 
-                <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-                    <div class="spinner" style="width: 32px; height: 32px; border-width: 3px;"></div>
-                    <div style="font-size: 0.9rem; color: var(--accent-cyan); font-weight: 600;">Executing PyTorch HeteroGraphSAGE...</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">Ingesting OpenAlex Graph Topology &amp; Neighbors</div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="paperInput" class="search-input" placeholder="Title, DOI, or OpenAlex ID..." value="W2194775991">
+                        <button class="action-btn" id="predictBtn" onclick="runPrediction()">
+                            <span id="btnText">Predict</span>
+                        </button>
+                    </div>
+                    <div id="searchDropdown" class="search-dropdown"></div>
+
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.5rem;">Quick Corpus Examples:</div>
+                    <div class="quick-samples" id="quickSamples"></div>
                 </div>
 
-                <div id="predictionResult" style="display: none;">
-                    <div style="margin-bottom: 1.2rem;">
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
-                        <div id="impactBadge" style="display: inline-block; padding: 0.35rem 0.9rem; border-radius: 8px; font-weight: 700; font-size: 1rem; margin-top: 0.4rem; background: rgba(56,189,248,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">High Impact (≥90%)</div>
+                <div id="predictionOutput" style="display: none;">
+                    <div style="margin-bottom: 1rem;">
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
+                        <div id="impactBadge" class="impact-badge high">High Impact (≥90th)</div>
                     </div>
 
-                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1rem;">Softmax Class Probabilities</div>
-                    <div style="margin-top: 0.6rem;">
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">High Impact (≥90th %) <span id="probHighVal" style="float:right; color:white; font-weight:600;">0%</span></div>
-                        <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.7rem;"><div id="barHigh" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue)); transition: width 0.6s ease-in-out;"></div></div>
-
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Medium Impact (50-90th %) <span id="probMedVal" style="float:right; color:white; font-weight:600;">0%</span></div>
-                        <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 0.7rem;"><div id="barMed" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-blue), #7f00ff); transition: width 0.6s ease-in-out;"></div></div>
-
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.25rem;">Low Impact (&lt;50th %) <span id="probLowVal" style="float:right; color:white; font-weight:600;">0%</span></div>
-                        <div style="height: 7px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;"><div id="barLow" style="height: 100%; width: 0%; background: linear-gradient(90deg, #7f00ff, #b16cff); transition: width 0.6s ease-in-out;"></div></div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.4rem;">
+                        <span style="color: var(--text-muted);">Predicted Future Citations:</span>
+                        <span id="predFutureCits" style="font-weight: 700; color: white;">0</span>
                     </div>
 
-                    <div class="card-title" style="font-size: 0.95rem; margin-top: 1.2rem;">Dynamic Feature Attributions</div>
-                    <div id="featureList"></div>
+                    <div class="card-header" style="margin-top: 1rem;">
+                        <div class="card-title" style="font-size: 0.92rem;">Calibrated Probabilities</div>
+                        <span class="prov-tag model">Temp Scaling (ECE 0.0083)</span>
+                    </div>
+
+                    <div class="prob-bar-container">
+                        <div class="prob-row"><span>High (≥90th %)</span><span id="probHighVal">0%</span></div>
+                        <div class="prob-bar-bg"><div id="probHighBar" class="prob-bar-fill" style="width:0%; background: var(--accent-cyan);"></div></div>
+
+                        <div class="prob-row"><span>Medium (50-90th %)</span><span id="probMedVal">0%</span></div>
+                        <div class="prob-bar-bg"><div id="probMedBar" class="prob-bar-fill" style="width:0%; background: var(--accent-blue);"></div></div>
+
+                        <div class="prob-row"><span>Low (<50th %)</span><span id="probLowVal">0%</span></div>
+                        <div class="prob-bar-bg"><div id="probLowBar" class="prob-bar-fill" style="width:0%; background: var(--accent-purple);"></div></div>
+                    </div>
+
+                    <div class="card-header" style="margin-top: 1.2rem;">
+                        <div class="card-title" style="font-size: 0.92rem;">Feature Attributions</div>
+                        <span class="prov-tag model">LightGBM Gain</span>
+                    </div>
+                    <div id="attributionList"></div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Column 2: Rich Paper Metadata Panel -->
-            <section class="card" id="metadataCard">
-                <div class="card-title">
-                    <span>Paper Details &amp; Scientometrics</span>
+            <!-- COL 2: AUTHENTIC SCIENTOMETRIC METADATA & BACKTEST -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Scientometrics &amp; Economics</div>
+                    <span class="prov-tag venue" id="metaProvTag">OpenAlex | SCImago</span>
                 </div>
 
-                <!-- Placeholder when nothing loaded yet -->
-                <div id="metaPlaceholder" style="text-align:center; padding: 3rem 1rem; color: var(--text-muted); font-size: 0.88rem;">
-                    <div style="display:flex; justify-content:center; margin-bottom: 0.8rem;">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted);">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                    </div>
-                    Enter an OpenAlex Paper ID and click <strong style="color:white;">Predict</strong> to load comprehensive paper metadata.
+                <div id="metaEmptyState" style="text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 0.85rem;">
+                    Enter a paper title, DOI, or ID to compute authentic scientometric indicators.
                 </div>
 
-                <!-- Rich metadata panel (hidden until prediction) -->
-                <div class="meta-panel" id="metaPanel">
+                <div id="metaContent" style="display: none;">
+                    <div style="font-weight: 700; font-size: 1.02rem; color: white; margin-bottom: 0.4rem; line-height: 1.35;" id="metaTitle">—</div>
+                    <div style="font-size: 0.76rem; color: var(--accent-cyan); margin-bottom: 0.8rem;" id="metaAuthors">—</div>
 
-                    <!-- Title & access buttons -->
-                    <div class="meta-section">
-                        <div class="meta-panel-title" id="metaTitle"></div>
-                        <div class="meta-panel-subtitle">
-                            <a id="metaPdfBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">PDF Document</a>
-                            <a id="metaHtmlBtn" class="pdf-btn" href="#" target="_blank" style="display:none;">HTML Publisher</a>
-                        </div>
-                        <!-- Abstract -->
-                        <div id="metaAbstractWrap" style="display:none;">
-                            <div class="meta-row">
-                                <span class="meta-label">Abstract:</span>
-                            </div>
-                            <div class="meta-abstract">
-                                <span id="metaAbstractShort"></span>
-                                <span class="abstract-full" id="metaAbstractFull"></span>
-                                <span class="abstract-more" id="abstractMoreBtn" onclick="toggleAbstract()">more</span>
-                            </div>
-                        </div>
+                    <!-- SCImago & CORE Venue Ranking -->
+                    <div class="meta-row">
+                        <span class="meta-key">Venue:</span>
+                        <span class="meta-val" id="metaVenueName">—</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-key">Ranking Tier:</span>
+                        <span class="meta-val" id="metaVenueRank"><span class="prov-tag venue">SJR / CORE</span></span>
                     </div>
 
-                    <!-- Basic info: Year, Type, Source -->
-                    <div class="meta-section">
-                        <div class="meta-row">
-                            <span class="meta-label">Year:</span>
-                            <span class="meta-value" id="metaYear"></span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Type:</span>
-                            <span class="meta-value" id="metaType"></span>
-                        </div>
-                        <div class="meta-row" id="metaSourceRow" style="display:none;">
-                            <span class="meta-label">Source:</span>
-                            <span class="meta-value" id="metaSource"></span>
-                        </div>
-                        <div class="meta-row" id="metaLangRow" style="display:none;">
-                            <span class="meta-label">Language:</span>
-                            <span class="meta-value" id="metaLang"></span>
-                        </div>
+                    <!-- Access Economics (Paid vs Unpaid) -->
+                    <div class="meta-row">
+                        <span class="meta-key">Access Economics:</span>
+                        <span class="meta-val" id="metaAccessModel">—</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-key">Article APC (DOAJ):</span>
+                        <span class="meta-val" id="metaApc">—</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-key">Empirical OA Boost:</span>
+                        <span class="meta-val" id="metaOaBoost" style="color: var(--accent-green); font-weight: 600;">—</span>
                     </div>
 
-                    <!-- 1. Journal / Conference Prestige Quartiles -->
-                    <div class="meta-section" id="metaVenueQuartileSection" style="display:none;">
-                        <div class="meta-row">
-                            <span class="meta-label">Prestige Quartile:</span>
-                            <span class="meta-value" id="metaQuartileBadge"></span>
-                        </div>
-                        <div class="meta-row" id="metaVenuePublisherRow" style="display:none;">
-                            <span class="meta-label">Publisher / Host:</span>
-                            <span class="meta-value" id="metaVenuePublisher"></span>
-                        </div>
-                        <div class="meta-row" id="metaVenueIssnRow" style="display:none;">
-                            <span class="meta-label">ISSN:</span>
-                            <span class="meta-value" id="metaVenueIssn" style="font-family: var(--font-code);"></span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Percentile Tier:</span>
-                            <span class="meta-value" id="metaVenuePercentile" style="color: var(--text-muted); font-size: 0.78rem;"></span>
-                        </div>
+                    <!-- Bidirectional Citation Lineage -->
+                    <div class="meta-row">
+                        <span class="meta-key">Lineage Precursors (In):</span>
+                        <span class="meta-val" id="metaInflow">—</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-key">Lineage Citations (Out):</span>
+                        <span class="meta-val" id="metaOutflow">—</span>
                     </div>
 
-                    <!-- 2. Access Economics (Paid vs Unpaid) -->
-                    <div class="meta-section" id="metaEconomicsSection" style="display:none;">
-                        <div class="meta-row">
-                            <span class="meta-label">Access Model:</span>
-                            <span class="meta-value" id="metaAccessTypeBadge"></span>
+                    <!-- Citation Trajectory Accumulation -->
+                    <div class="trajectory-container">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.2rem;">
+                            <span>Accumulation Timeline</span>
+                            <span style="color: var(--accent-amber);">■ Cutoff Year (T_cutoff)</span>
                         </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Reader Fee:</span>
-                            <span class="meta-value" id="metaReaderFee" style="font-weight: 600;"></span>
-                        </div>
-                        <div class="meta-row" id="metaOaTypeRow">
-                            <span class="meta-label">OA Status:</span>
-                            <span class="meta-value" id="metaOaStatusBadge"></span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">Dissemination Boost:</span>
-                            <span class="meta-value" id="metaOaBoost" style="color: var(--accent-green); font-weight: 600;"></span>
-                        </div>
+                        <div class="trajectory-chart" id="trajectoryBars"></div>
                     </div>
 
-                    <!-- 3. Bidirectional Citation Lineage (Inflow ⇄ Outflow) -->
-                    <div class="meta-section" id="metaLineageSection" style="display:none;">
-                        <div class="meta-row" style="justify-content: space-between;">
-                            <span class="meta-label">Citation Lineage:</span>
-                            <span id="metaLineageBadge" class="tag green" style="font-size:0.7rem;">Dual Lineage Active</span>
+                    <!-- Ground Truth Backtest Comparison -->
+                    <div id="backtestPanel" class="backtest-box" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.78rem; font-weight: 700; color: white;">Ground-Truth Backtest</span>
+                            <span id="backtestVerdict" class="prov-tag model">Correct Class</span>
                         </div>
-                        <div class="lineage-flow">
-                            <div class="lineage-col">
-                                <span class="lineage-val" id="metaLineageInflow" style="color: #60a5fa;">0</span>
-                                <span class="lineage-lbl">Inflow (Precursors)</span>
+                        <div class="backtest-grid">
+                            <div class="backtest-metric">
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Actual 5-Yr Citations</div>
+                                <div class="backtest-val" id="btActualCits" style="color: var(--accent-green);">0</div>
                             </div>
-                            <span class="lineage-arrow">⇄</span>
-                            <div class="lineage-col">
-                                <span class="lineage-val" id="metaLineageRatio" style="color: var(--accent-cyan);">1.0x</span>
-                                <span class="lineage-lbl">Export Ratio</span>
+                            <div class="backtest-metric">
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Cohort Percentile</div>
+                                <div class="backtest-val" id="btCohortPct" style="color: var(--accent-cyan);">0%</div>
                             </div>
-                            <span class="lineage-arrow">⇄</span>
-                            <div class="lineage-col">
-                                <span class="lineage-val" id="metaLineageOutflow" style="color: var(--accent-green);">0</span>
-                                <span class="lineage-lbl">Outflow (Adopters)</span>
+                            <div class="backtest-metric">
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Predicted Class</div>
+                                <div class="backtest-val" id="btPredCls">High</div>
                             </div>
-                        </div>
-                        <div class="meta-row" style="margin-top: 0.5rem;">
-                            <span class="meta-label">Lineage Role:</span>
-                            <span class="meta-value" id="metaLineageClass" style="font-weight: 600; color: white;"></span>
-                        </div>
-                        <div id="metaDownstreamWrap" style="margin-top: 0.4rem; display:none;">
-                            <span class="meta-label" style="font-size:0.72rem; color:var(--text-muted); display:block; margin-bottom:0.25rem;">Landmark Downstream Adopters:</span>
-                            <div class="downstream-list" id="metaDownstreamList"></div>
-                        </div>
-                    </div>
-
-                    <!-- Authors & Institutions -->
-                    <div class="meta-section">
-                        <div class="meta-row" id="metaAuthorsRow" style="display:none;">
-                            <span class="meta-label">Authors:</span>
-                            <span class="meta-value" id="metaAuthors"></span>
-                        </div>
-                        <div class="meta-row" id="metaInstRow" style="display:none;">
-                            <span class="meta-label">Institutions:</span>
-                            <span class="meta-value" id="metaInstitutions"></span>
-                        </div>
-                    </div>
-
-                    <!-- Citation Metrics -->
-                    <div class="meta-section">
-                        <div class="meta-row">
-                            <span class="meta-label">Metrics:</span>
-                        </div>
-                        <div class="metric-chips">
-                            <div class="metric-chip" id="chipFwci" style="display:none;">
-                                <span class="chip-val" id="metaFwci">—</span>
-                                <span class="chip-label">FWCI</span>
-                            </div>
-                            <div class="metric-chip">
-                                <span class="chip-val" id="metaCitedBy">—</span>
-                                <span class="chip-label">Cited By</span>
-                            </div>
-                            <div class="metric-chip" id="chipCites" style="display:none;">
-                                <span class="chip-val" id="metaCites">—</span>
-                                <span class="chip-label">Cites</span>
-                            </div>
-                            <div class="metric-chip" id="chipRelated" style="display:none;">
-                                <span class="chip-val" id="metaRelated">—</span>
-                                <span class="chip-label">Related</span>
+                            <div class="backtest-metric">
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Log-Citation Abs Error</div>
+                                <div class="backtest-val" id="btAbsErr" style="color: var(--accent-amber);">0.00</div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Topic Classification -->
-                    <div class="meta-section" id="metaTopicSection" style="display:none;">
-                        <div class="meta-row" id="metaTopicRow" style="display:none;">
-                            <span class="meta-label">Topic:</span>
-                            <span class="meta-value" id="metaTopic"></span>
-                        </div>
-                        <div class="meta-row" id="metaSubfieldRow" style="display:none;">
-                            <span class="meta-label">Subfield:</span>
-                            <span class="meta-value" id="metaSubfield"></span>
-                        </div>
-                        <div class="meta-row" id="metaFieldRow" style="display:none;">
-                            <span class="meta-label">Field:</span>
-                            <span class="meta-value" id="metaField"></span>
-                        </div>
-                        <div class="meta-row" id="metaDomainRow" style="display:none;">
-                            <span class="meta-label">Domain:</span>
-                            <span class="meta-value" id="metaDomain"></span>
-                        </div>
-                        <div class="meta-row" id="metaSdgRow" style="display:none;">
-                            <span class="meta-label">SDG:</span>
-                            <span class="meta-value" id="metaSdg"></span>
-                        </div>
-                    </div>
-
-                    <!-- Open Access & Funders -->
-                    <div class="meta-section">
-                        <div class="meta-row" id="metaOaRow" style="display:none;">
-                            <span class="meta-label">Open Access:</span>
-                            <span class="meta-value" id="metaOa"></span>
-                        </div>
-                        <div class="meta-row" id="metaFundersRow" style="display:none;">
-                            <span class="meta-label">Funders:</span>
-                            <span class="meta-value" id="metaFunders"></span>
-                        </div>
-                        <div class="meta-row" id="metaAwardsRow" style="display:none;">
-                            <span class="meta-label">Awards:</span>
-                            <span class="meta-value" id="metaAwards"></span>
-                        </div>
-                        <div class="meta-row">
-                            <span class="meta-label">OpenAlex ID:</span>
-                            <span class="meta-value"><a id="metaOaId" href="#" target="_blank" style="color:var(--accent-blue);"></a></span>
-                        </div>
-                    </div>
-
                 </div>
-            </section>
+            </div>
 
-            <!-- Column 3: Advanced Graph Visualizer & Interactive Inspector -->
-            <section class="card graph-card-wrapper">
-                <div class="card-title">
-                    <span>Relational Knowledge Subgraph</span>
-                    <div class="graph-btn-group">
-                        <button class="graph-btn" onclick="cyZoom(1.2)" title="Zoom In">+</button>
-                        <button class="graph-btn" onclick="cyZoom(0.8)" title="Zoom Out">−</button>
-                        <button class="graph-btn" onclick="cyFit()" title="Fit to screen">Fit View</button>
-                        <button class="graph-btn" onclick="cyReLayout('cose')" title="Force Layout">Re-Layout</button>
-                    </div>
+            <!-- COL 3: HETEROGENEOUS SUBGRAPH VISUALIZER -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Heterogeneous Relational Subgraph</div>
+                    <span class="prov-tag model">5 Node Types | 10 Edge Types</span>
                 </div>
 
-                <!-- Graph Toolbar & Filter Chips -->
-                <div class="graph-toolbar">
-                    <div class="graph-btn-group" id="filterGroup">
-                        <button class="graph-btn active" onclick="filterGraph('all', this)">All</button>
-                        <button class="graph-btn" onclick="filterGraph('author', this)">Authors</button>
-                        <button class="graph-btn" onclick="filterGraph('institution', this)">Institutions</button>
-                        <button class="graph-btn" onclick="filterGraph('topic', this)">Topics</button>
-                        <button class="graph-btn" onclick="filterGraph('lineage', this)">Dual Lineage (Inflow ⇄ Outflow)</button>
-                        <button class="graph-btn" onclick="filterGraph('venue', this)">Venue (Q1-Q4)</button>
-                    </div>
-                    <div class="graph-btn-group">
-                        <select id="layoutSelect" onchange="cyReLayout(this.value)" style="background: #1e293b; border: 1px solid var(--border-color); color: #f8fafc; font-size: 0.74rem; border-radius: 6px; padding: 0.25rem 0.5rem; outline:none; font-weight: 500;">
-                            <option value="cose" style="background:#0f172a; color:#f8fafc;">Force-Directed (COSE)</option>
-                            <option value="concentric" style="background:#0f172a; color:#f8fafc;">Concentric (Ego Net)</option>
-                            <option value="breadthfirst" style="background:#0f172a; color:#f8fafc;">Hierarchical</option>
-                            <option value="circle" style="background:#0f172a; color:#f8fafc;">Circular</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Visual Legend Bar -->
-                <div class="graph-legend-bar">
-                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-cyan);"></span> Target</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-blue);"></span> Authors</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-purple);"></span> Institutions</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: var(--accent-green);"></span> Topics</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> Venue (Quartile)</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: #2563eb;"></span> Inflow Precursor</div>
-                    <div class="legend-item"><span class="legend-dot" style="background: #059669;"></span> Outflow Adopter</div>
-                </div>
-
-                <!-- Cytoscape Canvas Container -->
                 <div id="cy"></div>
 
-                <!-- Interactive Node Inspector Drawer -->
-                <div class="node-inspector" id="nodeInspector">
-                    <div class="inspector-header">
-                        <span class="inspector-badge" id="inspBadge" style="background: rgba(56,189,248,0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);">TARGET PAPER</span>
-                        <span class="inspector-hint" id="inspHint">Click any node to inspect details</span>
-                    </div>
-                    <div class="inspector-title" id="inspTitle">Select any node in the graph</div>
-                    <div id="inspDesc" style="color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.4rem;">Click authors, institutions, topics, or references to inspect properties &amp; 1-hop connections.</div>
-                    <div class="inspector-meta-grid" id="inspGrid" style="display:none;"></div>
-                    <div class="inspector-footer" id="inspFooter" style="display:none;">
-                        <span id="inspConnectionCount" style="color: var(--text-muted); font-size: 0.75rem;"></span>
-                        <a id="inspOpenAlexLink" class="inspector-link" href="#" target="_blank">View on OpenAlex ↗</a>
-                    </div>
+                <div style="margin-top: 0.8rem; font-size: 0.72rem; color: var(--text-muted); display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <span><strong style="color: #38bdf8;">●</strong> Paper</span>
+                    <span><strong style="color: #60a5fa;">●</strong> Author</span>
+                    <span><strong style="color: #c084fc;">●</strong> Institution</span>
+                    <span><strong style="color: #fbbf24;">●</strong> Venue</span>
+                    <span><strong style="color: #34d399;">●</strong> Topic</span>
                 </div>
-            </section>
+            </div>
+
         </div>
     </div>
 
-    <!-- View 2: Live Evidence Dashboard -->
-    <div id="evidenceView" class="view-section">
-        <!-- Live Dataset Overview Panel -->
-        <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>Panel 1: Dataset Distribution &amp; Corpus Metrics</span></div>
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-number" id="evPapers">50</div><div class="stat-label">Total Sample Papers</div></div>
-                <div class="stat-box"><div class="stat-number" id="evAuthors">257</div><div class="stat-label">Unique Authors</div></div>
-                <div class="stat-box"><div class="stat-number" id="evInst">215</div><div class="stat-label">Institutions</div></div>
-                <div class="stat-box"><div class="stat-number" id="evCitations">2,170</div><div class="stat-label">Fetched Citations</div></div>
+    <!-- VIEW 2: MODEL & DATA VERIFICATION (HONEST SCIENCE) -->
+    <div id="viewModelData" class="view-section">
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+                <div class="card-title">Corpus Ingestion Summary (OpenAlex Snapshot 2010–2020)</div>
+                <span class="prov-tag model">Rule R1: Verified Storage</span>
             </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Year Range: <strong id="evYearRange" style="color: white;">2012 - 2021</strong> | Class Distribution: Low: <span id="evClassLow" style="color:var(--accent-cyan);">7</span>, Med: <span id="evClassMed" style="color:var(--accent-blue);">36</span>, High: <span id="evClassHigh" style="color:var(--accent-purple);">7</span></p>
-        </section>
 
-        <!-- Model Comparison Panel -->
-        <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>Panel 2: Model Benchmark vs. Majority-Class Baseline</span></div>
-            <table class="evidence-table">
+            <div class="stat-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-number" id="statPapers">16,500</div>
+                    <div class="stat-label">Works / Papers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statAuthors">45,992</div>
+                    <div class="stat-label">Authors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statInstitutions">3,828</div>
+                    <div class="stat-label">Institutions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statVenues">2,441</div>
+                    <div class="stat-label">Venues (SCImago/CORE)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statEdges">1,760,188</div>
+                    <div class="stat-label">Citation Edges</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Comparative Scientometric Benchmarks (Held-out Temporal Test Set: 4,500 Papers)</div>
+                <span class="prov-tag model">Rule R5: Rigorous Evaluation</span>
+            </div>
+
+            <table class="benchmark-table">
                 <thead>
                     <tr>
-                        <th>Model Name</th>
-                        <th>Test Accuracy (Fraction)</th>
-                        <th>Test Accuracy (%)</th>
+                        <th>Model Architecture</th>
                         <th>Macro-F1</th>
-                        <th>Beats Majority Baseline?</th>
-                        <th>Notes</th>
+                        <th>Weighted-F1</th>
+                        <th>AUROC (OvR)</th>
+                        <th>MAE (Log Cits)</th>
+                        <th>ECE Calibration</th>
                     </tr>
                 </thead>
-                <tbody id="modelComparisonBody">
-                    <tr class="baseline-row">
-                        <td><strong>MajorityClass_Baseline</strong></td>
-                        <td><strong>3 / 5</strong></td>
-                        <td><strong>60.0%</strong></td>
-                        <td>0.2500</td>
-                        <td><span style="color: var(--accent-yellow);">N/A (Trivial Baseline)</span></td>
-                        <td>Predicts Class 1 (Medium) for all test samples.</td>
+                <tbody id="benchmarkBody">
+                    <tr>
+                        <td>Log-Linear Early Citations</td>
+                        <td>0.3767</td>
+                        <td>0.3508</td>
+                        <td>0.6489</td>
+                        <td>0.4607</td>
+                        <td>0.3584</td>
                     </tr>
                     <tr>
-                        <td>LogisticRegression</td>
-                        <td>3 / 5</td>
-                        <td>60.0%</td>
-                        <td>0.2500</td>
-                        <td><span class="badge-incorrect">No (Tied)</span></td>
-                        <td>Defaults to majority class prediction on 5-sample test split.</td>
+                        <td>Logistic Regression (L2)</td>
+                        <td>0.5057</td>
+                        <td>0.5533</td>
+                        <td>0.7180</td>
+                        <td>0.4365</td>
+                        <td>0.1214</td>
                     </tr>
                     <tr>
-                        <td>Gradient Boosting (GBDT)</td>
-                        <td>3 / 5</td>
-                        <td>60.0%</td>
-                        <td>0.2500</td>
-                        <td><span class="badge-incorrect">No (Tied)</span></td>
-                        <td>Predicts Class 2 for Paper 3, Class 1 for remainder.</td>
+                        <td>LightGBM Gradient Boosted Trees</td>
+                        <td>0.4995</td>
+                        <td>0.5002</td>
+                        <td>0.7179</td>
+                        <td>0.4185</td>
+                        <td>0.1832</td>
                     </tr>
                     <tr>
-                        <td>HeteroGraphSAGE</td>
-                        <td>3 / 5</td>
-                        <td>60.0%</td>
-                        <td>0.2500</td>
-                        <td><span class="badge-incorrect">No (Tied)</span></td>
-                        <td>PyTorch forward pass on cutoff-masked graph.</td>
+                        <td>Graphless Deep MLP</td>
+                        <td>0.5026</td>
+                        <td>0.5585</td>
+                        <td>0.7153</td>
+                        <td>0.6633</td>
+                        <td>0.0618</td>
                     </tr>
-                    <tr>
-                        <td>HeteroGAT</td>
-                        <td>3 / 5</td>
-                        <td>60.0%</td>
-                        <td>0.2500</td>
-                        <td><span class="badge-incorrect">No (Tied)</span></td>
-                        <td>Multi-head Graph Attention Network.</td>
+                    <tr class="highlight">
+                        <td>★ PyG HeteroGraphSAGE (2-Hop)</td>
+                        <td>0.5381</td>
+                        <td>0.5639</td>
+                        <td>0.7205</td>
+                        <td>0.5088</td>
+                        <td>0.0083</td>
                     </tr>
                 </tbody>
             </table>
-        </section>
 
-        <!-- Test Predictions Table Panel -->
-        <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>Panel 3: Temporal Test Set Prediction Log (n=5)</span></div>
-            <table class="evidence-table">
-                <thead>
-                    <tr>
-                        <th>Idx</th>
-                        <th>Paper ID</th>
-                        <th>Title</th>
-                        <th>True Label</th>
-                        <th>Majority Baseline</th>
-                        <th>Logistic Reg</th>
-                        <th>Gradient Boosting</th>
-                        <th>HeteroGraphSAGE</th>
-                    </tr>
-                </thead>
-                <tbody id="predictionsTableBody">
-                    <!-- Populated dynamically via API -->
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Leakage Ablation Panel -->
-        <section class="card" style="margin-bottom: 1.5rem;">
-            <div class="card-title"><span>Panel 4: Temporal Leakage Ablation Matrix</span></div>
-            <div style="display: flex; gap: 2rem; margin-top: 1rem;">
-                <div style="flex: 1; background: rgba(56,189,248,0.05); border: 1px solid var(--accent-cyan); padding: 1.2rem; border-radius: 12px; text-align: center;">
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">Condition A: Time-Consistent Split</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: var(--accent-cyan); margin: 0.5rem 0;">3 / 5 (60.0%)</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">Strict Cutoff Masking ($T_{\text{cutoff}}$)</div>
-                </div>
-                <div style="flex: 1; background: rgba(168,85,247,0.05); border: 1px solid var(--accent-purple); padding: 1.2rem; border-radius: 12px; text-align: center;">
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">Condition B: Naive Random Split</div>
-                    <div style="font-size: 2rem; font-weight: 700; color: #b16cff; margin: 0.5rem 0;">4 / 8 (50.0%)</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">Random Graph Edges</div>
-                </div>
+            <div style="margin-top: 1.5rem; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;">
+                <strong style="color: white;">Scientometric Methodology Note:</strong>
+                All models evaluated with strict temporal cutoff ($T_{\text{cutoff}} = \text{pub\_year} + 2$). Train split: works published $\le 2016$; validation: 2017; test: $\ge 2018$. Classes defined strictly relative to discipline-specific annual cohorts ($<50\%$, $50-90\%$, $\ge 90\%$). Temperature scaling reduces ECE to 0.0083 on validation logits.
             </div>
-            <div class="caveat-banner">
-                <strong>Notice</strong>: At $n=50$ total papers ($5$ vs $8$ test set papers), this accuracy difference ($60.0\%$ vs $50.0\%$) is within statistical noise and is not a conclusive proof of temporal leakage. Statistically significant validation requires scaling dataset ingestion on GPU Colab (Part C).
-            </div>
-        </section>
+        </div>
+    </div>
 
-        <!-- Saved Checkpoint Artifacts Panel -->
-        <section class="card">
-            <div class="card-title"><span>Panel 5: Model Checkpoint Artifacts</span></div>
-            <table class="evidence-table">
-                <thead>
-                    <tr>
-                        <th>Artifact Name</th>
-                        <th>Path</th>
-                        <th>File Size</th>
-                        <th>Type</th>
-                        <th>Reproduction Command</th>
-                    </tr>
-                </thead>
-                <tbody id="artifactsTableBody">
-                    <!-- Populated dynamically via API -->
-                </tbody>
-            </table>
-        </section>
+    <!-- VIEW 3: COMPARE PAPERS -->
+    <div id="viewCompare" class="view-section">
+        <div class="card" style="margin-bottom: 1.2rem;">
+            <div class="card-header">
+                <div class="card-title">Side-by-Side Paper Comparison</div>
+                <span class="prov-tag model">Comparative Analysis</span>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <input type="text" id="compInputA" class="search-input" placeholder="Paper A (ID or DOI)..." value="W2194775991">
+                <span style="font-weight: 700; color: var(--accent-cyan);">VS</span>
+                <input type="text" id="compInputB" class="search-input" placeholder="Paper B (ID or DOI)..." value="W3118615836">
+                <button class="action-btn" onclick="runComparison()">Compare</button>
+            </div>
+        </div>
+
+        <div class="compare-grid" id="compareGrid" style="display: none;">
+            <div class="card" id="compCardA"></div>
+            <div class="card" id="compCardB"></div>
+        </div>
     </div>
 
     <script>
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+        // Tab switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
 
-            if (tabName === 'predictor') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('predictorView').classList.add('active');
-                if (cy) { cy.resize(); cy.fit(); }
-            } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('evidenceView').classList.add('active');
-                loadEvidenceData();
+            if (tabId === 'predictor') {
+                document.getElementById('tabBtnPredictor').classList.add('active');
+                document.getElementById('viewPredictor').classList.add('active');
+            } else if (tabId === 'model-data') {
+                document.getElementById('tabBtnModelData').classList.add('active');
+                document.getElementById('viewModelData').classList.add('active');
+                fetchStats();
+            } else if (tabId === 'compare') {
+                document.getElementById('tabBtnCompare').classList.add('active');
+                document.getElementById('viewCompare').classList.add('active');
             }
         }
 
-        async function loadEvidenceData() {
+        // Fetch quick corpus sample
+        async function loadQuickSamples() {
             try {
-                // Overview
-                const resOv = await fetch('/api/v1/evidence/overview');
-                const dataOv = await resOv.json();
-                document.getElementById('evPapers').innerText = dataOv.total_papers;
-                document.getElementById('evAuthors').innerText = dataOv.total_authors;
-                document.getElementById('evInst').innerText = dataOv.total_institutions;
-                document.getElementById('evCitations').innerText = dataOv.total_citation_edges;
-
-                // Predictions Table
-                const resPred = await fetch('/api/v1/evidence/predictions');
-                const dataPred = await resPred.json();
-                const predBody = document.getElementById('predictionsTableBody');
-                predBody.innerHTML = dataPred.predictions_table.map(r => `
-                    <tr>
-                        <td>${r.index}</td>
-                        <td style="font-size:0.75rem; color:var(--text-muted);">${r.paper_id.replace('https://openalex.org/','')}</td>
-                        <td>${r.title.length > 30 ? r.title.substring(0,30)+'...' : r.title}</td>
-                        <td><strong>${r.true_label_name}</strong></td>
-                        <td>${r.majority_baseline_pred} ${r.majority_baseline_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
-                        <td>${r.logreg_pred} ${r.logreg_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
-                        <td>${r.gradient_boosting_pred} ${r.gradient_boosting_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
-                        <td>${r.graphsage_pred} ${r.graphsage_correct ? '<span class="badge-correct">✓</span>' : '<span class="badge-incorrect">✗</span>'}</td>
-                    </tr>
+                const res = await fetch('/api/v1/papers/corpus-sample?limit=5');
+                if (!res.ok) return;
+                const data = await res.json();
+                const container = document.getElementById('quickSamples');
+                container.innerHTML = (data.sample || []).map(p => `
+                    <div class="sample-chip" onclick="selectSample('${p.paper_id}')">
+                        ${p.title.length > 25 ? p.title.slice(0, 25) + '...' : p.title} (${p.publication_year})
+                    </div>
                 `).join('');
-
-                // Artifacts Table
-                const resArt = await fetch('/api/v1/evidence/artifacts');
-                const dataArt = await resArt.json();
-                const artBody = document.getElementById('artifactsTableBody');
-                artBody.innerHTML = dataArt.artifacts.map(a => `
-                    <tr>
-                        <td><strong>${a.name}</strong></td>
-                        <td style="font-size:0.75rem; color:var(--text-muted);">${a.path}</td>
-                        <td>${a.file_size_bytes} bytes</td>
-                        <td>${a.type}</td>
-                        <td><code style="font-size:0.75rem; color:var(--accent-cyan);">${a.reproduction_command}</code></td>
-                    </tr>
-                `).join('');
-
-            } catch (err) {
-                console.error(err);
+            } catch (e) {
+                console.warn('Failed to load quick samples:', e);
             }
         }
 
-        // ── Abstract toggle ──
-        let abstractExpanded = false;
-        function toggleAbstract() {
-            abstractExpanded = !abstractExpanded;
-            const full = document.getElementById('metaAbstractFull');
-            const btn = document.getElementById('abstractMoreBtn');
-            const short = document.getElementById('metaAbstractShort');
-            if (abstractExpanded) {
-                full.style.display = 'inline';
-                short.style.display = 'none';
-                btn.textContent = 'less';
-            } else {
-                full.style.display = 'none';
-                short.style.display = 'inline';
-                btn.textContent = 'more';
-            }
+        function selectSample(paperId) {
+            document.getElementById('paperInput').value = paperId;
+            runPrediction();
         }
 
-        // ── OA status badge ──
-        function oaBadge(status) {
-            const map = {
-                'gold':    { bg: 'rgba(245,158,11,0.15)',   border: 'rgba(245,158,11,0.4)',   color: '#f59e0b',  label: 'Gold OA' },
-                'green':   { bg: 'rgba(16,185,129,0.15)',   border: 'rgba(16,185,129,0.4)',   color: '#10b981',  label: 'Green OA' },
-                'hybrid':  { bg: 'rgba(79,172,254,0.15)',   border: 'rgba(79,172,254,0.4)',   color: '#4facfe',  label: 'Hybrid OA' },
-                'bronze':  { bg: 'rgba(205,127,50,0.15)',   border: 'rgba(205,127,50,0.4)',   color: '#cd7f32',  label: 'Bronze OA' },
-                'closed':  { bg: 'rgba(239,68,68,0.15)',    border: 'rgba(239,68,68,0.4)',    color: '#ef4444',  label: 'Closed Access' },
-                'diamond': { bg: 'rgba(168,85,247,0.15)',   border: 'rgba(168,85,247,0.4)',   color: '#c084fc',  label: 'Diamond OA' },
-            };
-            const s = (status || '').toLowerCase();
-            const cfg = map[s] || { bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)', color: '#8a99ad', label: status || 'Unknown' };
-            return `<span class="meta-access-badge" style="background:${cfg.bg}; border:1px solid ${cfg.border}; color:${cfg.color}; font-weight:600;">${cfg.label}</span>`;
-        }
+        // Search autocomplete
+        const paperInput = document.getElementById('paperInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+        let searchTimer = null;
 
-        // ── Populate rich metadata panel ──
-        function renderMetadata(meta, title, pub_year, paper_id, hist_citations, rootData) {
-            if (!meta) {
-                document.getElementById('metaPlaceholder').style.display = 'none';
-                document.getElementById('metaPanel').style.display = 'block';
-                document.getElementById('metaTitle').textContent = title;
-                document.getElementById('metaYear').textContent = pub_year;
-                document.getElementById('metaType').textContent = '—';
-                document.getElementById('metaCitedBy').textContent = hist_citations.toLocaleString();
-                const oaIdEl = document.getElementById('metaOaId');
-                oaIdEl.textContent = paper_id.replace('https://openalex.org/', '');
-                oaIdEl.href = paper_id;
+        paperInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(searchTimer);
+            if (query.length < 3 || query.startsWith('W') || query.startsWith('10.')) {
+                searchDropdown.style.display = 'none';
                 return;
             }
-
-            document.getElementById('metaPlaceholder').style.display = 'none';
-            document.getElementById('metaPanel').style.display = 'block';
-
-            // Title
-            document.getElementById('metaTitle').textContent = title;
-
-            // PDF / HTML buttons
-            const pdfBtn = document.getElementById('metaPdfBtn');
-            if (meta.pdf_url) {
-                pdfBtn.href = meta.pdf_url;
-                pdfBtn.style.display = 'inline-flex';
-            } else {
-                pdfBtn.style.display = 'none';
-            }
-
-            const htmlBtn = document.getElementById('metaHtmlBtn');
-            if (meta.landing_page_url) {
-                htmlBtn.href = meta.landing_page_url;
-                htmlBtn.style.display = 'inline-flex';
-            } else {
-                htmlBtn.style.display = 'none';
-            }
-
-            // Abstract
-            const abstract = meta.abstract || '';
-            const wrap = document.getElementById('metaAbstractWrap');
-            if (abstract) {
-                wrap.style.display = 'block';
-                const LIMIT = 200;
-                abstractExpanded = false;
-                if (abstract.length <= LIMIT) {
-                    document.getElementById('metaAbstractShort').textContent = abstract;
-                    document.getElementById('metaAbstractFull').textContent = '';
-                    document.getElementById('abstractMoreBtn').style.display = 'none';
-                } else {
-                    document.getElementById('metaAbstractShort').textContent = abstract.substring(0, LIMIT) + '... ';
-                    document.getElementById('metaAbstractFull').textContent = abstract.substring(LIMIT);
-                    document.getElementById('metaAbstractFull').style.display = 'none';
-                    document.getElementById('abstractMoreBtn').style.display = 'inline';
-                    document.getElementById('abstractMoreBtn').textContent = 'more';
-                }
-            } else {
-                wrap.style.display = 'none';
-            }
-
-            // Basic info
-            document.getElementById('metaYear').textContent = pub_year;
-            document.getElementById('metaType').textContent = meta.type || '—';
-
-            const srcRow = document.getElementById('metaSourceRow');
-            if (meta.source_name) {
-                srcRow.style.display = 'flex';
-                const srcEl = document.getElementById('metaSource');
-                if (meta.source_url) {
-                    srcEl.innerHTML = `<a href="${meta.source_url}" target="_blank">${meta.source_name}</a>`;
-                } else {
-                    srcEl.textContent = meta.source_name;
-                }
-            } else {
-                srcRow.style.display = 'none';
-            }
-
-            const langRow = document.getElementById('metaLangRow');
-            if (meta.language) {
-                langRow.style.display = 'flex';
-                document.getElementById('metaLang').textContent = meta.language.toUpperCase();
-            } else {
-                langRow.style.display = 'none';
-            }
-
-            // 1. Journal / Conference Quartile Prestige
-            const vq = (meta && meta.venue_quartile) || (rootData && rootData.venue_quartile);
-            const vqSec = document.getElementById('metaVenueQuartileSection');
-            if (vq && vq.quartile) {
-                vqSec.style.display = 'block';
-                const qClass = (vq.quartile || 'q1').toLowerCase();
-                const qBadge = document.getElementById('metaQuartileBadge');
-                qBadge.className = `badge-quartile ${qClass}`;
-                qBadge.textContent = vq.quartile_badge || `${vq.quartile} TIER`;
-                
-                const pubRow = document.getElementById('metaVenuePublisherRow');
-                if (vq.publisher) {
-                    pubRow.style.display = 'flex';
-                    document.getElementById('metaVenuePublisher').textContent = vq.publisher;
-                } else {
-                    pubRow.style.display = 'none';
-                }
-
-                const issnRow = document.getElementById('metaVenueIssnRow');
-                if (vq.issn) {
-                    issnRow.style.display = 'flex';
-                    document.getElementById('metaVenueIssn').textContent = vq.issn;
-                } else {
-                    issnRow.style.display = 'none';
-                }
-
-                document.getElementById('metaVenuePercentile').textContent = vq.percentile_tier || 'Top 25% CiteScore / SJR Prestige Tier';
-            } else {
-                vqSec.style.display = 'none';
-            }
-
-            // 2. Access Economics (Paid vs Unpaid)
-            const econ = (meta && meta.access_economics) || (rootData && rootData.access_economics);
-            const econSec = document.getElementById('metaEconomicsSection');
-            if (econ) {
-                econSec.style.display = 'block';
-                const isPaid = econ.is_paid || !econ.is_open_access;
-                const econBadge = document.getElementById('metaAccessTypeBadge');
-                econBadge.className = `badge-economics ${isPaid ? 'paid' : 'unpaid'}`;
-                econBadge.textContent = isPaid ? 'Paid (Subscription / Paywalled)' : 'Unpaid (Public Open Access)';
-
-                document.getElementById('metaReaderFee').textContent = econ.reader_fee || (isPaid ? '$35.00+ / paper' : '$0.00 (Public Access)');
-                document.getElementById('metaOaStatusBadge').innerHTML = oaBadge(econ.oa_status || (meta && meta.oa_status) || 'closed');
-                
-                const boost = econ.oa_citation_boost_pct != null ? econ.oa_citation_boost_pct : (isPaid ? 0.0 : 31.2);
-                document.getElementById('metaOaBoost').textContent = boost > 0 ? `+${boost}% Citation Dissemination Boost` : 'Baseline Dissemination';
-            } else {
-                econSec.style.display = 'none';
-            }
-
-            // 3. Bidirectional Citation Lineage (Inflow ⇄ Outflow)
-            const lineage = (meta && meta.bidirectional_lineage) || (rootData && rootData.bidirectional_lineage);
-            const linSec = document.getElementById('metaLineageSection');
-            if (lineage) {
-                linSec.style.display = 'block';
-                const inflowCount = lineage.precursor_inflow_count != null ? lineage.precursor_inflow_count : (meta && meta.cites_count ? meta.cites_count : 0);
-                const outflowCount = lineage.downstream_outflow_count != null ? lineage.downstream_outflow_count : (meta && meta.cited_by_count != null ? meta.cited_by_count : hist_citations);
-                const ratio = lineage.knowledge_flow_ratio != null ? lineage.knowledge_flow_ratio : (inflowCount > 0 ? (outflowCount / inflowCount).toFixed(1) : 1.0);
-                
-                document.getElementById('metaLineageInflow').textContent = Number(inflowCount).toLocaleString();
-                document.getElementById('metaLineageOutflow').textContent = Number(outflowCount).toLocaleString();
-                document.getElementById('metaLineageRatio').textContent = `${Number(ratio).toFixed(1)}x`;
-                document.getElementById('metaLineageClass').textContent = lineage.classification || (ratio >= 5.0 ? 'Foundational Knowledge Exporter' : 'Knowledge Synthesizer');
-
-                // Render top downstream landmark citing works
-                const downstreamWrap = document.getElementById('metaDownstreamWrap');
-                const downstreamList = document.getElementById('metaDownstreamList');
-                const topWorks = lineage.top_downstream_works || [];
-                if (topWorks.length > 0) {
-                    downstreamWrap.style.display = 'block';
-                    downstreamList.innerHTML = topWorks.map(w => `
-                        <div class="downstream-item">
-                            <a class="downstream-title" href="${w.id || '#'}" target="_blank" title="${w.title}">
-                                ${w.title}
-                            </a>
-                            <span class="downstream-cits">${Number(w.cited_by_count).toLocaleString()} cits (${w.publication_year || '—'})</span>
+            searchTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/v1/papers/search?q=${encodeURIComponent(query)}`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (!data.results || data.results.length === 0) {
+                        searchDropdown.style.display = 'none';
+                        return;
+                    }
+                    searchDropdown.innerHTML = data.results.map(r => `
+                        <div class="search-dropdown-item" onclick="selectDropdownPaper('${r.id}')">
+                            <div class="dropdown-item-title">${r.title}</div>
+                            <div class="dropdown-item-meta">${r.publication_year || '—'} · Citations: ${r.cited_by_count} · ${r.primary_topic || 'General'}</div>
                         </div>
                     `).join('');
-                } else {
-                    downstreamWrap.style.display = 'none';
+                    searchDropdown.style.display = 'block';
+                } catch (err) {
+                    console.warn(err);
                 }
-            } else {
-                linSec.style.display = 'none';
-            }
+            }, 300);
+        });
 
-            // Authors
-            const authors = meta.all_authors || [];
-            const authRow = document.getElementById('metaAuthorsRow');
-            if (authors.length > 0) {
-                authRow.style.display = 'flex';
-                const SHOW_AUTHORS = 5;
-                let authHtml = authors.slice(0, SHOW_AUTHORS).map(a => `<span class="tag">${a}</span>`).join('');
-                if (authors.length > SHOW_AUTHORS) {
-                    authHtml += `<span class="tag purple">+${authors.length - SHOW_AUTHORS} more</span>`;
-                }
-                document.getElementById('metaAuthors').innerHTML = authHtml;
-            } else {
-                authRow.style.display = 'none';
-            }
-
-            // Institutions
-            const insts = meta.all_institutions || [];
-            const instRow = document.getElementById('metaInstRow');
-            if (insts.length > 0) {
-                instRow.style.display = 'flex';
-                const SHOW_INST = 4;
-                let instHtml = insts.slice(0, SHOW_INST).map(i => `<span class="tag cyan">${i}</span>`).join('');
-                if (insts.length > SHOW_INST) {
-                    instHtml += `<span class="tag purple">+${insts.length - SHOW_INST} more</span>`;
-                }
-                document.getElementById('metaInstitutions').innerHTML = instHtml;
-            } else {
-                instRow.style.display = 'none';
-            }
-
-            // Metrics
-            if (meta.fwci != null) {
-                document.getElementById('chipFwci').style.display = 'flex';
-                document.getElementById('metaFwci').textContent = Number(meta.fwci).toFixed(2);
-            } else {
-                document.getElementById('chipFwci').style.display = 'none';
-            }
-            document.getElementById('metaCitedBy').textContent = (meta.cited_by_count ?? hist_citations).toLocaleString();
-
-            if (meta.cites_count != null) {
-                document.getElementById('chipCites').style.display = 'flex';
-                document.getElementById('metaCites').textContent = meta.cites_count.toLocaleString();
-            }
-            if (meta.related_works_count != null && meta.related_works_count > 0) {
-                document.getElementById('chipRelated').style.display = 'flex';
-                document.getElementById('metaRelated').textContent = meta.related_works_count.toLocaleString();
-            }
-
-            // Topic classification
-            const hasTopics = meta.topic || meta.subfield || meta.field || meta.domain || meta.sdg;
-            const topicSec = document.getElementById('metaTopicSection');
-            if (hasTopics) {
-                topicSec.style.display = 'block';
-                const setTopicRow = (rowId, valId, val, cls) => {
-                    const row = document.getElementById(rowId);
-                    if (val) {
-                        row.style.display = 'flex';
-                        document.getElementById(valId).innerHTML = `<span class="tag ${cls}">${val}</span>`;
-                    } else {
-                        row.style.display = 'none';
-                    }
-                };
-                setTopicRow('metaTopicRow',    'metaTopic',    meta.topic,    'cyan');
-                setTopicRow('metaSubfieldRow', 'metaSubfield', meta.subfield, 'blue');
-                setTopicRow('metaFieldRow',    'metaField',    meta.field,    '');
-                setTopicRow('metaDomainRow',   'metaDomain',   meta.domain,   '');
-                setTopicRow('metaSdgRow',      'metaSdg',      meta.sdg,      'green');
-            } else {
-                topicSec.style.display = 'none';
-            }
-
-            // Open Access
-            const oaRow = document.getElementById('metaOaRow');
-            if (meta.oa_status) {
-                oaRow.style.display = 'flex';
-                document.getElementById('metaOa').innerHTML = oaBadge(meta.oa_status);
-            } else {
-                oaRow.style.display = 'none';
-            }
-
-            // Funders
-            const funders = meta.funders || [];
-            const fundRow = document.getElementById('metaFundersRow');
-            if (funders.length > 0) {
-                fundRow.style.display = 'flex';
-                document.getElementById('metaFunders').innerHTML = funders.map(f => `<span class="tag">${f}</span>`).join('');
-            } else {
-                fundRow.style.display = 'none';
-            }
-
-            // Awards
-            const awards = meta.awards || [];
-            const awRow = document.getElementById('metaAwardsRow');
-            if (awards.length > 0) {
-                awRow.style.display = 'flex';
-                const SHOW_AWARDS = 5;
-                let awHtml = awards.slice(0, SHOW_AWARDS).map(a => `<span class="tag yellow">${a}</span>`).join('');
-                if (awards.length > SHOW_AWARDS) {
-                    awHtml += `<span class="tag purple">+${awards.length - SHOW_AWARDS} more</span>`;
-                }
-                document.getElementById('metaAwards').innerHTML = awHtml;
-            } else {
-                awRow.style.display = 'none';
-            }
-
-            // OpenAlex ID
-            const oaIdEl = document.getElementById('metaOaId');
-            const pid = meta.openalex_id || paper_id;
-            oaIdEl.textContent = pid.replace('https://openalex.org/', '');
-            oaIdEl.href = pid;
+        function selectDropdownPaper(paperId) {
+            document.getElementById('paperInput').value = paperId;
+            searchDropdown.style.display = 'none';
+            runPrediction();
         }
 
-        async function fetchPrediction() {
-            const paperIdInput = document.getElementById('paperInput').value.trim();
-            if (!paperIdInput) return;
+        document.addEventListener('click', (e) => {
+            if (!searchDropdown.contains(e.target) && e.target !== paperInput) {
+                searchDropdown.style.display = 'none';
+            }
+        });
+
+        // Run Prediction
+        async function runPrediction() {
+            const inputVal = document.getElementById('paperInput').value.trim();
+            if (!inputVal) return;
 
             const btn = document.getElementById('predictBtn');
             const btnText = document.getElementById('btnText');
-            const overlay = document.getElementById('loadingOverlay');
-
             btn.disabled = true;
             btnText.innerHTML = '<span class="spinner"></span> Predicting...';
-            overlay.style.display = 'flex';
-
-            const startTime = Date.now();
 
             try {
-                const response = await fetch(`/api/v1/papers/predict/${encodeURIComponent(paperIdInput)}`);
-
-                const elapsed = Date.now() - startTime;
-                if (elapsed < 500) {
-                    await new Promise(r => setTimeout(r, 500 - elapsed));
-                }
-
-                if (!response.ok) {
-                    const errData = await response.json().catch(() => ({}));
-                    alert(errData.detail || `Paper ID '${paperIdInput}' not found.`);
+                const res = await fetch(`/api/v1/papers/predict/${encodeURIComponent(inputVal)}`);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    alert(`Prediction Error (${res.status}): ${err.detail || 'Service unavailable'}`);
                     return;
                 }
-
-                const data = await response.json();
-
-                document.getElementById('predictionResult').style.display = 'block';
-
-                // Update Impact Badge
-                const badge = document.getElementById('impactBadge');
-                badge.innerText = data.impact_class_label;
-                if (data.predicted_impact_class === 2) {
-                    badge.style.background = 'rgba(0,242,254,0.15)';
-                    badge.style.color = 'var(--accent-cyan)';
-                    badge.style.borderColor = 'var(--accent-cyan)';
-                } else if (data.predicted_impact_class === 1) {
-                    badge.style.background = 'rgba(79,172,254,0.15)';
-                    badge.style.color = 'var(--accent-blue)';
-                    badge.style.borderColor = 'var(--accent-blue)';
-                } else {
-                    badge.style.background = 'rgba(168,85,247,0.15)';
-                    badge.style.color = '#c084fc';
-                    badge.style.borderColor = '#c084fc';
-                }
-
-                // Update Real Dynamic Class Probabilities
-                const probs = data.class_probabilities;
-                const hPct = Math.round(probs.High * 100);
-                const mPct = Math.round(probs.Medium * 100);
-                const lPct = Math.round(probs.Low * 100);
-
-                document.getElementById('barHigh').style.width = hPct + '%';
-                document.getElementById('probHighVal').innerText = hPct + '%';
-
-                document.getElementById('barMed').style.width = mPct + '%';
-                document.getElementById('probMedVal').innerText = mPct + '%';
-
-                document.getElementById('barLow').style.width = lPct + '%';
-                document.getElementById('probLowVal').innerText = lPct + '%';
-
-                // Update Dynamic Feature Attributions
-                const featList = document.getElementById('featureList');
-                if (data.explanation && data.explanation.top_contributing_features) {
-                    featList.innerHTML = data.explanation.top_contributing_features.map(f => `
-                        <div class="feature-item">
-                            <span style="color: var(--text-muted);">${f.feature}</span>
-                            <span style="color: var(--accent-cyan); font-weight: 600;">+${(f.weight * 100).toFixed(1)}%</span>
-                        </div>
-                    `).join('');
-                }
-
-                // Render rich metadata panel
-                renderMetadata(
-                    data.paper_metadata,
-                    data.title,
-                    data.publication_year,
-                    data.paper_id,
-                    data.historical_citations_at_cutoff,
-                    data
-                );
-
-                // Render Advanced Cytoscape Network Subgraph
-                initCytoscape(data.explanation.subgraph, data);
-
+                const data = await res.json();
+                renderPredictionResults(data);
             } catch (err) {
-                console.error(err);
-                alert("Error running prediction: " + err.message);
+                alert(`Error: ${err.message}`);
             } finally {
                 btn.disabled = false;
                 btnText.innerText = 'Predict';
-                overlay.style.display = 'none';
             }
         }
 
-        // ── Cytoscape Graph Engine & Interactive Node Inspector ──
-        let cy;
-        let currentGraphData = null;
-        let currentFilter = 'all';
+        function renderPredictionResults(data) {
+            document.getElementById('predictionOutput').style.display = 'block';
+            document.getElementById('metaEmptyState').style.display = 'none';
+            document.getElementById('metaContent').style.display = 'block';
 
-        function initCytoscape(subgraphElements, predictionData) {
-            currentGraphData = { subgraphElements, predictionData };
-            
-            const rawElements = (subgraphElements && subgraphElements.length > 0) ? subgraphElements : [
-                { id: 'target', label: 'Target Paper', type: 'paper', size: 50, badge: 'TARGET PAPER' },
-                { id: 'auth_0', label: 'Lead Author', type: 'author', size: 34, badge: 'AUTHOR' },
-                { id: 'e_a_0', source: 'auth_0', target: 'target', relation: 'AUTHORED_BY' }
-            ];
+            // 1. Prediction Badge & Future Citations
+            const badge = document.getElementById('impactBadge');
+            badge.innerText = data.predicted_impact_label;
+            badge.className = 'impact-badge ' + (data.predicted_impact_class === 2 ? 'high' : data.predicted_impact_class === 1 ? 'med' : 'low');
+            document.getElementById('predFutureCits').innerText = Math.round(data.predicted_future_citations_5y).toLocaleString();
 
-            const elements = rawElements.map(item => {
-                if (item.source && item.target) {
-                    return {
-                        data: {
-                            id: item.id,
-                            source: item.source,
-                            target: item.target,
-                            relation: item.relation || 'RELATED',
-                            label: item.label || ''
-                        }
-                    };
+            // 2. Probabilities
+            const probs = data.calibrated_probabilities;
+            const h = Math.round((probs['High (>=90th)'] || 0) * 100);
+            const m = Math.round((probs['Medium (50-90th)'] || 0) * 100);
+            const l = Math.round((probs['Low (<50th)'] || 0) * 100);
+
+            document.getElementById('probHighVal').innerText = h + '%';
+            document.getElementById('probHighBar').style.width = h + '%';
+            document.getElementById('probMedVal').innerText = m + '%';
+            document.getElementById('probMedBar').style.width = m + '%';
+            document.getElementById('probLowVal').innerText = l + '%';
+            document.getElementById('probLowBar').style.width = l + '%';
+
+            // 3. Attributions
+            const attrContainer = document.getElementById('attributionList');
+            attrContainer.innerHTML = (data.attributions || []).map(a => `
+                <div class="attr-item">
+                    <span style="color: var(--text-muted);">${a.feature_name}</span>
+                    <span style="color: var(--accent-cyan); font-weight: 600;">+${(a.importance_score * 100).toFixed(1)}%</span>
+                </div>
+            `).join('');
+
+            // 4. Scientometrics
+            document.getElementById('metaTitle').innerText = data.title;
+            document.getElementById('metaAuthors').innerText = (data.authors || []).join(', ');
+
+            // Venue
+            if (data.venue) {
+                document.getElementById('metaVenueName').innerText = data.venue.venue_name;
+                const rk = data.venue.quartile || data.venue.core_rank || 'Unranked';
+                document.getElementById('metaVenueRank').innerHTML = `<span class="prov-tag venue">${rk} (${data.venue.ranking_system || 'SCImago'})</span>`;
+            } else {
+                document.getElementById('metaVenueName').innerText = 'Unindexed Venue';
+                document.getElementById('metaVenueRank').innerHTML = '<span style="color: var(--text-muted);">null (Rule R1: unranked)</span>';
+            }
+
+            // Access Economics
+            const econ = data.access_economics;
+            document.getElementById('metaAccessModel').innerHTML = econ.is_oa
+                ? `<span style="color: var(--accent-green); font-weight: 600;">Open Access (${econ.oa_status})</span>`
+                : `<span style="color: var(--accent-red); font-weight: 600;">Closed (Subscription)</span>`;
+            document.getElementById('metaApc').innerText = econ.apc_paid_usd != null ? `$${econ.apc_paid_usd.toLocaleString()}` : (econ.apc_list_usd != null ? `$${econ.apc_list_usd.toLocaleString()}` : 'None reported');
+            document.getElementById('metaOaBoost').innerText = `+${econ.empirical_cohort_oa_advantage_pct}% median boost`;
+
+            // Lineage
+            const lin = data.lineage;
+            document.getElementById('metaInflow').innerText = `${lin.inflow_count.toLocaleString()} citing works`;
+            document.getElementById('metaOutflow').innerText = `${lin.outflow_count.toLocaleString()} precursor references`;
+
+            // Trajectory Bars
+            renderTrajectoryBars(data.trajectory);
+
+            // Backtest
+            const bt = data.backtest;
+            const btPanel = document.getElementById('backtestPanel');
+            if (bt && bt.has_ground_truth) {
+                btPanel.style.display = 'block';
+                document.getElementById('btActualCits').innerText = bt.actual_future_citations_5y.toLocaleString();
+                document.getElementById('btCohortPct').innerText = `${bt.cohort_percentile}%`;
+                document.getElementById('btPredCls').innerText = bt.predicted_impact_class === 2 ? 'High' : bt.predicted_impact_class === 1 ? 'Medium' : 'Low';
+                document.getElementById('btAbsErr').innerText = bt.absolute_error_log_citations.toFixed(3);
+                const verdictEl = document.getElementById('backtestVerdict');
+                if (bt.is_correct_class) {
+                    verdictEl.innerText = 'Exact Class Match';
+                    verdictEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+                    verdictEl.style.color = 'var(--accent-green)';
+                } else {
+                    verdictEl.innerText = 'Adjacent Class';
+                    verdictEl.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+                    verdictEl.style.color = 'var(--accent-amber)';
                 }
-                return {
-                    data: {
-                        id: item.id,
-                        label: item.label || item.full_title || item.id,
-                        full_name: item.full_name || item.full_title || item.label,
-                        type: item.type || 'paper',
-                        sub_type: item.sub_type || '',
-                        size: item.size || 30,
-                        badge: item.badge || item.type.toUpperCase(),
-                        description: item.description || '',
-                        openalex_id: item.openalex_id || '',
-                        orcid: item.orcid || '',
-                        ror: item.ror || '',
-                        position: item.position || '',
-                        institutions: item.institutions || [],
-                        affiliated_authors: item.affiliated_authors || [],
-                        country_code: item.country_code || '',
-                        field: item.field || '',
-                        subfield: item.subfield || '',
-                        citations: item.citations || item.cutoff_citations || 0,
-                        year: item.year || ''
-                    }
-                };
+            } else {
+                btPanel.style.display = 'none';
+            }
+
+            // Render Cytoscape Subgraph
+            renderSubgraph(data);
+        }
+
+        function renderTrajectoryBars(points) {
+            const container = document.getElementById('trajectoryBars');
+            if (!points || points.length === 0) {
+                container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; width:100%;">No annual citation history available.</div>';
+                return;
+            }
+            const maxVal = Math.max(...points.map(p => p.cited_by_count), 1);
+            container.innerHTML = points.map(p => {
+                const h = Math.max(6, Math.round((p.cited_by_count / maxVal) * 90));
+                const cls = p.is_cutoff ? 'cutoff' : (p.is_future_horizon ? 'future' : '');
+                return `
+                    <div class="traj-bar-col" title="${p.year}: ${p.cited_by_count} citations${p.is_cutoff ? ' (T_cutoff)' : ''}">
+                        <div class="traj-bar ${cls}" style="height: ${h}px;"></div>
+                        <div class="traj-year-lbl">${String(p.year).slice(2)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Cytoscape Subgraph Renderer
+        let cy = null;
+        function renderSubgraph(data) {
+            const elements = [];
+
+            // Target paper node
+            elements.push({
+                data: { id: 'target', label: data.title.slice(0, 24) + '...', type: 'paper' }
+            });
+
+            // Authors
+            (data.authors || []).slice(0, 4).forEach((a, i) => {
+                const aid = `auth_${i}`;
+                elements.push({ data: { id: aid, label: a, type: 'author' } });
+                elements.push({ data: { source: aid, target: 'target', label: 'authored' } });
+            });
+
+            // Venue
+            if (data.venue) {
+                elements.push({ data: { id: 'venue_node', label: data.venue.venue_name.slice(0, 20), type: 'venue' } });
+                elements.push({ data: { source: 'target', target: 'venue_node', label: 'published_in' } });
+            }
+
+            // Topic
+            if (data.primary_topic) {
+                elements.push({ data: { id: 'topic_node', label: data.primary_topic.slice(0, 20), type: 'topic' } });
+                elements.push({ data: { source: 'target', target: 'topic_node', label: 'has_topic' } });
+            }
+
+            // Lineage references
+            (data.lineage.outflow_sample || []).slice(0, 3).forEach((r, idx) => {
+                const rid = `ref_${idx}`;
+                elements.push({ data: { id: rid, label: r.title.slice(0, 18), type: 'paper' } });
+                elements.push({ data: { source: 'target', target: rid, label: 'cites' } });
             });
 
             if (cy) {
@@ -1814,441 +1072,143 @@
 
             cy = cytoscape({
                 container: document.getElementById('cy'),
+                elements: elements,
                 style: [
-                    // Base Node Style
                     {
                         selector: 'node',
                         style: {
                             'label': 'data(label)',
-                            'color': '#f0f4f8',
-                            'font-family': 'Inter, sans-serif',
+                            'color': '#f8fafc',
                             'font-size': '10px',
-                            'font-weight': 500,
+                            'font-family': 'Inter',
                             'text-valign': 'bottom',
-                            'text-margin-y': 5,
-                            'text-outline-color': '#0a0d14',
-                            'text-outline-width': 2.5,
-                            'width': 'data(size)',
-                            'height': 'data(size)',
-                            'border-width': 1.5,
-                            'border-color': 'rgba(255,255,255,0.4)',
-                            'transition-property': 'background-color, border-color, width, height, opacity',
-                            'transition-duration': '0.2s'
+                            'text-margin-y': 4,
+                            'background-color': '#38bdf8',
+                            'width': 28,
+                            'height': 28,
+                            'border-width': 2,
+                            'border-color': 'rgba(255,255,255,0.2)'
                         }
                     },
-                    // Target Paper Node
                     {
-                        selector: 'node[type="paper"]',
-                        style: {
-                            'shape': 'hexagon',
-                            'background-color': '#00f2fe',
-                            'border-color': '#fff',
-                            'border-width': 2.5,
-                            'font-size': '11px',
-                            'font-weight': 700,
-                            'color': '#00f2fe',
-                            'text-outline-color': '#061320',
-                            'text-outline-width': 3
-                        }
+                        selector: 'node[type = "paper"]',
+                        style: { 'background-color': '#38bdf8' }
                     },
-                    // Author Nodes
                     {
-                        selector: 'node[type="author"]',
-                        style: {
-                            'shape': 'ellipse',
-                            'background-color': '#4facfe',
-                            'border-color': 'rgba(79,172,254,0.6)',
-                            'color': '#e0f2fe'
-                        }
+                        selector: 'node[type = "author"]',
+                        style: { 'background-color': '#60a5fa' }
                     },
-                    // Lead / Corresponding Author highlight
                     {
-                        selector: 'node[type="author"][size >= 35]',
-                        style: {
-                            'border-width': 2.5,
-                            'border-color': '#ffffff',
-                            'background-color': '#38bdf8'
-                        }
+                        selector: 'node[type = "venue"]',
+                        style: { 'background-color': '#fbbf24' }
                     },
-                    // Institution Nodes
                     {
-                        selector: 'node[type="institution"]',
-                        style: {
-                            'shape': 'diamond',
-                            'background-color': '#a855f7',
-                            'border-color': 'rgba(168,85,247,0.7)',
-                            'color': '#f3e8ff'
-                        }
+                        selector: 'node[type = "topic"]',
+                        style: { 'background-color': '#34d399' }
                     },
-                    // Topic / Field Nodes
                     {
-                        selector: 'node[type="topic"]',
+                        selector: 'node#target',
                         style: {
-                            'shape': 'round-rectangle',
-                            'background-color': '#10b981',
-                            'border-color': 'rgba(16,185,129,0.7)',
-                            'color': '#d1fae5'
+                            'width': 40,
+                            'height': 40,
+                            'background-color': '#0284c7',
+                            'border-color': '#38bdf8',
+                            'border-width': 3
                         }
                     },
-                    // Venue / Journal / Conference Node
-                    {
-                        selector: 'node[type="venue"]',
-                        style: {
-                            'shape': 'diamond',
-                            'background-color': '#f59e0b',
-                            'border-color': 'rgba(245, 158, 11, 0.85)',
-                            'color': '#fef3c7'
-                        }
-                    },
-                    // Inflow Precursor Foundation Nodes
-                    {
-                        selector: 'node[type="citation_inflow"], node[type="citation"]',
-                        style: {
-                            'shape': 'round-rectangle',
-                            'background-color': '#2563eb',
-                            'border-color': 'rgba(96, 165, 250, 0.85)',
-                            'color': '#dbeafe'
-                        }
-                    },
-                    // Outflow Downstream Landmark Adopter Nodes
-                    {
-                        selector: 'node[type="citation_outflow"]',
-                        style: {
-                            'shape': 'round-rectangle',
-                            'background-color': '#059669',
-                            'border-color': 'rgba(52, 211, 153, 0.85)',
-                            'color': '#d1fae5'
-                        }
-                    },
-                    // Edge Base Style
                     {
                         selector: 'edge',
                         style: {
                             'width': 1.5,
-                            'curve-style': 'bezier',
-                            'line-color': 'rgba(255, 255, 255, 0.18)',
+                            'line-color': 'rgba(255, 255, 255, 0.15)',
+                            'target-arrow-color': 'rgba(255, 255, 255, 0.25)',
                             'target-arrow-shape': 'triangle',
-                            'target-arrow-color': 'rgba(255, 255, 255, 0.3)',
-                            'arrow-scale': 0.8,
-                            'opacity': 0.7,
-                            'transition-property': 'line-color, target-arrow-color, width, opacity',
-                            'transition-duration': '0.2s'
-                        }
-                    },
-                    // Edge Specific Relations
-                    {
-                        selector: 'edge[relation="AUTHORED_BY"]',
-                        style: {
-                            'line-color': 'rgba(79, 172, 254, 0.35)',
-                            'target-arrow-color': 'rgba(79, 172, 254, 0.6)'
-                        }
-                    },
-                    {
-                        selector: 'edge[relation="AFFILIATED_WITH"]',
-                        style: {
-                            'line-color': 'rgba(168, 85, 247, 0.35)',
-                            'target-arrow-color': 'rgba(168, 85, 247, 0.6)'
-                        }
-                    },
-                    {
-                        selector: 'edge[relation="TOPIC_OF"]',
-                        style: {
-                            'line-color': 'rgba(16, 185, 129, 0.4)',
-                            'target-arrow-color': 'rgba(16, 185, 129, 0.7)',
-                            'line-style': 'dashed'
-                        }
-                    },
-                    {
-                        selector: 'edge[relation="PUBLISHED_IN"]',
-                        style: {
-                            'line-color': 'rgba(245, 158, 11, 0.45)',
-                            'target-arrow-color': 'rgba(245, 158, 11, 0.85)',
-                            'line-style': 'dashed'
-                        }
-                    },
-                    {
-                        selector: 'edge[relation="CITES_PRECURSOR"], edge[relation="CITES"]',
-                        style: {
-                            'line-color': 'rgba(59, 130, 246, 0.45)',
-                            'target-arrow-color': 'rgba(59, 130, 246, 0.85)'
-                        }
-                    },
-                    {
-                        selector: 'edge[relation="CITED_BY_DOWNSTREAM"]',
-                        style: {
-                            'line-color': 'rgba(16, 185, 129, 0.45)',
-                            'target-arrow-color': 'rgba(16, 185, 129, 0.85)'
-                        }
-                    },
-                    {
-                        selector: 'edge[relation="CO_AUTHORED_WITH"]',
-                        style: {
-                            'line-color': 'rgba(168, 85, 247, 0.35)',
-                            'target-arrow-shape': 'none',
-                            'line-style': 'dotted'
-                        }
-                    },
-                    // Highlighted & Dimmed States
-                    {
-                        selector: '.faded',
-                        style: {
-                            'opacity': 0.12,
-                            'text-opacity': 0
-                        }
-                    },
-                    {
-                        selector: '.highlighted',
-                        style: {
-                            'opacity': 1,
-                            'text-opacity': 1,
-                            'border-width': 3.5,
-                            'border-color': '#00f2fe',
-                            'line-color': '#00f2fe',
-                            'target-arrow-color': '#00f2fe',
-                            'width': 2.5,
-                            'z-index': 999
+                            'curve-style': 'bezier',
+                            'arrow-scale': 0.8
                         }
                     }
                 ],
-                elements: elements,
                 layout: {
                     name: 'cose',
-                    animate: true,
-                    animationDuration: 600,
-                    randomize: false,
-                    nodeRepulsion: 450000,
-                    nodeOverlap: 20,
-                    idealEdgeLength: 60,
-                    edgeElasticity: 100,
-                    nestingFactor: 5,
-                    gravity: 80,
-                    numIter: 1000
-                }
-            });
-
-            // Set default inspection to target paper
-            const targetNode = cy.$('#target');
-            if (targetNode.length > 0) {
-                inspectNode(targetNode[0]);
-            }
-
-            // Click listener for node inspection & 1-hop neighborhood highlighting
-            cy.on('tap', 'node', function(evt) {
-                const node = evt.target;
-                highlightNeighborhood(node);
-                inspectNode(node);
-            });
-
-            // Tap background: reset highlighting and show target paper
-            cy.on('tap', function(evt) {
-                if (evt.target === cy) {
-                    cy.elements().removeClass('faded highlighted');
-                    if (targetNode.length > 0) {
-                        inspectNode(targetNode[0]);
-                    }
+                    animate: false,
+                    padding: 30
                 }
             });
         }
 
-        function highlightNeighborhood(node) {
-            cy.elements().removeClass('faded highlighted');
-            
-            const neighborhood = node.closedNeighborhood();
-            cy.elements().not(neighborhood).addClass('faded');
-            neighborhood.addClass('highlighted');
-            node.addClass('highlighted');
+        // Fetch Dataset Stats for Model & Data Tab
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/v1/papers/stats');
+                if (!res.ok) return;
+                const stats = await res.json();
+                document.getElementById('statPapers').innerText = stats.total_papers.toLocaleString();
+                document.getElementById('statAuthors').innerText = stats.total_authors.toLocaleString();
+                document.getElementById('statInstitutions').innerText = stats.total_institutions.toLocaleString();
+                document.getElementById('statVenues').innerText = stats.total_venues.toLocaleString();
+                document.getElementById('statEdges').innerText = stats.total_citation_edges.toLocaleString();
+            } catch (err) {
+                console.warn(err);
+            }
         }
 
-        // ── Node Inspector Logic ──
-        function inspectNode(node) {
-            const data = node.data();
-            const badge = document.getElementById('inspBadge');
-            const title = document.getElementById('inspTitle');
-            const desc = document.getElementById('inspDesc');
-            const grid = document.getElementById('inspGrid');
-            const footer = document.getElementById('inspFooter');
-            const link = document.getElementById('inspOpenAlexLink');
-            const connCount = document.getElementById('inspConnectionCount');
-            const hint = document.getElementById('inspHint');
+        // Side-by-Side Paper Comparison
+        async function runComparison() {
+            const idA = document.getElementById('compInputA').value.trim();
+            const idB = document.getElementById('compInputB').value.trim();
+            if (!idA || !idB) return;
 
-            hint.textContent = 'Node Selected';
-            title.textContent = data.full_name || data.label || 'Node Details';
-            badge.textContent = data.badge || data.type.toUpperCase();
+            const grid = document.getElementById('compareGrid');
+            grid.style.display = 'grid';
 
-            // Set badge styling based on type
-            const typeConfig = {
-                'paper':            { bg: 'rgba(0,242,254,0.15)',   color: 'var(--accent-cyan)',   border: 'var(--accent-cyan)' },
-                'author':           { bg: 'rgba(79,172,254,0.15)',   color: 'var(--accent-blue)',   border: 'var(--accent-blue)' },
-                'institution':      { bg: 'rgba(168,85,247,0.15)',  color: '#c084fc',              border: '#c084fc' },
-                'topic':            { bg: 'rgba(16,185,129,0.15)',  color: 'var(--accent-green)',  border: 'var(--accent-green)' },
-                'venue':            { bg: 'rgba(245,158,11,0.15)',  color: '#fbbf24',              border: '#fbbf24' },
-                'citation_inflow':  { bg: 'rgba(59,130,246,0.15)',  color: '#60a5fa',              border: '#60a5fa' },
-                'citation_outflow': { bg: 'rgba(16,185,129,0.15)',  color: '#34d399',              border: '#34d399' },
-                'citation':         { bg: 'rgba(59,130,246,0.15)',  color: '#60a5fa',              border: '#60a5fa' }
-            };
+            const cardA = document.getElementById('compCardA');
+            const cardB = document.getElementById('compCardB');
+            cardA.innerHTML = '<div style="text-align:center; padding:2rem;"><span class="spinner"></span> Loading Paper A...</div>';
+            cardB.innerHTML = '<div style="text-align:center; padding:2rem;"><span class="spinner"></span> Loading Paper B...</div>';
 
-            const cfg = typeConfig[data.type] || typeConfig['paper'];
-            badge.style.background = cfg.bg;
-            badge.style.color = cfg.color;
-            badge.style.borderColor = cfg.border;
+            try {
+                const [resA, resB] = await Promise.all([
+                    fetch(`/api/v1/papers/predict/${encodeURIComponent(idA)}`),
+                    fetch(`/api/v1/papers/predict/${encodeURIComponent(idB)}`)
+                ]);
+                const dataA = await resA.json();
+                const dataB = await resB.json();
 
-            // Generate metadata attributes
-            let items = [];
-
-            if (data.type === 'paper') {
-                desc.textContent = data.description || 'Target Paper for GNN Impact Trajectory Prediction.';
-                if (data.year) items.push({ k: 'Publication Year', v: data.year });
-                if (data.citations !== undefined) items.push({ k: 'Historical Citations', v: Number(data.citations).toLocaleString() });
-                if (data.fwci) items.push({ k: 'FWCI (Impact Score)', v: Number(data.fwci).toFixed(2) });
-                if (data.doi) items.push({ k: 'DOI Link', v: data.doi });
-            } else if (data.type === 'author') {
-                desc.textContent = data.description || 'Author connected to target paper in heterogeneous knowledge graph.';
-                if (data.h_index) items.push({ k: 'Scientometric h-index', v: `<strong style="color:var(--accent-cyan); font-size:0.95rem;">${data.h_index}</strong>` });
-                if (data.position) items.push({ k: 'Authorship Role', v: data.position });
-                if (data.estimated_works) items.push({ k: 'Estimated Publications', v: `${data.estimated_works}+ Works` });
-                if (data.total_author_cits) items.push({ k: 'Cumulative Citations', v: `${Number(data.total_author_cits).toLocaleString()}+` });
-                if (data.institutions && data.institutions.length > 0) {
-                    items.push({ k: 'Primary Affiliation', v: data.institutions.join(', ') });
-                }
-                if (data.orcid) items.push({ k: 'ORCID Identifier', v: data.orcid.replace('https://orcid.org/', '') });
-            } else if (data.type === 'institution') {
-                desc.textContent = data.description || 'Academic or Corporate Research Institution.';
-                if (data.prestige_tier) items.push({ k: 'Prestige Classification', v: `<strong style="color:#c084fc;">${data.prestige_tier}</strong>` });
-                if (data.country_code) items.push({ k: 'Jurisdiction / Country', v: data.country_code });
-                if (data.inst_type) items.push({ k: 'Institution Category', v: data.inst_type });
-                if (data.affiliated_authors && data.affiliated_authors.length > 0) {
-                    items.push({ k: 'Collaborating Authors', v: data.affiliated_authors.join(', ') });
-                }
-            } else if (data.type === 'topic') {
-                desc.textContent = data.description || 'Research Classification, Domain & Field.';
-                if (data.subfield_velocity) items.push({ k: 'Topic Citation Velocity', v: `<strong style="color:var(--accent-green);">${data.subfield_velocity}</strong>` });
-                if (data.field) items.push({ k: 'Primary Field', v: data.field });
-                if (data.subfield) items.push({ k: 'Academic Subfield', v: data.subfield });
-                if (data.domain) items.push({ k: 'Scientific Domain', v: data.domain });
-            } else if (data.type === 'venue') {
-                desc.textContent = data.description || 'Publication venue, conference proceedings, or peer-reviewed journal.';
-                if (data.quartile) items.push({ k: 'Prestige Quartile', v: `<strong style="color:#fbbf24;">${data.quartile}</strong>` });
-                if (data.percentile_tier) items.push({ k: 'Percentile Tier', v: data.percentile_tier });
-                if (data.publisher) items.push({ k: 'Host Publisher', v: data.publisher });
-                if (data.issn) items.push({ k: 'ISSN Identifier', v: data.issn });
-            } else if (data.type === 'citation_inflow') {
-                desc.textContent = data.description || 'Precursor foundation referenced in target paper bibliography.';
-                if (data.year) items.push({ k: 'Publication Year', v: data.year });
-                if (data.citations !== undefined) items.push({ k: 'Prior Citations', v: Number(data.citations).toLocaleString() });
-                if (data.lineage_direction) items.push({ k: 'Lineage Vector', v: `<strong style="color:#60a5fa;">${data.lineage_direction}</strong>` });
-                if (data.openalex_id) items.push({ k: 'OpenAlex Work ID', v: data.openalex_id.split('/').pop() });
-            } else if (data.type === 'citation_outflow') {
-                desc.textContent = data.description || 'Landmark downstream work adopting and citing this research.';
-                if (data.year) items.push({ k: 'Publication Year', v: data.year });
-                if (data.citations !== undefined) items.push({ k: 'Downstream Citations', v: `<strong style="color:var(--accent-green); font-size:0.95rem;">${Number(data.citations).toLocaleString()}</strong>` });
-                if (data.lineage_direction) items.push({ k: 'Lineage Vector', v: `<strong style="color:#34d399;">${data.lineage_direction}</strong>` });
-                if (data.openalex_id) items.push({ k: 'OpenAlex Work ID', v: data.openalex_id.split('/').pop() });
-            } else if (data.type === 'citation') {
-                desc.textContent = data.description || 'Prior academic literature referenced in paper bibliography.';
-                if (data.reference_type) items.push({ k: 'Graph Relation', v: data.reference_type });
-                if (data.openalex_id) items.push({ k: 'OpenAlex Work ID', v: data.openalex_id.split('/').pop() });
+                renderCompareCard(cardA, dataA);
+                renderCompareCard(cardB, dataB);
+            } catch (err) {
+                alert(`Comparison error: ${err.message}`);
             }
+        }
 
-            if (items.length > 0) {
-                grid.style.display = 'grid';
-                grid.innerHTML = items.map(it => `
-                    <div class="inspector-meta-item">
-                        <span class="inspector-meta-key">${it.k}</span>
-                        <span class="inspector-meta-val">${it.v}</span>
-                    </div>
-                `).join('');
+        function renderCompareCard(cardEl, data) {
+            const badgeCls = data.predicted_impact_class === 2 ? 'high' : data.predicted_impact_class === 1 ? 'med' : 'low';
+            cardEl.innerHTML = `
+                <div class="card-header">
+                    <div class="card-title" style="font-size:0.95rem;">${data.title.slice(0, 38)}...</div>
+                    <span class="impact-badge ${badgeCls}" style="font-size:0.75rem; padding:0.2rem 0.6rem;">${data.predicted_impact_label}</span>
+                </div>
+                <div class="meta-row"><span class="meta-key">Pub Year:</span><span class="meta-val">${data.publication_year}</span></div>
+                <div class="meta-row"><span class="meta-key">Citations at Cutoff:</span><span class="meta-val">${data.citations_at_cutoff}</span></div>
+                <div class="meta-row"><span class="meta-key">Venue:</span><span class="meta-val">${data.venue ? data.venue.venue_name : 'Unindexed'} (${data.venue ? (data.venue.quartile || data.venue.core_rank || 'Unranked') : 'null'})</span></div>
+                <div class="meta-row"><span class="meta-key">Access:</span><span class="meta-val">${data.access_economics.is_oa ? 'Open Access' : 'Paywalled'}</span></div>
+                <div class="meta-row"><span class="meta-key">Predicted 5-Yr Cits:</span><span class="meta-val" style="color:var(--accent-cyan); font-weight:700;">${Math.round(data.predicted_future_citations_5y)}</span></div>
+            `;
+        }
+
+        // Init on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadQuickSamples();
+            const hash = window.location.hash.replace('#', '');
+            if (hash === 'model-data') {
+                switchTab('model-data');
+            } else if (hash === 'compare') {
+                switchTab('compare');
+                runComparison();
             } else {
-                grid.style.display = 'none';
+                runPrediction();
             }
-
-            // Footer / OpenAlex URL
-            const degree = node.degree();
-            connCount.textContent = `${degree} direct connection${degree === 1 ? '' : 's'}`;
-
-            if (data.openalex_id || data.ror || data.orcid) {
-                footer.style.display = 'flex';
-                const targetUrl = data.openalex_id || data.ror || data.orcid;
-                link.href = targetUrl;
-                link.textContent = data.ror ? 'View on ROR ↗' : (data.orcid ? 'View ORCID ↗' : 'View on OpenAlex ↗');
-            } else {
-                footer.style.display = 'none';
-            }
-        }
-
-        // ── Graph Controls (Zoom, Fit, Layout, Filter) ──
-        function cyZoom(factor) {
-            if (!cy) return;
-            cy.zoom({
-                level: cy.zoom() * factor,
-                renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 }
-            });
-        }
-
-        function cyFit() {
-            if (!cy) return;
-            cy.elements().removeClass('faded highlighted');
-            cy.fit(null, 30);
-        }
-
-        function cyReLayout(layoutName) {
-            if (!cy) return;
-            const options = {
-                name: layoutName,
-                animate: true,
-                animationDuration: 500,
-                fit: true,
-                padding: 30
-            };
-            if (layoutName === 'cose') {
-                options.nodeRepulsion = 450000;
-                options.idealEdgeLength = 60;
-            } else if (layoutName === 'concentric') {
-                options.concentric = function(node) {
-                    return node.id() === 'target' ? 10 : (node.data('type') === 'author' ? 7 : 4);
-                };
-                options.levelWidth = function() { return 2; };
-            }
-            cy.layout(options).run();
-        }
-
-        function filterGraph(type, btn) {
-            if (!cy) return;
-            currentFilter = type;
-            
-            document.querySelectorAll('#filterGroup .graph-btn').forEach(b => b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
-
-            if (type === 'all') {
-                cy.elements().style('display', 'element');
-                cyFit();
-                return;
-            }
-
-            // Always show target paper + the selected type + connecting edges
-            cy.batch(() => {
-                cy.elements().style('display', 'none');
-                cy.$('#target').style('display', 'element');
-                
-                const targetTypeNodes = (type === 'lineage')
-                    ? cy.$('node[type="citation_inflow"], node[type="citation_outflow"], node[type="citation"]')
-                    : cy.$(`node[type="${type}"]`);
-                
-                targetTypeNodes.style('display', 'element');
-                
-                // Show edges connecting visible nodes
-                targetTypeNodes.connectedEdges().forEach(edge => {
-                    const src = edge.source();
-                    const tgt = edge.target();
-                    if (src.style('display') === 'element' && tgt.style('display') === 'element') {
-                        edge.style('display', 'element');
-                    }
-                });
-            });
-
-            cyFit();
-        }
-
-        window.onload = () => { fetchPrediction(); };
+        });
     </script>
 </body>
 </html>

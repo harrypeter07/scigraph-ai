@@ -23,7 +23,10 @@ data/processed/*
 # Model checkpoints & artifacts
 ml/gnn/checkpoints/*
 !ml/gnn/checkpoints/.gitkeep
+!ml/gnn/checkpoints/hetero_graphsage.pt
+!ml/gnn/checkpoints/MODEL_CARD.json
 *.pt
+!ml/gnn/checkpoints/hetero_graphsage.pt
 *.pth
 *.onnx
 

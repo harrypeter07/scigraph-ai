@@ -73,6 +73,7 @@ class BacktestComparison(BaseModel):
     window_end: int
     actual_window: Optional[int] = None
     actual_future_citations_5y: Optional[int] = None
+    actual_citations_window: Optional[int] = None
     actual_impact_class: Optional[int] = None
     actual_label: Optional[str] = None
     predicted_impact_class: int
@@ -114,6 +115,7 @@ class PaperPredictionResponse(BaseModel):
     calibrated_probabilities: Dict[str, float]
     predicted_future_citations_5y: float
     citations_in_window: Optional[float] = None
+    citations_window: Optional[float] = None
     split: Optional[str] = None
     in_training_data: Optional[bool] = None
     venue: Optional[VenueMetadata] = None

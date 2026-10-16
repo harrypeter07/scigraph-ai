@@ -84,20 +84,24 @@ def test_corpus_sample_test_split_only(client):
 
 
 def test_no_hardcoded_numbers():
-    """Verify no forbidden fabricated numbers remain in web/index.html or README.md."""
-    forbidden = ["0.5381", "19.3%", "0.0083", "0.5284", "16/16"]
+    """Verify no forbidden fabricated numbers or claims remain in web/index.html or README.md."""
+    forbidden = [
+        "0.5381", "19.3%", "0.0083", "0.5284", "16/16",
+        "9,000 Papers", "3,000 Papers", "Zero Temporal Leakage",
+        "Independently Verifiable", "world's first", "70% of papers"
+    ]
 
     html_path = REPO_ROOT / "web" / "index.html"
     if html_path.exists():
         html_content = html_path.read_text(encoding="utf-8")
         for num in forbidden:
-            assert num not in html_content, f"Found forbidden fabricated number '{num}' in web/index.html"
+            assert num not in html_content, f"Found forbidden fabricated string '{num}' in web/index.html"
 
     readme_path = REPO_ROOT / "README.md"
     if readme_path.exists():
         readme_content = readme_path.read_text(encoding="utf-8")
         for num in forbidden:
-            assert num not in readme_content, f"Found forbidden fabricated number '{num}' in README.md"
+            assert num not in readme_content, f"Found forbidden fabricated string '{num}' in README.md"
 
 
 def test_verification_summary_endpoint(client):

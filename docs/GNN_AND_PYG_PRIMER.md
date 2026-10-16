@@ -69,9 +69,12 @@ Why not just write graph message passing in a Python `for` loop?
 
 ---
 
-## 5. Worked, Hand-Traceable Example with Real Dataset Papers
+## 5. Worked, Hand-Traceable Example (Illustrative Toy Trace)
 
-Let's trace one single GNN message-passing step using 3 real papers from our dataset:
+> [!NOTE]
+> **Illustrative Example**: The vectors, weights, and probability values below are simplified toy numbers for intuitive conceptual walkthrough of PyG neighborhood message passing, not internal model parameters.
+
+Let's trace one conceptual GNN message-passing step using 3 real papers from our dataset:
 
 ### 📄 Input Sample Data (Cutoff Snapshot $T_{\text{cutoff}}$):
 * **Paper 1 (`W2194775991` - ResNet)**:
@@ -94,11 +97,11 @@ Let's trace one single GNN message-passing step using 3 real papers from our dat
 
 1. **Message from Author to Target Paper**:
    $$\mathbf{m}_{\text{author} \to \text{paper}} = \mathbf{W}_{\text{writes}} \cdot \mathbf{h}_{\text{author}}$$
-   For ResNet, the author message brings strong positive weights ($+0.85$) into the paper's representation.
+   For ResNet, the author message brings positive collaborative signal into the paper's representation.
 
 2. **Aggregation at Target Paper Node**:
    $$\mathbf{z}_1 = \text{ReLU}\left( \mathbf{W}_{\text{self}} \cdot \mathbf{x}_1 + \sum_{u \in \mathcal{N}(1)} \mathbf{m}_{u \to 1} \right)$$
-   The paper node combines its early 2-year citations with the institutional and author reputation signals.
+   The paper node combines its early citation velocity with the institutional and author reputation signals.
 
 3. **Classification Layer**:
    $$\text{Logits} = \mathbf{W}_{\text{out}} \cdot \mathbf{z}_1 \quad \longrightarrow \quad \text{Softmax}(\text{Logits}) = [0.07, 0.21, 0.72]$$
@@ -110,4 +113,4 @@ Let's trace one single GNN message-passing step using 3 real papers from our dat
 
 ## 🎙️ 30-Second Seminar Defense Pitch:
 
-> *"Our architecture uses PyTorch Geometric to represent science as a heterogeneous graph of papers, authors, and institutions. Through neighborhood message passing, the GNN aggregates collaborative reputation and institutional velocity to forecast 5-year citation trajectory at the moment of publication without temporal leakage."*
+> *"SciGraph AI explores whether representing science as a heterogeneous graph of papers, authors, institutions, and venues provides additive predictive signal over tabular bibliometric features. We forecast citation impact tiers in years 3–5 relative to field-year cohorts, using only information available as of Year + 2."*

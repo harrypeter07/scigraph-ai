@@ -74,6 +74,54 @@ app.include_router(paper_router, prefix="/api/v1/paper")
 app.include_router(verify_router, prefix="/api/v1/verify")
 
 
+_cached_splits = None
+
+def get_splits_data():
+    global _cached_splits
+    if _cached_splits is not None:
+        return _cached_splits
+    import pandas as pd
+    base_dir = Path(__file__).resolve().parent.parent / "data" / "processed"
+    train_path = base_dir / "train.parquet"
+    val_path = base_dir / "val.parquet"
+    test_path = base_dir / "test.parquet"
+
+    train_df = pd.read_parquet(train_path) if train_path.exists() else None
+    val_df = pd.read_parquet(val_path) if val_path.exists() else None
+    test_df = pd.read_parquet(test_path) if test_path.exists() else None
+
+    train_total = len(train_df) if train_df is not None else 0
+    train_honest = int((train_df["publication_year"] >= 2012).sum()) if train_df is not None else 0
+    train_pre2012_excluded = train_total - train_honest
+    val_count = len(val_df) if val_df is not None else 0
+    test_count = len(test_df) if test_df is not None else 0
+
+    _cached_splits = {
+        "train_2012_2016": train_honest,
+        "train_honest": train_honest,
+        "train_pre2012_excluded": train_pre2012_excluded,
+        "train_parquet_total": train_total,
+        "val_2017": val_count,
+        "val": val_count,
+        "test_2018_2020": test_count,
+        "test": test_count,
+        "total_active_benchmark": train_honest + val_count + test_count,
+        "total_corpus": train_total + val_count + test_count,
+        "years": {
+            "train": "2012–2016",
+            "val": "2017",
+            "test": "2018–2020"
+        }
+    }
+    return _cached_splits
+
+
+@app.get("/api/v1/meta/splits")
+def get_meta_splits():
+    """Returns dataset split counts computed directly from processed parquet tables and masks."""
+    return get_splits_data()
+
+
 @app.get("/api/v1/meta/numbers")
 def get_numbers_registry():
     """Returns the unified quantitative numbers registry from docs/NUMBERS.json."""

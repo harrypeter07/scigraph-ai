@@ -119,3 +119,20 @@ def test_error_handling_not_found(client):
     assert response.status_code == 404
     data = response.json()
     assert "detail" in data
+
+
+def test_splits_endpoints(client):
+    """Verify Task 1a: /api/v1/meta/splits and /api/v1/papers/splits serve exact split counts."""
+    for url in ["/api/v1/meta/splits", "/api/v1/papers/splits"]:
+        res = client.get(url)
+        assert res.status_code == 200, f"Failed GET {url}"
+        splits = res.json()
+        assert splits["train_2012_2016"] == 7500
+        assert splits["train_honest"] == 7500
+        assert splits["train_pre2012_excluded"] == 3000
+        assert splits["train_parquet_total"] == 10500
+        assert splits["val_2017"] == 1500
+        assert splits["test_2018_2020"] == 4500
+        assert splits["total_active_benchmark"] == 13500
+        assert splits["total_corpus"] == 16500
+

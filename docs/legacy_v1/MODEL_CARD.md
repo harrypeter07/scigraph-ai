@@ -1,3 +1,10 @@
+> [!CAUTION]
+> **OBSOLETE — v1 prototype (50 papers). Do not cite.**
+>
+> This document describes the deprecated v1 prototype (50 papers, 5 test papers, toy features) and contradicts authoritative v2 results. For authentic, verified results based on the 16,500 paper corpus and 4,500 paper test split, refer to [README.md](../../README.md), [reports/benchmark_latest.json](../../reports/benchmark_latest.json), and [reports/heldout_predictions_summary.json](../../reports/heldout_predictions_summary.json).
+
+---
+
 # Model Card: SciGraph AI Heterogeneous Citation GNN
 
 > **Model Architecture**: Heterogeneous GraphSAGE / Heterogeneous GAT (`HeteroConv`)  

@@ -115,6 +115,15 @@ class ScientometricVenueResolver:
         venue_issn_l = venue_issn_l or issn_l
         pub_year = publication_year or pub_year or 2018
         vname = venue_name or "Unknown Venue"
+        # De-duplicate duplicated venue strings like "X - X"
+        if vname and (" - " in vname or " / " in vname):
+            for sep in [" - ", " / "]:
+                if sep in vname:
+                    parts = [p.strip() for p in vname.split(sep) if p.strip()]
+                    if len(parts) >= 2 and parts[0].lower() == parts[1].lower():
+                        vname = parts[0]
+                        break
+
         vtype = (venue_type or "").lower()
         vname_clean = self._clean_str(vname)
 
@@ -124,7 +133,21 @@ class ScientometricVenueResolver:
         )
 
         if is_conference:
-            # A. Check parenthesized acronyms first (e.g. "(CVPR)")
+            # A. Match CVPR proceedings & conferences via CORE acronym/title
+            if "computer vision and pattern recognition" in vname.lower():
+                cvpr_rank = self.core_acronym_lookup.get("cvpr", "A*")
+                return VenueRankingResult(
+                    venue_name=vname,
+                    venue_type=venue_type or "conference",
+                    ranking_system="CORE",
+                    quartile=None,
+                    core_rank=cvpr_rank,
+                    sjr=None,
+                    h_index=None,
+                    provenance="core"
+                )
+
+            # B. Check parenthesized acronyms first (e.g. "(CVPR)")
             paren_matches = re.findall(r"[\(\[\{]([A-Za-z0-9\-]+)[\)\]\}]", vname)
             for p in paren_matches:
                 p_clean = self._clean_str(p)

@@ -52,6 +52,22 @@ def test_venue_resolver_core_conference():
     assert res.provenance == "core"
 
 
+def test_venue_resolver_real_corpus_cvpr_proceedings_resolves_and_deduplicates():
+    """Verify Task 1d: Real corpus CVPR proceedings string de-duplicates and resolves via CORE."""
+    real_vname = "IEEE Computer Society Conference on Computer Vision and Pattern Recognition/Proceedings - IEEE Computer Society Conference on Computer Vision and Pattern Recognition/Proceedings"
+    res = venue_resolver.resolve(
+        venue_name=real_vname,
+        venue_type="conference",
+        publication_year=2016
+    )
+    assert isinstance(res, VenueRankingResult)
+    assert res.venue_name == "IEEE Computer Society Conference on Computer Vision and Pattern Recognition/Proceedings"
+    assert res.ranking_system == "CORE"
+    assert res.core_rank == "A*"
+    assert res.provenance == "core"
+
+
+
 def test_venue_resolver_unknown_returns_none():
     """Verify Rule R1: Unknown venues must return None/null, NEVER default to Q2 or fake strings."""
     res = venue_resolver.resolve(

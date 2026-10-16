@@ -29,6 +29,13 @@ logger = logging.getLogger("scigraph.api.paper")
 router = APIRouter(tags=["Paper Predictions"])
 
 
+@router.get("/splits")
+def get_dataset_splits_endpoint():
+    """Return dataset split counts computed directly from processed parquet tables and masks."""
+    from api.main import get_splits_data
+    return get_splits_data()
+
+
 @router.get("/stats", response_model=DatasetStatsResponse)
 def get_dataset_stats():
     """Return genuine dataset overview statistics from ingested Parquet tables."""

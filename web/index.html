@@ -798,7 +798,7 @@
                 <path d="m4.93 4.93 2.12 2.12m9.9 9.9 2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9 2.12-2.12"></path>
             </svg>
             SciGraph AI 2.0
-            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600;">Honest Science — Independently Verifiable</span>
+            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600;">Honest Science — Leakage-tested (see proof)</span>
         </div>
         <div class="header-meta">
             <span>Cutoff: <strong style="color: var(--accent-amber);">T_cutoff = Year + 2</strong></span>
@@ -807,9 +807,19 @@
             <span>|</span>
             <span>Source of Truth: <strong style="color: var(--accent-cyan);">OpenAlex API</strong></span>
             <span>|</span>
-            <span style="color: var(--accent-green);">Zero Temporal Leakage</span>
+            <span style="color: var(--accent-green);">Leakage-tested (see proof)</span>
         </div>
     </header>
+
+    <!-- Global Inline Error Banner -->
+    <div id="errorBanner" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 0.75rem 1rem; border-radius: 8px; margin: 0 auto 1.2rem; max-width: 1540px; font-size: 0.85rem; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚠️</span>
+            <span id="errorMessage">An error occurred.</span>
+        </div>
+        <button onclick="dismissError()" style="background: transparent; border: none; color: #fca5a5; cursor: pointer; font-size: 1rem; padding: 0 0.4rem;">✕</button>
+    </div>
+
 
     <div class="nav-tabs">
         <button class="tab-btn active" id="tabBtnPredictor" onclick="switchTab('predictor')">
@@ -847,7 +857,7 @@
 
                 <div class="search-container">
                     <div class="search-box">
-                        <input type="text" id="paperInput" class="search-input" placeholder="Title, DOI, or OpenAlex ID (e.g. W2194775991)..." value="W2194775991">
+                        <input type="text" id="paperInput" class="search-input" placeholder="Title, DOI, or OpenAlex ID (e.g. W2752782242)..." value="W2752782242">
                         <button class="action-btn" id="predictBtn" onclick="runPrediction()">
                             <span id="btnText">Predict</span>
                         </button>
@@ -869,9 +879,10 @@
                 <!-- Prediction Output -->
                 <div id="predictionOutput" style="display: none;">
                     <div style="margin-bottom: 1rem;">
-                        <div style="font-size: 0.78rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
-                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Predicted Citation Class (Years 3–5 after Publication):</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem; flex-wrap: wrap;">
                             <div id="impactBadge" class="impact-badge high">High Impact (≥90th)</div>
+                            <div id="splitBadge" class="impact-badge" style="font-size: 0.72rem; padding: 0.2rem 0.6rem; border-color: rgba(52, 211, 153, 0.4); color: var(--accent-green); background: rgba(52, 211, 153, 0.1);">Held-out test paper</div>
                             <span id="graphContextBadge" class="prov-tag model" style="font-size: 0.72rem; text-transform: uppercase;">Graph: full</span>
                         </div>
                         <div class="significance-note">
@@ -951,7 +962,7 @@
                         </a>
                         <a href="#" id="linkScholar" target="_blank" class="verify-action-btn">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path></svg>
-                            Cross-Check Google Scholar ↗
+                            Google Scholar (Cumulative, not directly comparable) ↗
                         </a>
                         <a href="#" id="linkDoi" target="_blank" class="verify-action-btn" style="display: none;">
                             DOI Link ↗
@@ -982,12 +993,12 @@
                         <span class="meta-val" id="metaApc">—</span>
                     </div>
                     <div class="meta-row">
-                        <span class="meta-key">Empirical OA Association:</span>
+                        <span class="meta-key">Empirical OA Advantage:</span>
                         <span class="meta-val" id="metaOaBoost" style="color: var(--accent-green); font-weight: 600;">—</span>
                     </div>
                     <div class="significance-note green">
                         <span class="sig-pill">Empirical OA Advantage:</span>
-                        Across our verified 16,500-paper corpus, Open Access works show a statistically significant citation association. Crude: <span id="oaCrudeNote">…</span>, Adjusted for field and year: <span id="oaAdjNote">…</span> (OLS, p&lt;0.001). <strong>Association, not causation</strong> (author self-selection bias).
+                        Across our verified 16,500-paper corpus, Open Access works show an estimated citation advantage (adjusted for field, year, authors, venue prestige). Crude: <span id="oaCrudeNote">—</span>, Adjusted: <span id="oaAdjNote">—</span> <span id="oaPValNote">(OLS, p&lt;0.001)</span>. Controls: field, year, log(authors), SJR (+known flag), top-tier venue flag. <strong>Association, not causation</strong> (author self-selection bias).
                     </div>
 
                     <!-- Bidirectional Citation Lineage -->
@@ -1154,16 +1165,15 @@
                 Select a held-out test paper (2018–2020) or enter any OpenAlex ID / DOI to run a blind forecast:
             </div>
 
-            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.9rem;">
-                <button class="sample-chip" onclick="setBlindPaper('W2798606413')">Deep Learning (Nature 2018)</button>
-                <button class="sample-chip" onclick="setBlindPaper('W2963445205')">Attention/BERT (NeurIPS 2018)</button>
-                <button class="sample-chip" onclick="setBlindPaper('W2991192534')">Clinical Medicine (Lancet 2019)</button>
-                <button class="sample-chip" onclick="setBlindPaper('W2971253011')">Neural Networks (CVPR 2019)</button>
-                <button class="sample-chip" onclick="setBlindPaper('W2194775991')">Held-Out Test Paper (W2194775991)</button>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.9rem;" id="blindQuickSamples">
+                <button class="sample-chip" onclick="setBlindPaper('W2752782242')">Squeeze-and-Excitation Networks (2018)</button>
+                <button class="sample-chip" onclick="setBlindPaper('W2963163009')">MobileNetV2 (2018)</button>
+                <button class="sample-chip" onclick="setBlindPaper('W2787560479')">Deep Contextualized Word Representations (2018)</button>
+                <button class="sample-chip" onclick="setBlindPaper('W2889326414')">UMAP (2018)</button>
             </div>
 
             <div class="search-box">
-                <input type="text" id="blindInput" class="search-input" placeholder="OpenAlex Work ID (e.g. W2194775991) or DOI..." value="W2194775991">
+                <input type="text" id="blindInput" class="search-input" placeholder="OpenAlex Work ID (e.g. W2752782242) or DOI..." value="W2752782242">
                 <button class="action-btn" id="blindRunBtn" onclick="runBlindForecast()">
                     <span>Run Blind Forecast</span>
                 </button>
@@ -1263,11 +1273,11 @@
             <div class="stat-grid" id="heldoutKpis">
                 <div class="stat-card">
                     <div class="stat-number" id="kpiAccuracy">—</div>
-                    <div class="stat-label">Accuracy (vs 50% baseline)</div>
+                    <div class="stat-label">Accuracy (vs <span id="kpiMajorityAccBaseline" data-metric="majority_acc">50%</span> majority baseline)</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="kpiMacroF1">—</div>
-                    <div class="stat-label">Macro-F1 (vs 0.222 baseline)</div>
+                    <div class="stat-label">Macro-F1 (vs <span id="kpiMajorityF1Baseline" data-metric="majority_f1">0.222</span> majority baseline)</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="kpiAuroc">—</div>
@@ -1307,7 +1317,7 @@
 
                 <div class="significance-note green" style="margin-top: 1rem;">
                     <span class="sig-pill">Evaluating the High-Tier Lift:</span>
-                    For truly elite papers (≥90th percentile), <strong>93.5% were flagged as Medium or High</strong> (only 30 out of 464 were labeled Low). When the model predicts High, the empirical chance the paper is truly in the top 10% jumps from 10.3% (random base rate) to 39.6% — a <strong>3.84x lift</strong> over random selection.
+                    <span id="liftSummaryText" data-metric="lift_summary_text">Loading lift metrics from verification report...</span>
                 </div>
             </div>
         </div>
@@ -1342,7 +1352,7 @@
     <div id="viewAntiCheating" class="view-section">
         <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-header">
-                <div class="card-title">Live Future-Poison Immunity Test (Proof of Zero Leakage)</div>
+                <div class="card-title">Live Future-Poison Immunity Test (Leakage Control)</div>
                 <span class="prov-tag verified">Strict Temporal Firewall</span>
             </div>
 
@@ -1353,7 +1363,7 @@
             </p>
 
             <div style="display: flex; gap: 0.5rem; margin-top: 1rem; align-items: center; flex-wrap: wrap;">
-                <input type="text" id="poisonInput" class="search-input" placeholder="Work ID to test..." value="W2194775991" style="max-width: 320px;">
+                <input type="text" id="poisonInput" class="search-input" placeholder="Work ID to test..." value="W2752782242" style="max-width: 320px;">
                 <button class="action-btn danger" id="poisonBtn" onclick="runPoisonTest()">
                     <span>🚨 Inject +100,000 Future Citations (Year 2028)</span>
                 </button>
@@ -1362,7 +1372,7 @@
             <div id="poisonResult" style="display: none; margin-top: 1.2rem;">
                 <div class="backtest-box" style="border-color: rgba(52, 211, 153, 0.4);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 700; color: white;" id="poisonVerdict">✅ PASSED: Zero Temporal Leakage</span>
+                        <span style="font-weight: 700; color: white;" id="poisonVerdict">—</span>
                         <span class="prov-tag verified" id="poisonDeltaTag">Delta: 0.000000</span>
                     </div>
 
@@ -1395,7 +1405,7 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-top: 0.8rem;">
                 <div class="stat-card" style="text-align: left; border-left: 3px solid var(--accent-cyan);">
                     <div style="font-size: 0.9rem; font-weight: 700; color: white;">Training Cohort (2012–2016)</div>
-                    <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-cyan); margin: 0.3rem 0;">9,000 Papers</div>
+                    <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-cyan); margin: 0.3rem 0;" id="statTrainCount" data-metric="split_train_honest">7,500 Papers</div>
                     <div style="font-size: 0.73rem; color: var(--text-muted); line-height: 1.45;">
                         Strictly historical works. Zero exposure to validation or test data. Used to train model weights and empirical baseline distributions.
                     </div>
@@ -1403,15 +1413,15 @@
 
                 <div class="stat-card" style="text-align: left; border-left: 3px solid var(--accent-purple);">
                     <div style="font-size: 0.9rem; font-weight: 700; color: white;">Validation Cohort (2017)</div>
-                    <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-purple); margin: 0.3rem 0;">3,000 Papers</div>
+                    <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-purple); margin: 0.3rem 0;" id="statValCount" data-metric="split_val">1,500 Papers</div>
                     <div style="font-size: 0.73rem; color: var(--text-muted); line-height: 1.45;">
-                        Used exclusively for hyperparameter tuning and fitting the temperature calibration parameter (&tau; = 1.5637).
+                        Used exclusively for hyperparameter tuning and fitting the temperature calibration parameter (&tau; = <span id="statValTau" data-metric="val_temperature">—</span>).
                     </div>
                 </div>
 
                 <div class="stat-card" style="text-align: left; border-left: 3px solid var(--accent-green);">
                     <div style="font-size: 0.9rem; font-weight: 700; color: white;">Held-Out Test Cohort (2018–2020)</div>
-                    <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-green); margin: 0.3rem 0;">4,500 Papers</div>
+                    <div style="font-size: 1.3rem; font-weight: 800; color: var(--accent-green); margin: 0.3rem 0;" id="statTestCount" data-metric="split_test">4,500 Papers</div>
                     <div style="font-size: 0.73rem; color: var(--text-muted); line-height: 1.45;">
                         Strictly unobserved during training and tuning. Evaluated once to report genuine out-of-sample performance.
                     </div>
@@ -1428,16 +1438,16 @@
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.8rem;">
                 <div class="stat-card">
-                    <div class="stat-number" id="auditTotalEdges">87,709</div>
+                    <div class="stat-number" id="auditTotalEdges" data-metric="total_edges">—</div>
                     <div class="stat-label">Total In-Corpus Edges</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="auditValidEdges" style="color: var(--accent-green);">43,893</div>
+                    <div class="stat-number" id="auditValidEdges" data-metric="valid_edges" style="color: var(--accent-green);">—</div>
                     <div class="stat-label">Valid Edges as-of Cutoff</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="auditPrunedEdges" style="color: var(--accent-red);">43,816</div>
-                    <div class="stat-label">Pruned Future Edges (49.96%)</div>
+                    <div class="stat-number" id="auditPrunedEdges" data-metric="pruned_edges" style="color: var(--accent-red);">—</div>
+                    <div class="stat-label">Pruned Future Edges (<span id="auditPrunedPct" data-metric="pruned_pct">—</span>%)</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="auditShuffleStatus" style="color: var(--accent-green);">PASSED</div>
@@ -1581,6 +1591,56 @@
     </div>
 
     <script>
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showError(msg) {
+            const banner = document.getElementById('errorBanner');
+            const msgEl = document.getElementById('errorMessage');
+            if (banner && msgEl) {
+                msgEl.textContent = msg;
+                banner.style.display = 'flex';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                console.error(msg);
+            }
+        }
+
+        function dismissError() {
+            const banner = document.getElementById('errorBanner');
+            if (banner) banner.style.display = 'none';
+        }
+
+        async function fetchSplits() {
+            try {
+                const res = await fetch('/api/v1/meta/splits');
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.train_2012_2016 != null) {
+                    const el = document.getElementById('statTrainCount');
+                    if (el) el.innerText = `${data.train_2012_2016.toLocaleString()} Papers`;
+                }
+                if (data.val_2017 != null) {
+                    const el = document.getElementById('statValCount');
+                    if (el) el.innerText = `${data.val_2017.toLocaleString()} Papers`;
+                }
+                if (data.test_2018_2020 != null) {
+                    const el = document.getElementById('statTestCount');
+                    if (el) el.innerText = `${data.test_2018_2020.toLocaleString()} Papers`;
+                }
+            } catch (e) {
+                console.warn('Failed to load splits:', e);
+            }
+        }
+
         // Tab switching
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1640,7 +1700,8 @@
         paperInput.addEventListener('input', (e) => {
             const query = e.target.value.trim();
             clearTimeout(searchTimer);
-            if (query.length < 3 || query.startsWith('W') || query.startsWith('10.')) {
+            const isExplicitId = /^W\d+$/i.test(query) || query.startsWith('10.');
+            if (query.length < 3 || isExplicitId) {
                 searchDropdown.style.display = 'none';
                 return;
             }
@@ -1717,13 +1778,13 @@
                 const res = await fetch(`/api/v1/papers/predict/${encodeURIComponent(inputVal)}`);
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
-                    alert(`Prediction Error (${res.status}): ${err.detail || 'Service unavailable'}`);
+                    showError(`Prediction Error (${res.status}): ${err.detail || 'Service unavailable'}`);
                     return;
                 }
                 const data = await res.json();
                 renderPredictionResults(data);
             } catch (err) {
-                alert(`Error: ${err.message}`);
+                showError(`Error: ${err.message}`);
             } finally {
                 setPredictLoading(false);
             }
@@ -1800,13 +1861,17 @@
             }
 
             // Venue
-            if (data.venue) {
+            if (data.venue && data.venue.venue_name) {
                 document.getElementById('metaVenueName').innerText = data.venue.venue_name;
-                const rk = data.venue.quartile || data.venue.core_rank || 'Unranked';
-                document.getElementById('metaVenueRank').innerHTML = `<span class="prov-tag venue">${rk} (${data.venue.ranking_system || 'SCImago'})</span>`;
+                const rk = data.venue.quartile || data.venue.core_rank;
+                if (rk && data.venue.ranking_system) {
+                    document.getElementById('metaVenueRank').innerHTML = `<span class="prov-tag venue">${escapeHtml(rk)} (${escapeHtml(data.venue.ranking_system)})</span>`;
+                } else {
+                    document.getElementById('metaVenueRank').innerHTML = '<span style="color: var(--text-muted); font-size: 0.78rem;">No ranking found in SCImago or CORE</span>';
+                }
             } else {
                 document.getElementById('metaVenueName').innerText = 'Unindexed Venue';
-                document.getElementById('metaVenueRank').innerHTML = '<span style="color: var(--text-muted);">null (unranked)</span>';
+                document.getElementById('metaVenueRank').innerHTML = '<span style="color: var(--text-muted); font-size: 0.78rem;">No ranking found in SCImago or CORE</span>';
             }
 
             // Access Economics
@@ -1814,8 +1879,8 @@
             document.getElementById('metaAccessModel').innerHTML = econ.is_oa
                 ? `<span style="color: var(--accent-green); font-weight: 600;">Open Access (${econ.oa_status})</span>`
                 : `<span style="color: var(--accent-red); font-weight: 600;">Closed (Subscription)</span>`;
-            document.getElementById('metaApc').innerText = econ.apc_paid_usd != null ? `$${econ.apc_paid_usd.toLocaleString()}` : (econ.apc_list_usd != null ? `$${econ.apc_list_usd.toLocaleString()}` : 'None reported');
-            document.getElementById('metaOaBoost').innerText = `+${econ.empirical_cohort_oa_advantage_pct}% median boost`;
+            document.getElementById('metaApc').innerText = econ.apc_paid_usd != null ? `$${econ.apc_paid_usd.toLocaleString()}` : (econ.apc_list_usd != null ? `$${econ.apc_list_usd.toLocaleString()}` : 'Not listed');
+            document.getElementById('metaOaBoost').innerText = `+${econ.empirical_cohort_oa_advantage_pct}% estimated citation advantage`;
 
             // Lineage
             const lin = data.lineage;
@@ -2148,7 +2213,7 @@
         // ==========================================
         // VERIFICATION LAB (TAB 2) SCRIPTS
         // ==========================================
-        let currentBlindWorkId = 'W2194775991';
+        let currentBlindWorkId = 'W2752782242';
 
         function setBlindPaper(workId) {
             document.getElementById('blindInput').value = workId;
@@ -2175,6 +2240,26 @@
                 if (tm.auroc_ovr != null) document.getElementById('kpiAuroc').innerText = tm.auroc_ovr.toFixed(3);
                 if (la.lift_ratio != null) document.getElementById('kpiLift').innerText = `${la.lift_ratio.toFixed(2)}x`;
                 if (sc.rho != null) document.getElementById('kpiSpearman').innerText = sc.rho.toFixed(3);
+
+                if (data.temperature != null) {
+                    const tauEl = document.getElementById('statValTau');
+                    if (tauEl) tauEl.innerText = data.temperature.toFixed(4);
+                }
+
+                const cm = data.test_confusion_matrix;
+                if (cm && cm.matrix && la) {
+                    const totalHighTrue = cm.matrix[2].reduce((a,b)=>a+b,0);
+                    const lowFlaggedOfHigh = cm.matrix[2][0];
+                    const medHighFlagged = cm.matrix[2][1] + cm.matrix[2][2];
+                    const medHighPct = totalHighTrue > 0 ? ((medHighFlagged / totalHighTrue) * 100).toFixed(1) : '—';
+                    const baseRatePct = la.true_high_rate_in_test != null ? (la.true_high_rate_in_test * 100).toFixed(1) : '10.3';
+                    const precPct = la.lift_precision_at_predicted_high != null ? (la.lift_precision_at_predicted_high * 100).toFixed(1) : '39.6';
+                    const liftRatio = la.lift_ratio != null ? la.lift_ratio.toFixed(2) : '3.84';
+                    const liftEl = document.getElementById('liftSummaryText');
+                    if (liftEl) {
+                        liftEl.innerHTML = `For truly elite papers (≥90th percentile), <strong>${medHighPct}% were flagged as Medium or High</strong> (only ${lowFlaggedOfHigh} out of ${totalHighTrue} were labeled Low). When the model predicts High, the empirical chance the paper is truly in the top 10% jumps from ${baseRatePct}% (random base rate) to ${precPct}% — a <strong>${liftRatio}x lift</strong> over random selection.`;
+                    }
+                }
 
                 // Render Confusion Matrix
                 const cm = data.test_confusion_matrix;
@@ -2214,13 +2299,13 @@
                 const res = await fetch(`/api/v1/verify/blind/${encodeURIComponent(inputVal)}`);
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
-                    alert(`Error (${res.status}): ${err.detail || 'Service unavailable'}`);
+                    showError(`Error (${res.status}): ${err.detail || 'Service unavailable'}`);
                     return;
                 }
                 const data = await res.json();
                 renderBlindResults(data);
             } catch (err) {
-                alert(`Error: ${err.message}`);
+                showError(`Error: ${err.message}`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span>Run Blind Forecast</span>';
@@ -2261,7 +2346,7 @@
             try {
                 const res = await fetch(`/api/v1/verify/blind/${encodeURIComponent(currentBlindWorkId)}/reveal`);
                 if (!res.ok) {
-                    alert('Failed to reveal ground truth');
+                    showError('Failed to reveal ground truth');
                     return;
                 }
                 const data = await res.json();
@@ -2301,7 +2386,7 @@
                 document.getElementById('revScholarLink').href = `https://scholar.google.com/scholar?q=${encodeURIComponent(data.doi || data.title)}`;
 
             } catch (err) {
-                alert(`Error revealing ground truth: ${err.message}`);
+                showError(`Error revealing ground truth: ${err.message}`);
             } finally {
                 btn.disabled = false;
             }
@@ -2396,7 +2481,11 @@
                 const edge = audits.edge_time_audit || {};
                 if (edge.total_in_corpus_edges) document.getElementById('auditTotalEdges').innerText = edge.total_in_corpus_edges.toLocaleString();
                 if (edge.valid_as_of_cutoff_edges) document.getElementById('auditValidEdges').innerText = edge.valid_as_of_cutoff_edges.toLocaleString();
-                if (edge.leaked_future_edges) document.getElementById('auditPrunedEdges').innerText = `${edge.leaked_future_edges.toLocaleString()} (${edge.leak_percentage}%)`;
+                if (edge.leaked_future_edges) document.getElementById('auditPrunedEdges').innerText = edge.leaked_future_edges.toLocaleString();
+                if (edge.leak_percentage != null) {
+                    const el = document.getElementById('auditPrunedPct');
+                    if (el) el.innerText = edge.leak_percentage;
+                }
 
                 const shuffle = audits.label_shuffle_sanity || {};
                 if (shuffle.status) document.getElementById('auditShuffleStatus').innerText = shuffle.status;
@@ -2417,14 +2506,14 @@
             try {
                 const res = await fetch(`/api/v1/verify/poison/${encodeURIComponent(inputVal)}`);
                 if (!res.ok) {
-                    alert('Poison test failed');
+                    showError('Poison test failed');
                     return;
                 }
                 const data = await res.json();
 
                 document.getElementById('poisonResult').style.display = 'block';
                 document.getElementById('poisonVerdict').innerText = data.temporal_firewall_intact
-                    ? '✅ PASSED: Zero Temporal Leakage Verified'
+                    ? '✅ PASSED: Leakage-tested (Zero Future Citation Drift)'
                     : '❌ FAILED: Temporal Leakage Detected';
 
                 document.getElementById('poisonDeltaTag').innerText = `Max Delta: ${data.max_probability_delta.toFixed(6)}`;
@@ -2441,7 +2530,7 @@
                 `;
 
             } catch (err) {
-                alert(`Error running poison test: ${err.message}`);
+                showError(`Error running poison test: ${err.message}`);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span>🚨 Inject +100,000 Future Citations (Year 2028)</span>';
@@ -2566,7 +2655,7 @@
                 renderCompareCard(cardA, dataA);
                 renderCompareCard(cardB, dataB);
             } catch (err) {
-                alert(`Comparison error: ${err.message}`);
+                showError(`Comparison error: ${err.message}`);
             }
         }
 
@@ -2591,9 +2680,12 @@
 
         // Init on page load
         window.addEventListener('DOMContentLoaded', () => {
+            fetchSplits();
+            fetchOaMetrics();
             loadQuickSamples();
             fetchStats();
             fetchBenchmarkReport();
+            initAntiCheatingLab();
             const hash = window.location.hash.replace('#', '');
             if (hash === 'verify-lab') {
                 switchTab('verify-lab');

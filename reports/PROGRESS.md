@@ -251,6 +251,9 @@ Tracking implementation progress, commands, verified outputs, and before-vs-afte
 
 ## Work Package 7: Open Access Advantage Hardening
 
+> [!NOTE]
+> Numbers below are copied from reports at the time shown; `reports/*.json` is authoritative.
+
 - **Status:** COMPLETED
 - **Files Created / Changed:**
   - `scripts/oa_analysis.py` (Created: performs log-linear regressions estimating crude vs adjusted Open Access citation multipliers)
@@ -264,16 +267,16 @@ Tracking implementation progress, commands, verified outputs, and before-vs-afte
 - **Raw Output Excerpt:**
   ```text
   Crude Model: ln(1 + citations_window) ~ is_oa
-    OA Coefficient (b): 0.2118 (SE: 0.0245, t: 8.65, p < 1e-15)
-    Crude Citation Multiplier: +23.59% (95% CI: [17.70%, 29.77%])
+    OA Coefficient (b): 0.2118 (SE: 0.01368, p = 1.20e-53)
+    Crude Citation Multiplier: +23.59% (95% CI: [18.50%, 23.86%])
   Adjusted Model: ln(1 + citations_window) ~ is_oa + field + year + author_scale + log_refs + tier_top
-    Adjusted OA Coefficient (b): 0.1027 (SE: 0.0177, t: 5.79, p < 1e-8)
-    Adjusted Citation Multiplier: +10.82% (95% CI: [6.86%, 14.93%])
+    Adjusted OA Coefficient (b): 0.1027 (SE: 0.01288, p = 1.63e-15)
+    Adjusted Citation Multiplier: +10.82% (95% CI: [7.75%, 12.80%])
     Attenuation from crude to adjusted: 51.5%
   ```
-- **Before-vs-After Numbers:**
-  - OA citation advantage: Before = hardcoded fake constant "+28.4%"; After = empirical +23.59% crude advantage, which attenuates by 51.5% to +10.82% after adjusting for field, cohort year, author scale, and venue prestige.
-  - Discipline heterogeneity: Computer Science (+12.4%, p = 0.012), Physics (+11.7%, p = 0.027), Engineering (+10.2%, p = 0.041), Medicine (-1.9%, p = 0.548, not statistically significant).
+- **Authoritative Numbers (from `reports/oa_advantage_metrics.json`):**
+  - OA citation advantage: Crude advantage = +23.59% (SE: 0.01368), which attenuates by 51.5% to +10.82% (SE: 0.01288) after adjusting for field, cohort year, author scale, and venue prestige.
+  - Discipline heterogeneity: Computer Science (+6.34%, p = 0.042), Physics and Astronomy (+12.63%, p = 0.00011), Engineering (+4.52%, p = 0.022), Biochemistry/Genetics (+25.84%, p < 1e-8), Medicine (-1.88%, p = 0.548, not statistically significant).
   - Methodological honesty: Explicit notice stating that observational OA advantage reflects author self-selection rather than pure causal benefit.
 
 ---

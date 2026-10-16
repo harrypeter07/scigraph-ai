@@ -1,0 +1,126 @@
+{
+  "id": "https://openalex.org/W2983048398",
+  "title": "Gene therapy clinical trials worldwide to 2017: An update",
+  "doi": "https://doi.org/10.1002/jgm.3015",
+  "publication_year": 2018,
+  "publication_date": "2018-03-25",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "The Journal of Gene Medicine",
+      "issn_l": "1099-498X",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 4480.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Biochemistry, Genetics and Molecular Biology"
+    }
+  },
+  "primary_field_name": "Biochemistry, Genetics and Molecular Biology",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 147,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 29
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 68
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 86
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 77
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 124
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 141
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 151
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 148
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 36
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 12
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 6
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 6
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 3
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 2
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 5
+    }
+  ],
+  "citations_at_cutoff": 369,
+  "future_citations_5y": 342
+}

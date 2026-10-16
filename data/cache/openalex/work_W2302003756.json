@@ -1,0 +1,122 @@
+{
+  "id": "https://openalex.org/W2302003756",
+  "title": "Global patterns and trends in colorectal cancer incidence and mortality",
+  "doi": "https://doi.org/10.1136/gutjnl-2015-310912",
+  "publication_year": 2016,
+  "publication_date": "2016-01-27",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "bronze",
+    "oa_url": "https://gut.bmj.com/content/gutjnl/66/4/683.full.pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Gut",
+      "issn_l": "0017-5749",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Medicine"
+    }
+  },
+  "primary_field_name": "Medicine",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 62,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 300
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 464
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 508
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 549
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 734
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 750
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 804
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 596
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 344
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 127
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 41
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 1
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 2
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 516,
+  "future_citations_5y": 2150
+}

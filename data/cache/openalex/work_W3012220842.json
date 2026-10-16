@@ -1,0 +1,88 @@
+{
+  "id": "https://openalex.org/W3012220842",
+  "title": "AI-based chatbots in customer service and their effects on user compliance",
+  "doi": "https://doi.org/10.1007/s12525-020-00414-7",
+  "publication_year": 2020,
+  "publication_date": "2020-03-17",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "hybrid",
+    "oa_url": "https://link.springer.com/content/pdf/10.1007/s12525-020-00414-7.pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Electronic Markets",
+      "issn_l": "1019-6781",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 2750.0
+    },
+    "apc_list": {
+      "value_usd": 2750.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    }
+  ],
+  "referenced_works_count": 110,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 234
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 271
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 271
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 184
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 120
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 83
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 16
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 220,
+  "future_citations_5y": 726
+}

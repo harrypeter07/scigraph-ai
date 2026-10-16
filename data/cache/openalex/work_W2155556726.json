@@ -1,0 +1,111 @@
+{
+  "id": "https://openalex.org/W2155556726",
+  "title": "Demand Side Management: Demand Response, Intelligent Energy Systems, and Smart Loads",
+  "doi": "https://doi.org/10.1109/tii.2011.2158841",
+  "publication_year": 2011,
+  "publication_date": "2011-06-29",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "IEEE Transactions on Industrial Informatics",
+      "issn_l": "1551-3203",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 2645.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Engineering"
+    }
+  },
+  "primary_field_name": "Engineering",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    }
+  ],
+  "referenced_works_count": 33,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 131
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 122
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 122
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 175
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 164
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 238
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 266
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 296
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 307
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 280
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 263
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 219
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 173
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 108
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 56
+    }
+  ],
+  "citations_at_cutoff": 164,
+  "future_citations_5y": 655
+}

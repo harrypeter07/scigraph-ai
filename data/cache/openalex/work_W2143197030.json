@@ -1,0 +1,126 @@
+{
+  "id": "https://openalex.org/W2143197030",
+  "title": "Detection of ultra-rare mutations by next-generation sequencing",
+  "doi": "https://doi.org/10.1073/pnas.1208715109",
+  "publication_year": 2012,
+  "publication_date": "2012-08-01",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "green",
+    "oa_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/3437896"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Proceedings of the National Academy of Sciences",
+      "issn_l": "0027-8424",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Biochemistry, Genetics and Molecular Biology"
+    }
+  },
+  "primary_field_name": "Biochemistry, Genetics and Molecular Biology",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 53,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 50
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 81
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 86
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 69
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 88
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 88
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 88
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 79
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 77
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 75
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 81
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 60
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 75
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 39
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 3
+    }
+  ],
+  "citations_at_cutoff": 117,
+  "future_citations_5y": 216
+}

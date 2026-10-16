@@ -56,8 +56,9 @@ def test_model_card_endpoint(client):
     response = client.get("/api/v1/papers/model-card")
     assert response.status_code == 200
     card = response.json()
-    assert "benchmark_metrics" in card
-    assert "PyG HeteroGraphSAGE (2-Hop)" in card["benchmark_metrics"]
+    assert "benchmark_metrics" in card or "benchmark_summary" in card
+    metrics = card.get("benchmark_metrics") or card.get("benchmark_summary", {})
+    assert "PyG HeteroGraphSAGE (2-Hop)" in metrics or "M5_HeteroGraphSAGE" in metrics
 
 
 def test_corpus_sample_endpoint(client):

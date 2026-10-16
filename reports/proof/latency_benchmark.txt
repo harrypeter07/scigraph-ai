@@ -1,0 +1,36 @@
+================================================================================
+API SERVING LATENCY & ROBUSTNESS BENCHMARK (200 REQUESTS)
+================================================================================
+Constructed request pool with 200 items.
+
+Sending requests to /api/v1/paper/predict/...
+  Processed 25/200 requests (last: 452.3ms, status: 200)
+  Processed 25/200 requests (last: 452.3ms, status: 200)
+  Processed 50/200 requests (last: 370.6ms, status: 200)
+  Processed 50/200 requests (last: 370.6ms, status: 200)
+  Processed 75/200 requests (last: 418.4ms, status: 200)
+  Processed 75/200 requests (last: 418.4ms, status: 200)
+  Processed 100/200 requests (last: 396.8ms, status: 200)
+  Processed 100/200 requests (last: 396.8ms, status: 200)
+  Processed 125/200 requests (last: 396.0ms, status: 200)
+  Processed 125/200 requests (last: 396.0ms, status: 200)
+  Processed 150/200 requests (last: 375.8ms, status: 200)
+  Processed 150/200 requests (last: 375.8ms, status: 200)
+  Processed 175/200 requests (last: 605.1ms, status: 404)
+  Processed 175/200 requests (last: 605.1ms, status: 404)
+  Processed 200/200 requests (last: 495.7ms, status: 404)
+  Processed 200/200 requests (last: 495.7ms, status: 404)
+
+================================================================================
+LATENCY BENCHMARK RESULTS
+================================================================================
+Requests Total:   200
+Total Duration:   81.03 s
+Throughput:       2.5 req/s
+Status Codes:     {200: 170, 404: 30}
+Latency p50:      383.65 ms
+Latency p90:      507.16 ms
+Latency p99:      734.99 ms
+Latency Mean:     405.17 ms (Min: 61.57 ms, Max: 1877.76 ms)
+
+Saved latency report to C:\Users\ASUS\Documents\SECOND SEMISTER\INTERNSHIP\scigraph\reports\api_latency.json

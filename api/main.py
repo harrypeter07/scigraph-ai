@@ -61,8 +61,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routers
-app.include_router(paper_router)
+# Register routers for both singular and plural API paths
+app.include_router(paper_router, prefix="/api/v1/papers")
+app.include_router(paper_router, prefix="/api/v1/paper")
+
+
+@app.get("/api/v1/meta/numbers")
+def get_numbers_registry():
+    """Returns the unified quantitative numbers registry from docs/NUMBERS.json."""
+    from scripts.make_numbers import collect_numbers
+    return collect_numbers()
 
 
 @app.get("/health")

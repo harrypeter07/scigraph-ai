@@ -1,0 +1,12 @@
+{
+  "n_samples": 500,
+  "benchmark_macro_f1": 0.2371,
+  "benchmark_accuracy": 0.54,
+  "serving_macro_f1": 0.2371,
+  "serving_accuracy": 0.54,
+  "parity_gap_macro_f1": 0.0,
+  "context_distribution": {
+    "none": 500
+  },
+  "latency_ms_per_paper": 6.46
+}

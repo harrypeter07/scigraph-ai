@@ -12,6 +12,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
+import pandas as pd
 
 from api.config import settings
 
@@ -85,12 +86,16 @@ class ScientometricAccessService:
 
         # Extract authentic APC if available
         def parse_usd(obj: Optional[Dict[str, Any]]) -> Optional[float]:
+            import math
             if not obj or not isinstance(obj, dict):
                 return None
             v = obj.get("value_usd")
-            if v is not None:
+            if v is not None and not pd.isna(v):
                 try:
-                    return float(v)
+                    val = float(v)
+                    if math.isnan(val) or math.isinf(val):
+                        return None
+                    return val
                 except (ValueError, TypeError):
                     return None
             return None
@@ -100,13 +105,17 @@ class ScientometricAccessService:
 
         # Retrieve empirical advantage matching scientific field
         field_metrics = self.metrics.get("by_field", {}).get(field_name or "")
-        if field_metrics:
-            adv_pct = field_metrics.get("median_advantage_pct", 19.3)
-            ci_95 = field_metrics.get("ci_95", [55.0, 75.0])
+        global_adj = self.metrics.get("global_advantage", {}).get("adjusted", {})
+
+        if field_metrics and "multiplier_pct" in field_metrics:
+            adv_pct = float(field_metrics["multiplier_pct"])
+            ci_95 = [float(x) for x in field_metrics.get("ci_95", [0.0, 0.0])]
+        elif global_adj and "multiplier_pct" in global_adj:
+            adv_pct = float(global_adj["multiplier_pct"])
+            ci_95 = [float(x) for x in global_adj.get("ci_95", [0.0, 0.0])]
         else:
-            global_adv = self.metrics.get("global_advantage", {})
-            adv_pct = global_adv.get("median_advantage_pct", 19.3)
-            ci_95 = global_adv.get("median_diff_ci_95", [55.0, 75.0])
+            adv_pct = None
+            ci_95 = None
 
         notice = (
             "Empirical Association, Not Causation: Open Access citation differential "
@@ -119,8 +128,8 @@ class ScientometricAccessService:
             oa_url=oa_url,
             apc_paid_usd=apc_paid,
             apc_list_usd=apc_list,
-            empirical_cohort_oa_advantage_pct=adv_pct if is_oa else 0.0,
-            empirical_ci_95=ci_95 if is_oa else [0.0, 0.0],
+            empirical_cohort_oa_advantage_pct=adv_pct if (is_oa and adv_pct is not None) else 0.0,
+            empirical_ci_95=ci_95 if (is_oa and ci_95 is not None) else [0.0, 0.0],
             scientometric_notice=notice,
             provenance="openalex | computed"
         )

@@ -1,72 +1,57 @@
-# Scientometric Report: Empirical Open Access Citation Advantage & Access Economics
+# SciGraph AI 2.0: Scientometric Open Access Citation Advantage Analysis
 
-## 1. Executive Summary & Scientometric Grounding
+**Date:** 2026-10-16 16:06:49 UTC  
+**Sample Size:** 16,500 multi-disciplinary research articles  
+**Outcome Metric:** $\ln(1 + \text{citations_window})$ over horizon $(\text{cutoff}, \text{pub} + 5]$  
 
-In response to the teacher's suggestion (*Paid vs. unpaid economics and open access citation advantage*), this analysis replaces previously hardcoded marketing constants (`+28.4%`, `+31.2%`, `-$35 paywall penalty`) with **reproducible, empirical scientometrics** computed directly from our multi-disciplinary corpus of **16,500 peer-reviewed publications (2010–2020)**.
+---
+
+## 1. Executive Summary & Core Empirical Findings
+
+- **Crude Open Access Effect:** **+23.6%** (b = 0.2118, 95% CI: [0.1850, 0.2386], p = 1.20e-53, R2 = 0.0143).
+- **Multivariate Adjusted Effect:** **+10.8%** (b = 0.1027, 95% CI: [0.0775, 0.1280], p = 1.63e-15, R2 = 0.3091).
+- **Confounding Attenuation:** Controlling for field, cohort year, author count, SJR, and top-tier venue status reduces the estimated association by **51.5%**.
 
 > [!IMPORTANT]
-> **Methodological Standard: Association, Not Causation**
-> In accordance with scientometrics literature (e.g., Davis et al., Piwowar et al.), open access publications frequently demonstrate higher citation counts in observational studies. However, this differential is heavily confounded by **author self-selection bias** (authors systematically choose OA dissemination for their most promising research) and institutional funding disparities. All figures below represent empirical associations observed in our cohort data.
+> **Causation vs. Association:** In accordance with established scientometric literature (e.g., Davis et al. BMJ 2008, Gaule & Maystre 2011), the remaining positive association cannot be interpreted as purely causal. High-impact research groups systematically self-select into Gold/Hybrid open access publishing.
 
 ---
 
-## 2. Global Empirical Citation Advantage
+## 2. Regression Specifications & Model Comparison
 
-Across all 16,500 sampled works:
-
-| Metric | Open Access (OA) | Closed Access (Paywalled) | Difference / Advantage |
-| :--- | :--- | :--- | :--- |
-| **Sample Size (N)** | **11,878** (72.0%) | **4,622** (28.0%) | — |
-| **Median 5-Year Citations** | **401.0** | **336.0** | **+19.3%** |
-| **Bootstrap 95% CI (Median Diff)** | — | — | **[+55.0, +75.0] citations** |
-| **Mean 5-Year Citations** | **684.46** | **478.28** | **+206.18 citations** |
+| Specification | Model Formulation | OA Coef ($b$) | 95% Confidence Interval | Citation Multiplier ($e^b - 1$) | $R^2$ | $p$-value |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Crude OLS** | $\ln(1+C) \sim \text{is_oa}$ | `0.2118` | `[0.1850, 0.2386]` | **+23.6%** | `0.0143` | `< 0.001` |
+| **Adjusted OLS** | $\ln(1+C) \sim \text{is_oa} + \mathbf{X}_{\text{covariates}}$ | `0.1027` | `[0.0775, 0.1280]` | **+10.8%** | `0.3091` | `< 0.001` |
 
 ---
 
-## 3. Disciplinary Stratification (Field-Specific Advantage)
+## 3. Disaggregated OA Subtypes (Reference = Closed)
 
-Citation dynamics differ drastically across scientific domains. Comparing raw numbers across disciplines without stratification creates ecological fallacies:
-
-| Scientific Discipline | N (OA / Closed) | Median OA Cits | Median Closed Cits | Empirical Advantage (Median) | Bootstrap 95% CI |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Biochemistry, Genetics and Molecular Biology** | 2,924 / 376 | 413.0 | 313.0 | **+31.9%** | [+79.0, +117.0] |
-| **Computer Science** | 1,830 / 1,470 | 524.0 | 325.0 | **+61.2%** | [+172.5, +218.5] |
-| **Engineering** | 1,623 / 1,677 | 406.0 | 363.0 | **+11.8%** | [+30.0, +57.0] |
-| **Medicine** | 2,758 / 542 | 533.0 | 476.0 | **+12.0%** | [+29.5, +85.0] |
-| **Physics and Astronomy** | 2,743 / 557 | 215.0 | 189.0 | **+13.8%** | [+13.0, +39.0] |
+| OA Subtype | Crude Coef ($b$) | Crude Multiplier | Adjusted Coef ($b$) | Adjusted Multiplier | Adjusted 95% CI |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| `Gold` | `+0.3152` | +37.1% | `+0.1286` | **+13.7%** | `[0.0935, 0.1638]` |
+| `Green` | `+0.1373` | +14.7% | `+0.0863` | **+9.0%** | `[0.0578, 0.1147]` |
+| `Hybrid` | `+0.2851` | +33.0% | `+0.1011` | **+10.6%** | `[0.0657, 0.1365]` |
+| `Bronze` | `+0.1524` | +16.5% | `+0.1000` | **+10.5%** | `[0.0647, 0.1352]` |
 
 ---
 
-## 4. OA Subtype & Economic Pricing Breakdown
+## 4. Stratified Analysis Across Scientific Fields
 
-Open access is not monolithic. OpenAlex categorizes papers into 5 distinct legal and dissemination subtypes:
-
-| OA Subtype | Description & Economic Model | Corpus Share | Median 5Y Cits | Mean 5Y Cits | Documented APC Paid (Median) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **BRONZE** | Free to read on publisher portal without explicit open license | 15.3% (2,520) | 369.5 | 602.96 | $1,856 |
-| **CLOSED** | Traditional subscription paywall | 28.0% (4,622) | 336.0 | 478.28 | No APC tracked / $0 |
-| **DIAMOND** | Academic venue | 2.6% (431) | 332.0 | 2394.99 | $210 |
-| **GOLD** | Fully Open Access journal (Author/Institution APC funded) | 15.9% (2,625) | 451.0 | 668.27 | $3,380 |
-| **GREEN** | Self-archived preprint or institutional repository (Free for author & reader) | 24.1% (3,983) | 375.0 | 582.64 | No APC tracked / $0 |
-| **HYBRID** | Subscription journal with open article option (Individual APC paid) | 14.1% (2,319) | 428.0 | 648.34 | $4,190 |
+| Scientific Field | Sample Size | Adjusted Coef ($b$) | 95% Confidence Interval | Adjusted Advantage ($e^b - 1$) | Field $R^2$ |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Biochemistry, Genetics and Molecular Biology** | 3,300 | `+0.2298` | `[0.1551, 0.3045]` | **+25.8%** | `0.1955` |
+| **Computer Science** | 3,300 | `+0.0615` | `[0.0023, 0.1207]` | **+6.3%** | `0.3298` |
+| **Engineering** | 3,300 | `+0.0442` | `[0.0065, 0.0820]` | **+4.5%** | `0.2133` |
+| **Medicine** | 3,300 | `-0.0190` | `[-0.0810, 0.0430]` | **-1.9%** | `0.2032` |
+| **Physics and Astronomy** | 3,300 | `+0.1190` | `[0.0587, 0.1792]` | **+12.6%** | `0.1052` |
 
 ---
 
-## 5. Controlling for Venue Prestige (Venue Tier Stratification)
+## 5. Methodological Notes & Reproducibility
 
-To test whether the open access advantage is simply an artifact of prestigious journals, we examine the citation advantage stratified by authentic SCImago/CORE venue tiers:
-
-| Venue Tier | N (OA / Closed) | Median OA Cits | Median Closed Cits | Advantage (%) | Bootstrap 95% CI |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Mid/Low-Tier (Q2-Q4 / CORE B-C)** | 1,933 / 1,044 | 448.0 | 357.0 | **+25.5%** | [+61.0, +114.0] |
-| **Top-Tier (Q1 / CORE A-A*)** | 8,934 / 2,668 | 395.0 | 353.0 | **+11.9%** | [+30.0, +53.0] |
-| **Unranked / Non-Indexed** | 1,011 / 910 | 358.0 | 259.0 | **+38.2%** | [+79.0, +126.5] |
-
----
-
-## 6. Key Scientific Findings for Presentation
-
-1. **Empirical Advantage Reality**: The real empirical citation advantage in this multi-disciplinary dataset is **+19.3%**, not an invented arbitrary number.
-2. **Subtype Nuance**: Green Open Access (institutional repositories and arXiv self-archiving) demonstrates strong citation accrual without incurring commercial author APC fees.
-3. **Prestige Interplay**: While top-tier venues (SCImago Q1 and CORE A*) have higher baseline citations overall, open access papers within those venues still display a positive citation differential.
-4. **Honest Scientometric Stance**: SciGraph AI explicitly flags these metrics with provenance (`openalex | computed`) and presents them as observational association, preserving scholarly integrity.
+- **Command to Reproduce:** `python scripts/oa_analysis.py`
+- **Input Data:** `data/works.parquet` (16,500 OpenAlex papers)
+- **Dynamic Consumption:** Read directly at runtime by `ml/scientometrics/access_economics.py` and served via `/api/v1/paper/predict`.
+- **Zero Handcrafted Numbers:** All percentages and confidence intervals generated from empirical regression matrices.

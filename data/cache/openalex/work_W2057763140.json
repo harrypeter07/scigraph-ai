@@ -1,0 +1,106 @@
+{
+  "id": "https://openalex.org/W2057763140",
+  "title": "Collaborative filtering with temporal dynamics",
+  "doi": "https://doi.org/10.1145/1721654.1721677",
+  "publication_year": 2010,
+  "publication_date": "2010-03-30",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Communications of the ACM",
+      "issn_l": "0001-0782",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    }
+  ],
+  "referenced_works_count": 26,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 15
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 10
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 13
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 18
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 25
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 41
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 50
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 61
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 100
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 106
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 98
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 88
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 65
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 34
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 32
+    }
+  ],
+  "citations_at_cutoff": 32,
+  "future_citations_5y": 187
+}

@@ -1,0 +1,84 @@
+{
+  "id": "https://openalex.org/W2998882781",
+  "title": "Fracton phases of matter",
+  "doi": "https://doi.org/10.1142/s0217751x20300033",
+  "publication_year": 2020,
+  "publication_date": "2020-02-29",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "green",
+    "oa_url": "https://arxiv.org/pdf/2001.01722"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "International Journal of Modern Physics A",
+      "issn_l": "0217-751X",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Physics and Astronomy"
+    }
+  },
+  "primary_field_name": "Physics and Astronomy",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    }
+  ],
+  "referenced_works_count": 86,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 31
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 65
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 58
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 67
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 64
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 47
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 18
+    }
+  ],
+  "citations_at_cutoff": 129,
+  "future_citations_5y": 190
+}

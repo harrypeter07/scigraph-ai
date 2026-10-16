@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-10-16T16:53:57.640354+00:00",
+    "total_requests": 200,
+    "server_url": "http://127.0.0.1:8080",
+    "test_endpoint": "/api/v1/paper/predict/{id}"
+  },
+  "p50_ms": 383.65,
+  "p90_ms": 507.16,
+  "p99_ms": 734.99,
+  "mean_ms": 405.17,
+  "min_ms": 61.57,
+  "max_ms": 1877.76,
+  "status_code_distribution": {
+    "200": 170,
+    "404": 30
+  },
+  "throughput_req_per_sec": 2.47
+}

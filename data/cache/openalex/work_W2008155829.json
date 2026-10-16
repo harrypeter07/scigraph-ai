@@ -1,0 +1,118 @@
+{
+  "id": "https://openalex.org/W2008155829",
+  "title": "IMPROVED REFLECTION MODELS OF BLACK HOLE ACCRETION DISKS: TREATING THE ANGULAR DISTRIBUTION OF X-RAYS",
+  "doi": "https://doi.org/10.1088/0004-637x/782/2/76",
+  "publication_year": 2014,
+  "publication_date": "2014-01-30",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "bronze",
+    "oa_url": "https://iopscience.iop.org/article/10.1088/0004-637X/782/2/76/pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "The Astrophysical Journal",
+      "issn_l": "0004-637X",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 4499.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Physics and Astronomy"
+    }
+  },
+  "primary_field_name": "Physics and Astronomy",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 88,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 44
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 65
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 77
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 66
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 75
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 67
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 73
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 59
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 57
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 38
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 50
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 27
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 12
+    }
+  ],
+  "citations_at_cutoff": 89,
+  "future_citations_5y": 154
+}

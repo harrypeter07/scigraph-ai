@@ -1,0 +1,360 @@
+{
+  "metadata": {
+    "generated_at_utc": "2026-10-16T17:14:24.806548+00:00",
+    "git_commit": "ce8a630",
+    "description": "Unified empirical registry of all quantitative scientific metrics in SciGraph AI 2.0"
+  },
+  "metrics": [
+    {
+      "metric_name": "M0_Majority Test Macro-F1",
+      "value": "0.2215 \u00b1 0.0000",
+      "confidence_interval_95": [
+        0.2172,
+        0.2258
+      ],
+      "p_value_vs_m2": 1.0,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M0_Majority Calibrated ECE",
+      "value": "0.0006",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M0_Majority Test AUROC",
+      "value": "0.5000",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M1_LogisticRegression Test Macro-F1",
+      "value": "0.5244 \u00b1 0.0000",
+      "confidence_interval_95": [
+        0.5062,
+        0.5421
+      ],
+      "p_value_vs_m2": 0.003,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M1_LogisticRegression Calibrated ECE",
+      "value": "0.0318",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M1_LogisticRegression Test AUROC",
+      "value": "0.7141",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M2_LightGBM Test Macro-F1",
+      "value": "0.5020 \u00b1 0.0000",
+      "confidence_interval_95": [
+        0.4866,
+        0.5185
+      ],
+      "p_value_vs_m2": 1.0,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M2_LightGBM Calibrated ECE",
+      "value": "0.0799",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M2_LightGBM Test AUROC",
+      "value": "0.7182",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M3_GraphlessMLP Test Macro-F1",
+      "value": "0.4111 \u00b1 0.0352",
+      "confidence_interval_95": [
+        0.401,
+        0.4349
+      ],
+      "p_value_vs_m2": 1.0,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M3_GraphlessMLP Calibrated ECE",
+      "value": "0.0712",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M3_GraphlessMLP Test AUROC",
+      "value": "0.6711",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M4_HomogeneousGraphSAGE Test Macro-F1",
+      "value": "0.3138 \u00b1 0.0042",
+      "confidence_interval_95": [
+        0.3061,
+        0.3257
+      ],
+      "p_value_vs_m2": 1.0,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M4_HomogeneousGraphSAGE Calibrated ECE",
+      "value": "0.0917",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M4_HomogeneousGraphSAGE Test AUROC",
+      "value": "0.5129",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M5_HeteroGraphSAGE Test Macro-F1",
+      "value": "0.3167 \u00b1 0.0164",
+      "confidence_interval_95": [
+        0.3149,
+        0.3343
+      ],
+      "p_value_vs_m2": 1.0,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M5_HeteroGraphSAGE Calibrated ECE",
+      "value": "0.0679",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "M5_HeteroGraphSAGE Test AUROC",
+      "value": "0.5173",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/benchmark_latest.json",
+      "timestamp": "2026-10-16T16:14:15.824589+00:00"
+    },
+    {
+      "metric_name": "Crude Open Access Citation Multiplier",
+      "value": "+23.59%",
+      "confidence_interval_95": [
+        0.18496,
+        0.2386
+      ],
+      "p_value_vs_m2": 1.2048e-53,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Adjusted Open Access Citation Multiplier (Controlling for Field, Year, Authors, Prestige)",
+      "value": "+10.82%",
+      "confidence_interval_95": [
+        0.07746,
+        0.12795
+      ],
+      "p_value_vs_m2": 1.6262e-15,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Open Access Confounding Attenuation Percentage",
+      "value": "51.5%",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Adjusted OA Advantage in Biochemistry, Genetics and Molecular Biology",
+      "value": "+25.8%",
+      "confidence_interval_95": [
+        0.15511,
+        0.30451
+      ],
+      "p_value_vs_m2": 1.8008e-09,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Adjusted OA Advantage in Computer Science",
+      "value": "+6.3%",
+      "confidence_interval_95": [
+        0.0023,
+        0.1207
+      ],
+      "p_value_vs_m2": 0.04173,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Adjusted OA Advantage in Engineering",
+      "value": "+4.5%",
+      "confidence_interval_95": [
+        0.00648,
+        0.08199
+      ],
+      "p_value_vs_m2": 0.021663,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Adjusted OA Advantage in Medicine",
+      "value": "-1.9%",
+      "confidence_interval_95": [
+        -0.08103,
+        0.04305
+      ],
+      "p_value_vs_m2": 0.54848,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Adjusted OA Advantage in Physics and Astronomy",
+      "value": "+12.6%",
+      "confidence_interval_95": [
+        0.05871,
+        0.17924
+      ],
+      "p_value_vs_m2": 0.00011071,
+      "source_file": "reports/oa_advantage_metrics.json",
+      "timestamp": "2026-10-16T16:06:49.383736+00:00"
+    },
+    {
+      "metric_name": "Train-Serving Parity Gap (Benchmark F1 - Serving F1 on 500 Test Works)",
+      "value": "+0.0000",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/serving_parity_gap.json",
+      "timestamp": "verified"
+    },
+    {
+      "metric_name": "Serving Inference Latency per Paper",
+      "value": "6.46 ms",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/serving_parity_gap.json",
+      "timestamp": "verified"
+    },
+    {
+      "metric_name": "Future-Poison Feature Diff (Post-Cutoff Invariance)",
+      "value": "0.00000000",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/leakage_audit.json",
+      "timestamp": "2026-10-16T15:38:35.911054+00:00"
+    },
+    {
+      "metric_name": "Label-Shuffled Validation Macro-F1 (Sanity Bound < 0.40)",
+      "value": "0.3079",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/leakage_audit.json",
+      "timestamp": "2026-10-16T15:38:35.911054+00:00"
+    },
+    {
+      "metric_name": "Graph Citation Edge Filter Leakage Remediated",
+      "value": "43,816 edges (49.96%) filtered",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/leakage_audit.json",
+      "timestamp": "2026-10-16T15:38:35.911054+00:00"
+    },
+    {
+      "metric_name": "Permutation Feature Importance: sjr (SCImago Journal Rank (SJR))",
+      "value": "Drop: \u0394F1 = 0.0006 (Normalized: 42.9%)",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/global_importance.json",
+      "timestamp": "verified"
+    },
+    {
+      "metric_name": "Permutation Feature Importance: oa_closed (Closed Access Status)",
+      "value": "Drop: \u0394F1 = 0.0004 (Normalized: 28.6%)",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/global_importance.json",
+      "timestamp": "verified"
+    },
+    {
+      "metric_name": "Permutation Feature Importance: log_apc (Article Processing Charges (APC))",
+      "value": "Drop: \u0394F1 = 0.0002 (Normalized: 14.3%)",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/global_importance.json",
+      "timestamp": "verified"
+    },
+    {
+      "metric_name": "Permutation Feature Importance: log_cits_cutoff (Early Citation Acceleration)",
+      "value": "Drop: \u0394F1 = 0.0001 (Normalized: 7.1%)",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/global_importance.json",
+      "timestamp": "verified"
+    },
+    {
+      "metric_name": "Permutation Feature Importance: log_refs (Foundational Reference Depth)",
+      "value": "Drop: \u0394F1 = 0.0001 (Normalized: 7.1%)",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/global_importance.json",
+      "timestamp": "verified"
+    },
+    {
+      "metric_name": "API Serving Latency p50",
+      "value": "383.65 ms",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/api_latency.json",
+      "timestamp": "2026-10-16T16:53:57.640354+00:00"
+    },
+    {
+      "metric_name": "API Serving Latency p90",
+      "value": "507.16 ms",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/api_latency.json",
+      "timestamp": "2026-10-16T16:53:57.640354+00:00"
+    },
+    {
+      "metric_name": "API Serving Latency p99",
+      "value": "734.99 ms",
+      "confidence_interval_95": null,
+      "p_value_vs_m2": null,
+      "source_file": "reports/api_latency.json",
+      "timestamp": "2026-10-16T16:53:57.640354+00:00"
+    }
+  ]
+}

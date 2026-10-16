@@ -1,0 +1,95 @@
+{
+  "id": "https://openalex.org/W2963736842",
+  "title": "Sequence-Level Knowledge Distillation",
+  "doi": "https://doi.org/10.18653/v1/d16-1139",
+  "publication_year": 2016,
+  "publication_date": "2016-01-01",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "hybrid",
+    "oa_url": "https://www.aclweb.org/anthology/D16-1139.pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+      "issn_l": null,
+      "type": "conference"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    }
+  ],
+  "referenced_works_count": 56,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 34
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 56
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 45
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 135
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 111
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 157
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 142
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 75
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 42
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 16
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 4
+    }
+  ],
+  "citations_at_cutoff": 62,
+  "future_citations_5y": 374
+}

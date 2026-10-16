@@ -26,7 +26,7 @@ from ml.inference_service import inference_service
 
 logger = logging.getLogger("scigraph.api.paper")
 
-router = APIRouter(prefix="/api/v1/papers", tags=["Paper Predictions"])
+router = APIRouter(tags=["Paper Predictions"])
 
 
 @router.get("/stats", response_model=DatasetStatsResponse)
@@ -95,6 +95,16 @@ def get_model_card():
         with open(card_path, "r", encoding="utf-8") as f:
             return json.load(f)
     raise HTTPException(status_code=503, detail="Model card is not loaded or missing.")
+
+
+@router.get("/benchmark")
+def get_benchmark_report():
+    """Return scientific benchmark evaluation summary from reports/benchmark_latest.json."""
+    bm_path = settings.BASE_DIR / "reports" / "benchmark_latest.json"
+    if bm_path.exists():
+        with open(bm_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    raise HTTPException(status_code=503, detail="Benchmark report is not generated yet.")
 
 
 @router.get("/corpus-sample")

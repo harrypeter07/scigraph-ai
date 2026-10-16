@@ -1,0 +1,44 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.1.1, pluggy-1.5.0 -- C:\Users\ASUS\miniconda3\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ASUS\Documents\SECOND SEMISTER\INTERNSHIP\scigraph
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.10.0, asyncio-1.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 32 items
+
+tests/test_attributions_vary.py::test_global_importance_report_exists PASSED [  3%]
+tests/test_attributions_vary.py::test_attributions_vary_across_5_diverse_papers PASSED [  6%]
+tests/test_backend_api.py::test_health_check PASSED                      [  9%]
+tests/test_backend_api.py::test_dataset_stats PASSED                     [ 12%]
+tests/test_backend_api.py::test_model_card_endpoint PASSED               [ 15%]
+tests/test_backend_api.py::test_corpus_sample_endpoint PASSED            [ 18%]
+tests/test_backend_api.py::test_predict_paper_endpoint PASSED            [ 21%]
+tests/test_backend_api.py::test_error_handling_not_found PASSED          [ 25%]
+tests/test_backtest_window.py::test_resnet_2016_backtest_window PASSED   [ 28%]
+tests/test_backtest_window.py::test_ton_iot_2021_incomplete_window PASSED [ 31%]
+tests/test_backtest_window.py::test_2024_recent_paper_incomplete_window PASSED [ 34%]
+tests/test_feature_parity.py::test_feature_groups_structure PASSED       [ 37%]
+tests/test_feature_parity.py::test_text_encoder_persistence PASSED       [ 40%]
+tests/test_feature_parity.py::test_missingness_not_zero PASSED           [ 43%]
+tests/test_feature_parity.py::test_200_works_parity_parquet_vs_raw_openalex PASSED [ 46%]
+tests/test_lineage_scientometrics.py::test_cd_index_analytical_toy_graph PASSED [ 50%]
+tests/test_lineage_scientometrics.py::test_inflow_citations_cutoff_temporal_constraint PASSED [ 53%]
+tests/test_lineage_scientometrics.py::test_unknown_or_malformed_paper_graceful_handling PASSED [ 56%]
+tests/test_phase2_scientometrics.py::test_venue_resolver_scimago_issn PASSED [ 59%]
+tests/test_phase2_scientometrics.py::test_venue_resolver_core_conference PASSED [ 62%]
+tests/test_phase2_scientometrics.py::test_venue_resolver_unknown_returns_none PASSED [ 65%]
+tests/test_phase2_scientometrics.py::test_access_economics_gold_oa_with_apc PASSED [ 68%]
+tests/test_phase2_scientometrics.py::test_access_economics_closed_paywall PASSED [ 71%]
+tests/test_phase2_scientometrics.py::test_bidirectional_lineage_computation PASSED [ 75%]
+tests/test_phase3_model.py::test_heterogeneous_graph_structure PASSED    [ 78%]
+tests/test_phase3_model.py::test_model_forward_pass_and_calibration PASSED [ 81%]
+tests/test_phase3_model.py::test_checkpoint_and_model_card_integrity PASSED [ 84%]
+tests/test_phase3_model.py::test_loud_failure_on_missing_weights PASSED  [ 87%]
+tests/test_temporal_cutoff.py::test_future_poison_invariance PASSED      [ 90%]
+tests/test_temporal_cutoff.py::test_citation_edges_strictly_as_of_cutoff PASSED [ 93%]
+tests/test_temporal_cutoff.py::test_label_shuffle_sanity PASSED          [ 96%]
+tests/test_temporal_cutoff.py::test_no_truncated_works_in_train_mask PASSED [100%]
+
+================= 32 passed, 641 warnings in 81.16s (0:01:21) =================

@@ -1,0 +1,107 @@
+{
+  "id": "https://openalex.org/W2138820253",
+  "title": "Recombinant protein expression in Escherichia coli: advances and challenges",
+  "doi": "https://doi.org/10.3389/fmicb.2014.00172",
+  "publication_year": 2014,
+  "publication_date": "2014-04-17",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "gold",
+    "oa_url": "https://www.frontiersin.org/articles/10.3389/fmicb.2014.00172/pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Frontiers in Microbiology",
+      "issn_l": "1664-302X",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 3801.0
+    },
+    "apc_list": {
+      "value_usd": 3801.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Biochemistry, Genetics and Molecular Biology"
+    }
+  },
+  "primary_field_name": "Biochemistry, Genetics and Molecular Biology",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    }
+  ],
+  "referenced_works_count": 238,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 193
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 193
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 238
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 215
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 292
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 303
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 238
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 251
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 215
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 176
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 137
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 66
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 12
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 2
+    }
+  ],
+  "citations_at_cutoff": 217,
+  "future_citations_5y": 642
+}

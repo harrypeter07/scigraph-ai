@@ -1,0 +1,114 @@
+{
+  "id": "https://openalex.org/W2471768434",
+  "title": "DeepFashion: Powering Robust Clothes Recognition and Retrieval with Rich Annotations",
+  "doi": "https://doi.org/10.1109/cvpr.2016.124",
+  "publication_year": 2016,
+  "publication_date": "2016-06-01",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "IEEE Computer Society Conference on Computer Vision and Pattern Recognition/Proceedings - IEEE Computer Society Conference on Computer Vision and Pattern Recognition/Proceedings",
+      "issn_l": "1063-6919",
+      "type": "conference"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 43,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 90
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 144
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 187
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 223
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 233
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 275
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 227
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 212
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 133
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 66
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 5
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 205,
+  "future_citations_5y": 714
+}

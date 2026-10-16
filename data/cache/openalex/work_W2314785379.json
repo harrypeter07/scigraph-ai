@@ -1,0 +1,99 @@
+{
+  "id": "https://openalex.org/W2314785379",
+  "title": "Spectral–Spatial Feature Extraction for Hyperspectral Image Classification: A Dimension Reduction and Deep Learning Approach",
+  "doi": "https://doi.org/10.1109/tgrs.2016.2543748",
+  "publication_year": 2016,
+  "publication_date": "2016-04-08",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "IEEE Transactions on Geoscience and Remote Sensing",
+      "issn_l": "0196-2892",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 2645.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Engineering"
+    }
+  },
+  "primary_field_name": "Engineering",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    }
+  ],
+  "referenced_works_count": 39,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 82
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 120
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 123
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 115
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 116
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 147
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 164
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 153
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 116
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 65
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 10
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 192,
+  "future_citations_5y": 464
+}

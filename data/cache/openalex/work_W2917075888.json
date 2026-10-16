@@ -1,0 +1,93 @@
+{
+  "id": "https://openalex.org/W2917075888",
+  "title": "Network Pharmacology Databases for Traditional Chinese Medicine: Review and Assessment",
+  "doi": "https://doi.org/10.3389/fphar.2019.00123",
+  "publication_year": 2019,
+  "publication_date": "2019-02-20",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "gold",
+    "oa_url": "https://www.frontiersin.org/articles/10.3389/fphar.2019.00123/pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Frontiers in Pharmacology",
+      "issn_l": "1663-9812",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 2950.0
+    },
+    "apc_list": {
+      "value_usd": 2950.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    }
+  ],
+  "referenced_works_count": 122,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 128
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 161
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 225
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 208
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 271
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 151
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 94
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 16
+    }
+  ],
+  "citations_at_cutoff": 261,
+  "future_citations_5y": 704
+}

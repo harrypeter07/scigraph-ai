@@ -1,0 +1,121 @@
+{
+  "id": "https://openalex.org/W2119738171",
+  "title": "The Hadoop Distributed File System",
+  "doi": "https://doi.org/10.1109/msst.2010.5496972",
+  "publication_year": 2010,
+  "publication_date": "2010-05-01",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "IEEE Symposium on Mass Storage Systems and Technologies (MSST)",
+      "issn_l": null,
+      "type": "conference"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    }
+  ],
+  "referenced_works_count": 22,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 68
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 120
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 109
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 192
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 228
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 287
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 341
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 430
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 506
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 491
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 518
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 554
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 427
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 303
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 151
+    }
+  ],
+  "citations_at_cutoff": 151,
+  "future_citations_5y": 1284
+}

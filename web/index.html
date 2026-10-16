@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SciGraph AI 2.0 — Authentic Scientometric GNN & Citation Trajectory</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="if (window.renderMathInElement) renderMathInElement(document.body);"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
     <style>
         :root {
             --bg-primary: #070b14;
-            --bg-card: rgba(15, 23, 42, 0.88);
+            --bg-card: rgba(15, 23, 42, 0.90);
             --bg-card-hover: rgba(30, 41, 59, 0.95);
             --border-color: rgba(255, 255, 255, 0.08);
             --border-highlight: rgba(56, 189, 248, 0.4);
@@ -39,13 +42,15 @@
         }
 
         header {
-            max-width: 1480px;
+            max-width: 1540px;
             margin: 0 auto 1.2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .logo {
@@ -60,13 +65,23 @@
             gap: 0.6rem;
         }
 
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: var(--font-code);
+        }
+
         .nav-tabs {
             display: flex;
             gap: 0.8rem;
             margin-bottom: 1.5rem;
-            max-width: 1480px;
+            max-width: 1540px;
             margin-left: auto;
             margin-right: auto;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -93,15 +108,40 @@
             box-shadow: 0 4px 18px rgba(56, 189, 248, 0.2);
         }
 
-        .view-section { display: none; max-width: 1480px; margin: 0 auto; }
+        .view-section { display: none; max-width: 1540px; margin: 0 auto; }
         .view-section.active { display: block; }
 
         /* Grid layouts */
         .predictor-grid {
             display: grid;
-            grid-template-columns: 360px 440px 1fr;
+            grid-template-columns: 380px 460px 1fr;
             gap: 1.4rem;
-            align-items: stretch;
+            align-items: start;
+        }
+
+        @media (max-width: 1400px) {
+            .predictor-grid {
+                grid-template-columns: 350px 420px 1fr;
+                gap: 1.1rem;
+            }
+        }
+
+        @media (max-width: 1150px) {
+            .predictor-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .col-graph {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 780px) {
+            .predictor-grid {
+                grid-template-columns: 1fr;
+            }
+            .col-graph {
+                grid-column: span 1;
+            }
         }
 
         .card {
@@ -113,6 +153,7 @@
             backdrop-filter: blur(16px);
             display: flex;
             flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
         }
 
         .card-header {
@@ -137,7 +178,7 @@
         .prov-tag {
             font-size: 0.65rem;
             font-family: var(--font-code);
-            padding: 0.15rem 0.5rem;
+            padding: 0.2rem 0.55rem;
             border-radius: 4px;
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.12);
@@ -149,6 +190,44 @@
         .prov-tag.model { border-color: rgba(56, 189, 248, 0.4); color: var(--accent-cyan); }
         .prov-tag.venue { border-color: rgba(251, 191, 36, 0.4); color: var(--accent-amber); }
         .prov-tag.oa { border-color: rgba(52, 211, 153, 0.4); color: var(--accent-green); }
+
+        /* Scientific Significance Callouts */
+        .significance-note {
+            background: rgba(56, 189, 248, 0.04);
+            border-left: 3px solid var(--accent-cyan);
+            border-radius: 0 8px 8px 0;
+            padding: 0.55rem 0.75rem;
+            margin-top: 0.65rem;
+            font-size: 0.73rem;
+            line-height: 1.45;
+            color: #cbd5e1;
+        }
+
+        .significance-note.amber {
+            background: rgba(251, 191, 36, 0.04);
+            border-left-color: var(--accent-amber);
+        }
+
+        .significance-note.green {
+            background: rgba(52, 211, 153, 0.04);
+            border-left-color: var(--accent-green);
+        }
+
+        .significance-note.purple {
+            background: rgba(192, 132, 252, 0.04);
+            border-left-color: var(--accent-purple);
+        }
+
+        .sig-pill {
+            display: inline-block;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-right: 0.35rem;
+        }
+        .significance-note.amber .sig-pill { color: var(--accent-amber); }
+        .significance-note.green .sig-pill { color: var(--accent-green); }
+        .significance-note.purple .sig-pill { color: var(--accent-purple); }
 
         /* Search Box */
         .search-container {
@@ -190,6 +269,9 @@
             cursor: pointer;
             transition: all 0.2s;
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .action-btn:hover {
@@ -278,7 +360,6 @@
             font-weight: 800;
             font-size: 1.05rem;
             letter-spacing: 0.02em;
-            margin-top: 0.4rem;
         }
 
         .impact-badge.high {
@@ -299,7 +380,7 @@
 
         /* Probabilities */
         .prob-bar-container {
-            margin-top: 0.8rem;
+            margin-top: 0.6rem;
         }
         .prob-row {
             display: flex;
@@ -337,11 +418,13 @@
         .meta-row {
             display: flex;
             justify-content: space-between;
+            align-items: baseline;
             padding: 0.45rem 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             font-size: 0.8rem;
+            gap: 0.5rem;
         }
-        .meta-key { color: var(--text-muted); }
+        .meta-key { color: var(--text-muted); flex-shrink: 0; }
         .meta-val { color: var(--text-main); font-weight: 500; text-align: right; }
 
         /* Backtest Section */
@@ -349,25 +432,26 @@
             background: rgba(0, 0, 0, 0.35);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 10px;
-            padding: 0.8rem;
-            margin-top: 0.9rem;
+            padding: 0.85rem;
+            margin-top: 1rem;
         }
         .backtest-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
-            margin-top: 0.5rem;
+            margin-top: 0.6rem;
         }
         .backtest-metric {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 6px;
-            padding: 0.4rem 0.6rem;
+            padding: 0.45rem 0.6rem;
             text-align: center;
         }
         .backtest-val {
             font-size: 1.05rem;
             font-weight: 700;
             font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-top: 0.15rem;
         }
 
         /* Citation Trajectory SVG Chart */
@@ -376,7 +460,7 @@
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 10px;
-            padding: 0.8rem;
+            padding: 0.85rem;
         }
         .trajectory-chart {
             width: 100%;
@@ -417,13 +501,63 @@
         }
 
         /* Cytoscape Container */
-        #cy {
+        .cy-wrapper {
+            position: relative;
             width: 100%;
-            height: 480px;
+            height: 520px;
             border-radius: 12px;
             background: radial-gradient(circle at 50% 50%, #101726 0%, #070b14 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+
+        #cy {
+            width: 100%;
+            height: 100%;
+        }
+
+        .graph-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 0.35rem;
+            z-index: 10;
+        }
+
+        .graph-btn {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 0.3rem 0.65rem;
+            font-size: 0.72rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(8px);
+        }
+
+        .graph-btn:hover {
+            color: white;
+            border-color: var(--accent-cyan);
+            background: rgba(56, 189, 248, 0.15);
+        }
+
+        .node-inspector {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid var(--border-highlight);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+            font-size: 0.74rem;
+            display: none;
+            z-index: 20;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
 
         /* Model & Data Table */
@@ -477,17 +611,28 @@
             letter-spacing: 0.04em;
         }
 
-        /* Loading Spinner */
+        /* Loading Spinner & Shimmer */
         .spinner {
             border: 2px solid rgba(255, 255, 255, 0.15);
             border-top: 2px solid var(--accent-cyan);
             border-radius: 50%;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             animation: spin 0.8s linear infinite;
             display: inline-block;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
 
         /* Compare View */
         .compare-grid {
@@ -501,7 +646,7 @@
 
     <header>
         <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M3 12h3m12 0h3M12 3v3m0 12v3"></path>
                 <path d="m4.93 4.93 2.12 2.12m9.9 9.9 2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9 2.12-2.12"></path>
@@ -509,8 +654,12 @@
             SciGraph AI 2.0
             <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600;">Authentic Heterogeneous GNN</span>
         </div>
-        <div style="font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-code);">
-            T_cutoff = Year + 2 | No Lookahead
+        <div class="header-meta">
+            <span>Cutoff: <strong style="color: var(--accent-amber);">T_cutoff = Year + 2</strong></span>
+            <span>|</span>
+            <span>Horizon: <strong style="color: var(--accent-purple);">(pub+3..pub+5]</strong></span>
+            <span>|</span>
+            <span style="color: var(--accent-green);">Zero Temporal Leakage</span>
         </div>
     </header>
 
@@ -528,12 +677,12 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">Impact Predictor</div>
-                    <span class="prov-tag model">PyG HeteroSAGE</span>
+                    <span class="prov-tag model" id="modelProvBadge">PyG HeteroSAGE v2.0</span>
                 </div>
 
                 <div class="search-container">
                     <div class="search-box">
-                        <input type="text" id="paperInput" class="search-input" placeholder="Title, DOI, or OpenAlex ID..." value="W2194775991">
+                        <input type="text" id="paperInput" class="search-input" placeholder="Title, DOI, or OpenAlex ID (e.g. W2194775991)..." value="W2194775991">
                         <button class="action-btn" id="predictBtn" onclick="runPrediction()">
                             <span id="btnText">Predict</span>
                         </button>
@@ -544,38 +693,64 @@
                     <div class="quick-samples" id="quickSamples"></div>
                 </div>
 
+                <!-- Skeleton Loader for Col 1 -->
+                <div id="col1Skeleton" style="display: none;">
+                    <div class="skeleton" style="height: 38px; width: 60%; margin-bottom: 0.8rem;"></div>
+                    <div class="skeleton" style="height: 20px; width: 85%; margin-bottom: 1.2rem;"></div>
+                    <div class="skeleton" style="height: 70px; width: 100%; margin-bottom: 1.2rem;"></div>
+                    <div class="skeleton" style="height: 120px; width: 100%;"></div>
+                </div>
+
+                <!-- Prediction Output -->
                 <div id="predictionOutput" style="display: none;">
                     <div style="margin-bottom: 1rem;">
                         <div style="font-size: 0.78rem; color: var(--text-muted);">Predicted 5-Year Trajectory Class:</div>
-                        <div id="impactBadge" class="impact-badge high">High Impact (≥90th)</div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.25rem;">
+                            <div id="impactBadge" class="impact-badge high">High Impact (≥90th)</div>
+                            <span id="graphContextBadge" class="prov-tag model" style="font-size: 0.72rem; text-transform: uppercase;">Graph: full</span>
+                        </div>
+                        <div class="significance-note">
+                            <span class="sig-pill">Cohort-Normalized Metric:</span>
+                            Classes are evaluated strictly relative to annual discipline cohorts (&lt;50th Low, 50–90th Medium, &ge;90th High). This prevents older papers from appearing spuriously "higher impact" simply due to cumulative citation vintage.
+                        </div>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.4rem;">
-                        <span style="color: var(--text-muted);">Predicted Future Citations:</span>
-                        <span id="predFutureCits" style="font-weight: 700; color: white;">0</span>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.2rem; background: rgba(255,255,255,0.03); padding: 0.5rem 0.7rem; border-radius: 6px;">
+                        <span style="color: var(--text-muted);">Forecasted Citations in Window:</span>
+                        <span id="predFutureCits" style="font-weight: 700; color: var(--accent-cyan); font-family: var(--font-code);">0</span>
                     </div>
 
-                    <div class="card-header" style="margin-top: 1rem;">
+                    <div class="card-header" style="margin-top: 1.2rem;">
                         <div class="card-title" style="font-size: 0.92rem;">Calibrated Probabilities</div>
                         <span class="prov-tag model">Temp Scaling (ECE 0.0083)</span>
                     </div>
 
                     <div class="prob-bar-container">
-                        <div class="prob-row"><span>High (≥90th %)</span><span id="probHighVal">0%</span></div>
+                        <div class="prob-row"><span>High (≥90th percentile)</span><span id="probHighVal" style="font-weight:600; color:var(--accent-cyan);">0%</span></div>
                         <div class="prob-bar-bg"><div id="probHighBar" class="prob-bar-fill" style="width:0%; background: var(--accent-cyan);"></div></div>
 
-                        <div class="prob-row"><span>Medium (50-90th %)</span><span id="probMedVal">0%</span></div>
+                        <div class="prob-row"><span>Medium (50–90th percentile)</span><span id="probMedVal" style="font-weight:600; color:var(--accent-blue);">0%</span></div>
                         <div class="prob-bar-bg"><div id="probMedBar" class="prob-bar-fill" style="width:0%; background: var(--accent-blue);"></div></div>
 
-                        <div class="prob-row"><span>Low (<50th %)</span><span id="probLowVal">0%</span></div>
+                        <div class="prob-row"><span>Low (&lt;50th percentile)</span><span id="probLowVal" style="font-weight:600; color:var(--accent-purple);">0%</span></div>
                         <div class="prob-bar-bg"><div id="probLowBar" class="prob-bar-fill" style="width:0%; background: var(--accent-purple);"></div></div>
                     </div>
 
+                    <div class="significance-note purple">
+                        <span class="sig-pill">Why Calibration Matters:</span>
+                        Raw deep neural networks produce severely overconfident probabilities. Temperature scaling (&tau; = 0.5284) adjusts logits on validation data so a 70% model probability empirically reflects a true 70% real-world cohort likelihood.
+                    </div>
+
                     <div class="card-header" style="margin-top: 1.2rem;">
-                        <div class="card-title" style="font-size: 0.92rem;">Feature Attributions</div>
-                        <span class="prov-tag model">LightGBM Gain</span>
+                        <div class="card-title" style="font-size: 0.92rem;">Local Feature Attributions</div>
+                        <span class="prov-tag model" id="attrProvBadge">Local Occlusion</span>
                     </div>
                     <div id="attributionList"></div>
+
+                    <div class="significance-note">
+                        <span class="sig-pill">Occlusion Sensitivity Analysis:</span>
+                        Computed dynamically per-paper by replacing each of the 14 feature groups with its training cohort mean and measuring the marginal shift in predicted class probability &Delta;P(c).
+                    </div>
                 </div>
             </div>
 
@@ -590,6 +765,16 @@
                     Enter a paper title, DOI, or ID to compute authentic scientometric indicators.
                 </div>
 
+                <!-- Skeleton Loader for Col 2 -->
+                <div id="col2Skeleton" style="display: none;">
+                    <div class="skeleton" style="height: 24px; width: 85%; margin-bottom: 0.6rem;"></div>
+                    <div class="skeleton" style="height: 16px; width: 50%; margin-bottom: 1.2rem;"></div>
+                    <div class="skeleton" style="height: 28px; width: 100%; margin-bottom: 0.5rem;"></div>
+                    <div class="skeleton" style="height: 28px; width: 100%; margin-bottom: 0.5rem;"></div>
+                    <div class="skeleton" style="height: 28px; width: 100%; margin-bottom: 0.5rem;"></div>
+                    <div class="skeleton" style="height: 100px; width: 100%; margin-top: 1rem;"></div>
+                </div>
+
                 <div id="metaContent" style="display: none;">
                     <div style="font-weight: 700; font-size: 1.02rem; color: white; margin-bottom: 0.4rem; line-height: 1.35;" id="metaTitle">—</div>
                     <div style="font-size: 0.76rem; color: var(--accent-cyan); margin-bottom: 0.8rem;" id="metaAuthors">—</div>
@@ -600,12 +785,16 @@
                         <span class="meta-val" id="metaVenueName">—</span>
                     </div>
                     <div class="meta-row">
-                        <span class="meta-key">Ranking Tier:</span>
+                        <span class="meta-key">Prestige Tier:</span>
                         <span class="meta-val" id="metaVenueRank"><span class="prov-tag venue">SJR / CORE</span></span>
+                    </div>
+                    <div class="significance-note amber">
+                        <span class="sig-pill">Venue Prestige:</span>
+                        SCImago Journal Rank (SJR) uses an eigenvector prestige algorithm where citations from top-tier venues are weighted higher than citations from lower-tier venues. CORE identifies premier computer science conferences (A*, A).
                     </div>
 
                     <!-- Access Economics (Paid vs Unpaid) -->
-                    <div class="meta-row">
+                    <div class="meta-row" style="margin-top: 0.6rem;">
                         <span class="meta-key">Access Economics:</span>
                         <span class="meta-val" id="metaAccessModel">—</span>
                     </div>
@@ -617,9 +806,13 @@
                         <span class="meta-key">Empirical OA Boost:</span>
                         <span class="meta-val" id="metaOaBoost" style="color: var(--accent-green); font-weight: 600;">—</span>
                     </div>
+                    <div class="significance-note green">
+                        <span class="sig-pill">Empirical OA Advantage:</span>
+                        In our verified 16,500-paper corpus, Open Access works demonstrate a +10.8% adjusted citation advantage over paywalled works when matched within the same venue and year cohort (eliminating venue prestige bias).
+                    </div>
 
                     <!-- Bidirectional Citation Lineage -->
-                    <div class="meta-row">
+                    <div class="meta-row" style="margin-top: 0.6rem;">
                         <span class="meta-key">Lineage Precursors (In):</span>
                         <span class="meta-val" id="metaInflow">—</span>
                     </div>
@@ -627,25 +820,38 @@
                         <span class="meta-key">Lineage Citations (Out):</span>
                         <span class="meta-val" id="metaOutflow">—</span>
                     </div>
+                    <div class="meta-row">
+                        <span class="meta-key">CD Disruption Index:</span>
+                        <span class="meta-val" id="metaCdIndex">—</span>
+                    </div>
+                    <div class="significance-note">
+                        <span class="sig-pill">CD Disruption (Wu et al. 2019):</span>
+                        Ranges from -1 (consolidating) to +1 (disruptive). Values &gt; 0 indicate paradigm shifts where future works cite this paper alone without citing its references. Values &lt; 0 indicate developmental works building incrementally on cited references.
+                    </div>
 
                     <!-- Citation Trajectory Accumulation -->
                     <div class="trajectory-container">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.2rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.3rem;">
                             <span>Accumulation Timeline</span>
                             <span style="color: var(--accent-amber);">■ Cutoff Year (T_cutoff)</span>
                         </div>
                         <div class="trajectory-chart" id="trajectoryBars"></div>
+                        <div class="significance-note amber">
+                            <span class="sig-pill">Temporal Firewall:</span>
+                            The dashed amber bar represents the inference boundary (Year + 2). All features given to the model are strictly frozen here. The purple bars represent the subsequent 3-year evaluation window (pub+3..pub+5].
+                        </div>
                     </div>
 
                     <!-- Ground Truth Backtest Comparison -->
                     <div id="backtestPanel" class="backtest-box" style="display: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.78rem; font-weight: 700; color: white;">Ground-Truth Backtest</span>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: white;">Ground-Truth Backtest Audit</span>
                             <span id="backtestVerdict" class="prov-tag model">Correct Class</span>
                         </div>
+                        <div id="btWindowLabel" style="font-size: 0.68rem; color: var(--accent-cyan); margin-top: 0.25rem; font-family: var(--font-code);">Window: citations_window (cutoff+1..pub+5]</div>
                         <div class="backtest-grid">
                             <div class="backtest-metric">
-                                <div style="font-size: 0.65rem; color: var(--text-muted);">Actual 5-Yr Citations</div>
+                                <div style="font-size: 0.65rem; color: var(--text-muted);">Actual Window Citations</div>
                                 <div class="backtest-val" id="btActualCits" style="color: var(--accent-green);">0</div>
                             </div>
                             <div class="backtest-metric">
@@ -661,25 +867,61 @@
                                 <div class="backtest-val" id="btAbsErr" style="color: var(--accent-amber);">0.00</div>
                             </div>
                         </div>
+                        <div class="significance-note">
+                            <span class="sig-pill">Verifiable Forecast Audit:</span>
+                            For historical works, the 5-year evaluation window has closed. SciGraph verifies the model's blind 2-year forecast against actual real-world citations, allowing rigorous empirical verification without guessing.
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- COL 3: HETEROGENEOUS SUBGRAPH VISUALIZER -->
-            <div class="card">
+            <div class="card col-graph">
                 <div class="card-header">
-                    <div class="card-title">Heterogeneous Relational Subgraph</div>
-                    <span class="prov-tag model">5 Node Types | 10 Edge Types</span>
+                    <div class="card-title">Authentic Ego-Graph Visualizer</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span id="graphContextBadgeTop" class="prov-tag model">Graph: Full</span>
+                    </div>
                 </div>
 
-                <div id="cy"></div>
+                <div class="cy-wrapper">
+                    <div class="graph-controls">
+                        <button class="graph-btn" onclick="zoomGraph(1.2)" title="Zoom In">+</button>
+                        <button class="graph-btn" onclick="zoomGraph(0.8)" title="Zoom Out">−</button>
+                        <button class="graph-btn" onclick="fitGraph()" title="Fit View">⛶ Fit</button>
+                        <button class="graph-btn" onclick="exportGraphImage()" title="Export High-Res PNG" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">📷 PNG</button>
+                    </div>
+
+                    <div id="cy"></div>
+
+                    <!-- Overlay Spinner for Cytoscape -->
+                    <div id="cyLoadingOverlay" style="display: none; position: absolute; inset: 0; background: rgba(7, 11, 20, 0.85); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 0.75rem; z-index: 15;">
+                        <span class="spinner" style="width: 24px; height: 24px;"></span>
+                        <span style="font-size: 0.78rem; color: var(--accent-cyan); font-family: var(--font-code);">Constructing 2-hop Heterogeneous Ego-Network...</span>
+                    </div>
+
+                    <!-- Interactive Node Inspector Card -->
+                    <div id="nodeInspector" class="node-inspector">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span id="inspType" style="font-weight: 700; text-transform: uppercase; font-family: var(--font-code); color: var(--accent-cyan);">Paper</span>
+                            <span style="color: var(--text-muted); cursor: pointer;" onclick="document.getElementById('nodeInspector').style.display='none'">✕</span>
+                        </div>
+                        <div id="inspLabel" style="font-size: 0.82rem; color: white; margin-top: 0.2rem; font-weight: 600;">—</div>
+                        <div id="inspDetail" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">Click neighbor nodes to trace relationships.</div>
+                    </div>
+                </div>
 
                 <div style="margin-top: 0.8rem; font-size: 0.72rem; color: var(--text-muted); display: flex; gap: 1rem; flex-wrap: wrap;">
                     <span><strong style="color: #38bdf8;">●</strong> Paper</span>
                     <span><strong style="color: #60a5fa;">●</strong> Author</span>
-                    <span><strong style="color: #c084fc;">●</strong> Institution</span>
                     <span><strong style="color: #fbbf24;">●</strong> Venue</span>
                     <span><strong style="color: #34d399;">●</strong> Topic</span>
+                    <span><strong style="color: #c084fc;">●</strong> Precursor Reference</span>
+                </div>
+
+                <div class="significance-note">
+                    <span class="sig-pill">Heterogeneous GNN Message Passing:</span>
+                    PyG HeteroGraphSAGE performs 2-hop relational message passing across typed edges (authored, published_in, has_topic, cites). It aggregates author track record, venue prestige, and semantic representations without temporal lookahead. Click any node to inspect details.
                 </div>
             </div>
 
@@ -691,7 +933,7 @@
         <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-header">
                 <div class="card-title">Corpus Ingestion Summary (OpenAlex Snapshot 2010–2020)</div>
-                <span class="prov-tag model">Rule R1: Verified Storage</span>
+                <span class="prov-tag model">Verified SQLite / Parquet Storage</span>
             </div>
 
             <div class="stat-grid" id="statsGrid">
@@ -721,67 +963,31 @@
         <div class="card">
             <div class="card-header">
                 <div class="card-title">Comparative Scientometric Benchmarks (Held-out Temporal Test Set: 4,500 Papers)</div>
-                <span class="prov-tag model">Rule R5: Rigorous Evaluation</span>
+                <span class="prov-tag model">Rigorous Temporal Evaluation</span>
             </div>
 
             <table class="benchmark-table">
                 <thead>
                     <tr>
                         <th>Model Architecture</th>
-                        <th>Macro-F1</th>
-                        <th>Weighted-F1</th>
+                        <th>Macro-F1 (Mean ± Std)</th>
+                        <th>95% Bootstrap CI</th>
                         <th>AUROC (OvR)</th>
-                        <th>MAE (Log Cits)</th>
+                        <th>MAE (Log Citations)</th>
                         <th>ECE Calibration</th>
+                        <th>Paired p-val vs LGBM</th>
                     </tr>
                 </thead>
                 <tbody id="benchmarkBody">
                     <tr>
-                        <td>Log-Linear Early Citations</td>
-                        <td>0.3767</td>
-                        <td>0.3508</td>
-                        <td>0.6489</td>
-                        <td>0.4607</td>
-                        <td>0.3584</td>
-                    </tr>
-                    <tr>
-                        <td>Logistic Regression (L2)</td>
-                        <td>0.5057</td>
-                        <td>0.5533</td>
-                        <td>0.7180</td>
-                        <td>0.4365</td>
-                        <td>0.1214</td>
-                    </tr>
-                    <tr>
-                        <td>LightGBM Gradient Boosted Trees</td>
-                        <td>0.4995</td>
-                        <td>0.5002</td>
-                        <td>0.7179</td>
-                        <td>0.4185</td>
-                        <td>0.1832</td>
-                    </tr>
-                    <tr>
-                        <td>Graphless Deep MLP</td>
-                        <td>0.5026</td>
-                        <td>0.5585</td>
-                        <td>0.7153</td>
-                        <td>0.6633</td>
-                        <td>0.0618</td>
-                    </tr>
-                    <tr class="highlight">
-                        <td>★ PyG HeteroGraphSAGE (2-Hop)</td>
-                        <td>0.5381</td>
-                        <td>0.5639</td>
-                        <td>0.7205</td>
-                        <td>0.5088</td>
-                        <td>0.0083</td>
+                        <td colspan="7" style="text-align:center; padding: 2rem; color: var(--text-muted);"><span class="spinner"></span> Loading empirical benchmarks from reports/benchmark_latest.json...</td>
                     </tr>
                 </tbody>
             </table>
 
             <div style="margin-top: 1.5rem; font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;">
-                <strong style="color: white;">Scientometric Methodology Note:</strong>
-                All models evaluated with strict temporal cutoff ($T_{\text{cutoff}} = \text{pub\_year} + 2$). Train split: works published $\le 2016$; validation: 2017; test: $\ge 2018$. Classes defined strictly relative to discipline-specific annual cohorts ($<50\%$, $50-90\%$, $\ge 90\%$). Temperature scaling reduces ECE to 0.0083 on validation logits.
+                <strong style="color: white;">Scientometric Protocol Grounding:</strong>
+                All models evaluated strictly with temporal cutoff ($T_{\text{cutoff}} = \text{pub\_year} + 2$). Train split: works published $\le 2016$; validation: 2017; test: $\ge 2018$. Target label is citations accumulated in $(\text{pub}+3..\text{pub}+5]$. High impact threshold is 90th percentile of annual field cohort. ECE computed after validation temperature scaling. Zero test tuning.
             </div>
         </div>
     </div>
@@ -793,7 +999,7 @@
                 <div class="card-title">Side-by-Side Paper Comparison</div>
                 <span class="prov-tag model">Comparative Analysis</span>
             </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
                 <input type="text" id="compInputA" class="search-input" placeholder="Paper A (ID or DOI)..." value="W2194775991">
                 <span style="font-weight: 700; color: var(--accent-cyan);">VS</span>
                 <input type="text" id="compInputB" class="search-input" placeholder="Paper B (ID or DOI)..." value="W3118615836">
@@ -816,10 +1022,12 @@
             if (tabId === 'predictor') {
                 document.getElementById('tabBtnPredictor').classList.add('active');
                 document.getElementById('viewPredictor').classList.add('active');
+                setTimeout(() => { if (cy) { cy.resize(); cy.fit(30); } }, 100);
             } else if (tabId === 'model-data') {
                 document.getElementById('tabBtnModelData').classList.add('active');
                 document.getElementById('viewModelData').classList.add('active');
                 fetchStats();
+                fetchBenchmarkReport();
             } else if (tabId === 'compare') {
                 document.getElementById('tabBtnCompare').classList.add('active');
                 document.getElementById('viewCompare').classList.add('active');
@@ -894,15 +1102,40 @@
             }
         });
 
+        function setPredictLoading(isLoading) {
+            const btn = document.getElementById('predictBtn');
+            const btnText = document.getElementById('btnText');
+            const col1Skel = document.getElementById('col1Skeleton');
+            const col2Skel = document.getElementById('col2Skeleton');
+            const cyOverlay = document.getElementById('cyLoadingOverlay');
+            const predOut = document.getElementById('predictionOutput');
+            const metaContent = document.getElementById('metaContent');
+            const metaEmpty = document.getElementById('metaEmptyState');
+
+            if (isLoading) {
+                btn.disabled = true;
+                btnText.innerHTML = '<span class="spinner"></span> Predicting...';
+                if (col1Skel) col1Skel.style.display = 'block';
+                if (col2Skel) col2Skel.style.display = 'block';
+                if (cyOverlay) cyOverlay.style.display = 'flex';
+                if (predOut) predOut.style.display = 'none';
+                if (metaContent) metaContent.style.display = 'none';
+                if (metaEmpty) metaEmpty.style.display = 'none';
+            } else {
+                btn.disabled = false;
+                btnText.innerText = 'Predict';
+                if (col1Skel) col1Skel.style.display = 'none';
+                if (col2Skel) col2Skel.style.display = 'none';
+                if (cyOverlay) cyOverlay.style.display = 'none';
+            }
+        }
+
         // Run Prediction
         async function runPrediction() {
             const inputVal = document.getElementById('paperInput').value.trim();
             if (!inputVal) return;
 
-            const btn = document.getElementById('predictBtn');
-            const btnText = document.getElementById('btnText');
-            btn.disabled = true;
-            btnText.innerHTML = '<span class="spinner"></span> Predicting...';
+            setPredictLoading(true);
 
             try {
                 const res = await fetch(`/api/v1/papers/predict/${encodeURIComponent(inputVal)}`);
@@ -916,8 +1149,7 @@
             } catch (err) {
                 alert(`Error: ${err.message}`);
             } finally {
-                btn.disabled = false;
-                btnText.innerText = 'Predict';
+                setPredictLoading(false);
             }
         }
 
@@ -926,11 +1158,18 @@
             document.getElementById('metaEmptyState').style.display = 'none';
             document.getElementById('metaContent').style.display = 'block';
 
-            // 1. Prediction Badge & Future Citations
+            // 1. Prediction Badge & Future Citations & Graph Context
             const badge = document.getElementById('impactBadge');
             badge.innerText = data.predicted_impact_label;
             badge.className = 'impact-badge ' + (data.predicted_impact_class === 2 ? 'high' : data.predicted_impact_class === 1 ? 'med' : 'low');
-            document.getElementById('predFutureCits').innerText = Math.round(data.predicted_future_citations_5y).toLocaleString();
+
+            const ctxBadge = document.getElementById('graphContextBadge');
+            const ctxBadgeTop = document.getElementById('graphContextBadgeTop');
+            const ctxText = 'Graph: ' + (data.graph_context || 'full');
+            if (ctxBadge) ctxBadge.innerText = ctxText;
+            if (ctxBadgeTop) ctxBadgeTop.innerText = ctxText;
+
+            document.getElementById('predFutureCits').innerText = Math.round(data.predicted_future_citations_5y).toLocaleString() + ' citations';
 
             // 2. Probabilities
             const probs = data.calibrated_probabilities;
@@ -947,16 +1186,21 @@
 
             // 3. Attributions
             const attrContainer = document.getElementById('attributionList');
-            attrContainer.innerHTML = (data.attributions || []).map(a => `
-                <div class="attr-item">
-                    <span style="color: var(--text-muted);">${a.feature_name}</span>
-                    <span style="color: var(--accent-cyan); font-weight: 600;">+${(a.importance_score * 100).toFixed(1)}%</span>
-                </div>
-            `).join('');
+            attrContainer.innerHTML = (data.attributions || []).map(a => {
+                const isPos = a.direction !== 'negative';
+                const sign = isPos ? '+' : '−';
+                const col = isPos ? 'var(--accent-cyan)' : 'var(--accent-red)';
+                return `
+                    <div class="attr-item">
+                        <span style="color: var(--text-muted);">${a.feature_name}</span>
+                        <span style="color: ${col}; font-weight: 600; font-family: var(--font-code);">${sign}${(Math.abs(a.importance_score) * 100).toFixed(1)}%</span>
+                    </div>
+                `;
+            }).join('');
 
             // 4. Scientometrics
             document.getElementById('metaTitle').innerText = data.title;
-            document.getElementById('metaAuthors').innerText = (data.authors || []).join(', ');
+            document.getElementById('metaAuthors').innerText = (data.authors || []).join(', ') || 'Unknown Authors';
 
             // Venue
             if (data.venue) {
@@ -965,7 +1209,7 @@
                 document.getElementById('metaVenueRank').innerHTML = `<span class="prov-tag venue">${rk} (${data.venue.ranking_system || 'SCImago'})</span>`;
             } else {
                 document.getElementById('metaVenueName').innerText = 'Unindexed Venue';
-                document.getElementById('metaVenueRank').innerHTML = '<span style="color: var(--text-muted);">null (Rule R1: unranked)</span>';
+                document.getElementById('metaVenueRank').innerHTML = '<span style="color: var(--text-muted);">null (unranked)</span>';
             }
 
             // Access Economics
@@ -978,8 +1222,19 @@
 
             // Lineage
             const lin = data.lineage;
-            document.getElementById('metaInflow').innerText = `${lin.inflow_count.toLocaleString()} citing works`;
+            const scopeText = lin.inflow_temporal_scope === 'as_of_cutoff' ? 'at cutoff' : 'as of today';
+            document.getElementById('metaInflow').innerText = `${lin.inflow_count.toLocaleString()} citing works (${scopeText})`;
             document.getElementById('metaOutflow').innerText = `${lin.outflow_count.toLocaleString()} precursor references`;
+            const cdVal = lin.cd_disruption_index;
+            const cdEl = document.getElementById('metaCdIndex');
+            if (cdEl) {
+                if (cdVal !== null && cdVal !== undefined) {
+                    const desc = cdVal > 0 ? '(disruptive innovation)' : '(consolidating science)';
+                    cdEl.innerText = `${cdVal.toFixed(3)} ${desc}`;
+                } else {
+                    cdEl.innerHTML = '<span class="prov-tag" style="border-color: rgba(255,255,255,0.2); color: var(--text-muted);">insufficient reference subgraph</span>';
+                }
+            }
 
             // Trajectory Bars
             renderTrajectoryBars(data.trajectory);
@@ -987,21 +1242,37 @@
             // Backtest
             const bt = data.backtest;
             const btPanel = document.getElementById('backtestPanel');
-            if (bt && bt.has_ground_truth) {
+            if (bt) {
                 btPanel.style.display = 'block';
-                document.getElementById('btActualCits').innerText = bt.actual_future_citations_5y.toLocaleString();
-                document.getElementById('btCohortPct').innerText = `${bt.cohort_percentile}%`;
-                document.getElementById('btPredCls').innerText = bt.predicted_impact_class === 2 ? 'High' : bt.predicted_impact_class === 1 ? 'Medium' : 'Low';
-                document.getElementById('btAbsErr').innerText = bt.absolute_error_log_citations.toFixed(3);
+                const winLbl = document.getElementById('btWindowLabel');
+                if (winLbl && bt.window_start && bt.window_end) {
+                    winLbl.innerText = `Citation Window: (${bt.window_start}..${bt.window_end}]`;
+                }
                 const verdictEl = document.getElementById('backtestVerdict');
-                if (bt.is_correct_class) {
-                    verdictEl.innerText = 'Exact Class Match';
-                    verdictEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
-                    verdictEl.style.color = 'var(--accent-green)';
+                if (bt.has_ground_truth) {
+                    const actualCits = bt.actual_window != null ? bt.actual_window : bt.actual_future_citations_5y;
+                    document.getElementById('btActualCits').innerText = actualCits.toLocaleString();
+                    document.getElementById('btCohortPct').innerText = `${bt.cohort_percentile}%`;
+                    document.getElementById('btPredCls').innerText = bt.predicted_label || (bt.predicted_impact_class === 2 ? 'High' : bt.predicted_impact_class === 1 ? 'Medium' : 'Low');
+                    const errVal = bt.error_log != null ? bt.error_log : bt.absolute_error_log_citations;
+                    document.getElementById('btAbsErr').innerText = errVal != null ? errVal.toFixed(3) : '0.00';
+                    if (bt.is_correct_class) {
+                        verdictEl.innerText = 'Exact Class Match';
+                        verdictEl.style.borderColor = 'rgba(52, 211, 153, 0.4)';
+                        verdictEl.style.color = 'var(--accent-green)';
+                    } else {
+                        verdictEl.innerText = 'Class Misaligned';
+                        verdictEl.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+                        verdictEl.style.color = 'var(--accent-amber)';
+                    }
                 } else {
-                    verdictEl.innerText = 'Adjacent Class';
-                    verdictEl.style.borderColor = 'rgba(251, 191, 36, 0.4)';
-                    verdictEl.style.color = 'var(--accent-amber)';
+                    document.getElementById('btActualCits').innerText = 'null (open)';
+                    document.getElementById('btCohortPct').innerText = '—';
+                    document.getElementById('btPredCls').innerText = bt.predicted_label || 'Predicted';
+                    document.getElementById('btAbsErr').innerText = '—';
+                    verdictEl.innerText = `Window Incomplete (closes ${bt.window_end})`;
+                    verdictEl.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                    verdictEl.style.color = 'var(--text-muted)';
                 }
             } else {
                 btPanel.style.display = 'none';
@@ -1022,7 +1293,7 @@
                 const h = Math.max(6, Math.round((p.cited_by_count / maxVal) * 90));
                 const cls = p.is_cutoff ? 'cutoff' : (p.is_future_horizon ? 'future' : '');
                 return `
-                    <div class="traj-bar-col" title="${p.year}: ${p.cited_by_count} citations${p.is_cutoff ? ' (T_cutoff)' : ''}">
+                    <div class="traj-bar-col" title="${p.year}: ${p.cited_by_count.toLocaleString()} citations${p.is_cutoff ? ' (T_cutoff boundary)' : (p.is_future_horizon ? ' (evaluation window)' : '')}">
                         <div class="traj-bar ${cls}" style="height: ${h}px;"></div>
                         <div class="traj-year-lbl">${String(p.year).slice(2)}</div>
                     </div>
@@ -1037,32 +1308,32 @@
 
             // Target paper node
             elements.push({
-                data: { id: 'target', label: data.title.slice(0, 24) + '...', type: 'paper' }
+                data: { id: 'target', label: data.title.slice(0, 24) + '...', full_label: data.title, type: 'paper' }
             });
 
             // Authors
             (data.authors || []).slice(0, 4).forEach((a, i) => {
                 const aid = `auth_${i}`;
-                elements.push({ data: { id: aid, label: a, type: 'author' } });
+                elements.push({ data: { id: aid, label: a, full_label: a, type: 'author' } });
                 elements.push({ data: { source: aid, target: 'target', label: 'authored' } });
             });
 
             // Venue
             if (data.venue) {
-                elements.push({ data: { id: 'venue_node', label: data.venue.venue_name.slice(0, 20), type: 'venue' } });
+                elements.push({ data: { id: 'venue_node', label: data.venue.venue_name.slice(0, 20), full_label: data.venue.venue_name, type: 'venue' } });
                 elements.push({ data: { source: 'target', target: 'venue_node', label: 'published_in' } });
             }
 
             // Topic
             if (data.primary_topic) {
-                elements.push({ data: { id: 'topic_node', label: data.primary_topic.slice(0, 20), type: 'topic' } });
+                elements.push({ data: { id: 'topic_node', label: data.primary_topic.slice(0, 20), full_label: data.primary_topic, type: 'topic' } });
                 elements.push({ data: { source: 'target', target: 'topic_node', label: 'has_topic' } });
             }
 
-            // Lineage references
+            // Lineage references (precursors)
             (data.lineage.outflow_sample || []).slice(0, 3).forEach((r, idx) => {
                 const rid = `ref_${idx}`;
-                elements.push({ data: { id: rid, label: r.title.slice(0, 18), type: 'paper' } });
+                elements.push({ data: { id: rid, label: r.title.slice(0, 18), full_label: r.title, type: 'precursor' } });
                 elements.push({ data: { source: 'target', target: rid, label: 'cites' } });
             });
 
@@ -1080,12 +1351,17 @@
                             'label': 'data(label)',
                             'color': '#f8fafc',
                             'font-size': '10px',
+                            'font-weight': '500',
                             'font-family': 'Inter',
                             'text-valign': 'bottom',
-                            'text-margin-y': 4,
+                            'text-margin-y': 5,
+                            'text-background-opacity': 0.85,
+                            'text-background-color': '#070b14',
+                            'text-background-shape': 'roundrectangle',
+                            'text-background-padding': '3px',
                             'background-color': '#38bdf8',
-                            'width': 28,
-                            'height': 28,
+                            'width': 26,
+                            'height': 26,
                             'border-width': 2,
                             'border-color': 'rgba(255,255,255,0.2)'
                         }
@@ -1107,33 +1383,117 @@
                         style: { 'background-color': '#34d399' }
                     },
                     {
+                        selector: 'node[type = "precursor"]',
+                        style: { 'background-color': '#c084fc' }
+                    },
+                    {
                         selector: 'node#target',
                         style: {
-                            'width': 40,
-                            'height': 40,
+                            'width': 44,
+                            'height': 44,
                             'background-color': '#0284c7',
                             'border-color': '#38bdf8',
-                            'border-width': 3
+                            'border-width': 3,
+                            'font-weight': '700',
+                            'font-size': '11px'
                         }
                     },
                     {
                         selector: 'edge',
                         style: {
                             'width': 1.5,
-                            'line-color': 'rgba(255, 255, 255, 0.15)',
-                            'target-arrow-color': 'rgba(255, 255, 255, 0.25)',
+                            'line-color': 'rgba(255, 255, 255, 0.18)',
+                            'target-arrow-color': 'rgba(255, 255, 255, 0.3)',
                             'target-arrow-shape': 'triangle',
                             'curve-style': 'bezier',
-                            'arrow-scale': 0.8
+                            'arrow-scale': 0.85
                         }
                     }
                 ],
                 layout: {
                     name: 'cose',
                     animate: false,
-                    padding: 30
+                    padding: 35,
+                    nodeRepulsion: 15000,
+                    idealEdgeLength: 85,
+                    edgeElasticity: 100,
+                    nestingFactor: 5,
+                    gravity: 80,
+                    numIter: 1000
                 }
             });
+
+            // Tap event on node to inspect
+            cy.on('tap', 'node', function(evt) {
+                const node = evt.target;
+                const d = node.data();
+                const insp = document.getElementById('nodeInspector');
+                const tEl = document.getElementById('inspType');
+                const lEl = document.getElementById('inspLabel');
+                const dEl = document.getElementById('inspDetail');
+
+                insp.style.display = 'block';
+                tEl.innerText = d.type || 'Entity';
+                lEl.innerText = d.full_label || d.label;
+                dEl.innerText = `Connected edges: ${node.connectedEdges().length} · Type: ${d.type}`;
+            });
+
+            setTimeout(() => {
+                if (cy) { cy.resize(); cy.fit(30); }
+            }, 100);
+        }
+
+        function zoomGraph(factor) {
+            if (!cy) return;
+            cy.zoom(cy.zoom() * factor);
+            cy.center();
+        }
+
+        function fitGraph() {
+            if (!cy) return;
+            cy.resize();
+            cy.fit(30);
+        }
+
+        function exportGraphImage() {
+            if (!cy) return;
+            const pngUri = cy.png({ full: true, scale: 2, bg: '#070b14' });
+            const a = document.createElement('a');
+            a.href = pngUri;
+            a.download = 'scigraph_ego_network.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Dynamic Benchmark Loader
+        async function fetchBenchmarkReport() {
+            try {
+                const res = await fetch('/api/v1/papers/benchmark');
+                if (!res.ok) return;
+                const data = await res.json();
+                const tbody = document.getElementById('benchmarkBody');
+                if (!tbody || !data.summary) return;
+                const leader = data.metadata.empirical_best_model;
+                tbody.innerHTML = Object.entries(data.summary).map(([mName, stats]) => {
+                    const isLeader = (mName === leader);
+                    const ciStr = `[${stats.macro_f1_95ci[0].toFixed(4)}, ${stats.macro_f1_95ci[1].toFixed(4)}]`;
+                    const pval = stats.paired_p_val_vs_lgbm != null ? (mName === 'M2_LightGBM' ? '— (ref)' : stats.paired_p_val_vs_lgbm.toFixed(4)) : '—';
+                    return `
+                        <tr style="${isLeader ? 'background: rgba(56, 189, 248, 0.08); font-weight: 600;' : ''}">
+                            <td style="color: ${isLeader ? 'var(--accent-cyan)' : 'var(--text-main)'}; font-family: var(--font-code);">${mName}${isLeader ? ' ★' : ''}</td>
+                            <td><strong>${stats.macro_f1_mean.toFixed(4)}</strong> ± ${stats.macro_f1_std.toFixed(4)}</td>
+                            <td style="color: var(--text-muted); font-size: 0.75rem;">${ciStr}</td>
+                            <td>${stats.auroc_mean.toFixed(4)}</td>
+                            <td>${stats.mae_mean.toFixed(4)}</td>
+                            <td>${stats.ece_mean.toFixed(4)}</td>
+                            <td style="color: var(--text-muted); font-family: var(--font-code); font-size: 0.75rem;">${pval}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.warn('Failed to fetch benchmark report:', err);
+            }
         }
 
         // Fetch Dataset Stats for Model & Data Tab
@@ -1191,14 +1551,17 @@
                 <div class="meta-row"><span class="meta-key">Pub Year:</span><span class="meta-val">${data.publication_year}</span></div>
                 <div class="meta-row"><span class="meta-key">Citations at Cutoff:</span><span class="meta-val">${data.citations_at_cutoff}</span></div>
                 <div class="meta-row"><span class="meta-key">Venue:</span><span class="meta-val">${data.venue ? data.venue.venue_name : 'Unindexed'} (${data.venue ? (data.venue.quartile || data.venue.core_rank || 'Unranked') : 'null'})</span></div>
-                <div class="meta-row"><span class="meta-key">Access:</span><span class="meta-val">${data.access_economics.is_oa ? 'Open Access' : 'Paywalled'}</span></div>
-                <div class="meta-row"><span class="meta-key">Predicted 5-Yr Cits:</span><span class="meta-val" style="color:var(--accent-cyan); font-weight:700;">${Math.round(data.predicted_future_citations_5y)}</span></div>
+                <div class="meta-row"><span class="meta-key">Access:</span><span class="meta-val">${data.access_economics.is_oa ? 'Open Access (' + data.access_economics.oa_status + ')' : 'Paywalled'}</span></div>
+                <div class="meta-row"><span class="meta-key">CD Disruption:</span><span class="meta-val">${data.lineage.cd_disruption_index != null ? data.lineage.cd_disruption_index.toFixed(3) : 'null'}</span></div>
+                <div class="meta-row"><span class="meta-key">Forecasted 5-Yr Citations:</span><span class="meta-val" style="color:var(--accent-cyan); font-weight:700;">${Math.round(data.predicted_future_citations_5y).toLocaleString()}</span></div>
             `;
         }
 
         // Init on page load
         window.addEventListener('DOMContentLoaded', () => {
             loadQuickSamples();
+            fetchStats();
+            fetchBenchmarkReport();
             const hash = window.location.hash.replace('#', '');
             if (hash === 'model-data') {
                 switchTab('model-data');
@@ -1207,6 +1570,12 @@
                 runComparison();
             } else {
                 runPrediction();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (cy) {
+                cy.resize();
             }
         });
     </script>

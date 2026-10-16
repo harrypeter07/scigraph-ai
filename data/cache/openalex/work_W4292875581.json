@@ -1,0 +1,118 @@
+{
+  "id": "https://openalex.org/W4292875581",
+  "title": "Planck 2015 results",
+  "doi": "https://doi.org/10.1051/0004-6361/201525830",
+  "publication_year": 2016,
+  "publication_date": "2016-06-20",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "bronze",
+    "oa_url": "https://www.aanda.org/articles/aa/pdf/2016/10/aa25830-15.pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Astronomy and Astrophysics",
+      "issn_l": "0004-6361",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 1865.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Physics and Astronomy"
+    }
+  },
+  "primary_field_name": "Physics and Astronomy",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 465,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 371
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 757
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 735
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 777
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 844
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 909
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 1189
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 1406
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 1837
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 1440
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 306
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 8
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 3592,
+  "future_citations_5y": 3504
+}

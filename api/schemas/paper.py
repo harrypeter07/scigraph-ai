@@ -26,7 +26,7 @@ class VenueMetadata(BaseModel):
 
 class AccessEconomicsMetadata(BaseModel):
     is_oa: bool
-    oa_status: Literal["gold", "green", "hybrid", "bronze", "closed"]
+    oa_status: Literal["gold", "green", "hybrid", "bronze", "closed", "diamond"]
     oa_url: Optional[str] = None
     apc_paid_usd: Optional[float] = None
     apc_list_usd: Optional[float] = None
@@ -57,6 +57,10 @@ class BidirectionalLineageMetadata(BaseModel):
     inflow_outflow_ratio: Optional[float] = None
     citation_normalized_percentile: Optional[float] = None
     cd_disruption_index: Optional[float] = None
+    cd_disruption_index_status: Optional[str] = None
+    tracked_references_count: Optional[int] = None
+    cutoff_year_applied: Optional[int] = None
+    inflow_temporal_scope: Optional[Literal["as_of_cutoff", "as_of_today"]] = None
     inflow_sample: List[LineageNodeModel] = Field(default_factory=list)
     outflow_sample: List[LineageNodeModel] = Field(default_factory=list)
     provenance: Literal["openalex | computed"] = "openalex | computed"
@@ -64,13 +68,23 @@ class BidirectionalLineageMetadata(BaseModel):
 
 class BacktestComparison(BaseModel):
     has_ground_truth: bool
+    window_complete: bool
+    window_start: int
+    window_end: int
+    actual_window: Optional[int] = None
     actual_future_citations_5y: Optional[int] = None
     actual_impact_class: Optional[int] = None
+    actual_label: Optional[str] = None
     predicted_impact_class: int
+    predicted_label: Optional[str] = None
     is_correct_class: Optional[bool] = None
     actual_log_citations: Optional[float] = None
     predicted_log_citations: float
+    error_abs: Optional[float] = None
+    error_log: Optional[float] = None
     absolute_error_log_citations: Optional[float] = None
+    warning: Optional[str] = None
+    threshold_provenance: Optional[Dict[str, Any]] = None
     cohort_percentile: Optional[float] = None
     provenance: Literal["openalex | model | computed"] = "openalex | model | computed"
 
@@ -80,7 +94,7 @@ class FeatureAttribution(BaseModel):
     raw_value: Optional[float] = None
     importance_score: float
     direction: Literal["positive", "negative", "neutral"]
-    provenance: Literal["model | lightgbm", "model | shap | lightgbm", "model | gnn"] = "model | lightgbm"
+    provenance: Literal["model | lightgbm", "model | shap | lightgbm", "model | gnn", "model | local_occlusion", "model | permutation"] = "model | local_occlusion"
 
 
 class PaperPredictionResponse(BaseModel):
@@ -103,6 +117,7 @@ class PaperPredictionResponse(BaseModel):
     trajectory: List[CitationTrajectoryPoint] = Field(default_factory=list)
     backtest: Optional[BacktestComparison] = None
     attributions: List[FeatureAttribution] = Field(default_factory=list)
+    graph_context: Literal["full", "partial", "none"] = "partial"
     model_version: str = "PyG HeteroGraphSAGE v2.0"
     provenance: str = "openalex | scimago | core | model | computed"
 

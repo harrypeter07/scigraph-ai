@@ -1,0 +1,111 @@
+{
+  "id": "https://openalex.org/W2076479389",
+  "title": "Bessel and annular beams for materials processing",
+  "doi": "https://doi.org/10.1002/lpor.201100031",
+  "publication_year": 2012,
+  "publication_date": "2012-01-17",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Laser & Photonics Review",
+      "issn_l": "1863-8880",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 4880.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Physics and Astronomy"
+    }
+  },
+  "primary_field_name": "Physics and Astronomy",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    }
+  ],
+  "referenced_works_count": 125,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 28
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 48
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 67
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 66
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 54
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 59
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 62
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 72
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 62
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 40
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 29
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 32
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 19
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 18
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 3
+    }
+  ],
+  "citations_at_cutoff": 40,
+  "future_citations_5y": 101
+}

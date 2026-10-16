@@ -1,0 +1,106 @@
+{
+  "id": "https://openalex.org/W2803109435",
+  "title": "Blockchain-Based Decentralized Trust Management in Vehicular Networks",
+  "doi": "https://doi.org/10.1109/jiot.2018.2836144",
+  "publication_year": 2018,
+  "publication_date": "2018-05-14",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "IEEE Internet of Things Journal",
+      "issn_l": "2327-4662",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 2645.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Engineering"
+    }
+  },
+  "primary_field_name": "Engineering",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 29,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 29
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 75
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 94
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 135
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 154
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 169
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 173
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 87
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 11
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 272,
+  "future_citations_5y": 458
+}

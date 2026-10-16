@@ -25,10 +25,12 @@ ml/gnn/checkpoints/*
 !ml/gnn/checkpoints/.gitkeep
 !ml/gnn/checkpoints/hetero_graphsage.pt
 !ml/gnn/checkpoints/MODEL_CARD.json
+!ml/gnn/checkpoints/text_encoder.joblib
 *.pt
 !ml/gnn/checkpoints/hetero_graphsage.pt
 *.pth
 *.onnx
+ALL_RESPONSIBLE_CODE.txt
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/

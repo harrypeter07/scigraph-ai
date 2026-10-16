@@ -1,0 +1,109 @@
+{
+  "id": "https://openalex.org/W2006085890",
+  "title": "A Highly Characterized Yeast Toolkit for Modular, Multipart Assembly",
+  "doi": "https://doi.org/10.1021/sb500366v",
+  "publication_year": 2015,
+  "publication_date": "2015-04-14",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "hybrid",
+    "oa_url": "https://doi.org/10.1021/sb500366v"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "ACS Synthetic Biology",
+      "issn_l": "2161-5063",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 4500.0
+    },
+    "apc_list": {
+      "value_usd": 4500.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Biochemistry, Genetics and Molecular Biology"
+    }
+  },
+  "primary_field_name": "Biochemistry, Genetics and Molecular Biology",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    }
+  ],
+  "referenced_works_count": 54,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 85
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 109
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 123
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 115
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 103
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 102
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 88
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 67
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 50
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 43
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 25
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 9
+    }
+  ],
+  "citations_at_cutoff": 77,
+  "future_citations_5y": 205
+}

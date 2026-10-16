@@ -1,0 +1,126 @@
+{
+  "id": "https://openalex.org/W1761300068",
+  "title": "2012 Update of the 2008 American College of Rheumatology recommendations for the use of disease‐modifying antirheumatic drugs and biologic agents in the treatment of rheumatoid arthritis",
+  "doi": "https://doi.org/10.1002/acr.21641",
+  "publication_year": 2012,
+  "publication_date": "2012-04-02",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "bronze",
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/acr.21641"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Arthritis Care & Research",
+      "issn_l": "0893-7524",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 4640.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Medicine"
+    }
+  },
+  "primary_field_name": "Medicine",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 91,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 10
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 18
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 41
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 58
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 89
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 121
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 81
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 79
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 105
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 156
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 220
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 244
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 248
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 238
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 76
+    }
+  ],
+  "citations_at_cutoff": 562,
+  "future_citations_5y": 620
+}

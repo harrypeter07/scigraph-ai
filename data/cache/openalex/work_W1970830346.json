@@ -1,0 +1,121 @@
+{
+  "id": "https://openalex.org/W1970830346",
+  "title": "An Iteratively Weighted MMSE Approach to Distributed Sum-Utility Maximization for a MIMO Interfering Broadcast Channel",
+  "doi": "https://doi.org/10.1109/tsp.2011.2147784",
+  "publication_year": 2011,
+  "publication_date": "2011-05-03",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "IEEE Transactions on Signal Processing",
+      "issn_l": "1053-587X",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 2645.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Engineering"
+    }
+  },
+  "primary_field_name": "Engineering",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    }
+  ],
+  "referenced_works_count": 23,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 185
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 289
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 228
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 232
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 183
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 147
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 152
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 107
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 97
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 72
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 111
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 78
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 94
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 81
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 40
+    }
+  ],
+  "citations_at_cutoff": 121,
+  "future_citations_5y": 283
+}

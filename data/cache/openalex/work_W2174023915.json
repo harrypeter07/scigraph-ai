@@ -1,0 +1,126 @@
+{
+  "id": "https://openalex.org/W2174023915",
+  "title": "American Cancer Society, American Society for Colposcopy and Cervical Pathology, and American Society for Clinical Pathology screening guidelines for the prevention and early detection of cervical cancer",
+  "doi": "https://doi.org/10.3322/caac.21139",
+  "publication_year": 2012,
+  "publication_date": "2012-03-14",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "gold",
+    "oa_url": "https://onlinelibrary.wiley.com/doi/pdfdirect/10.3322/caac.21139"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "CA A Cancer Journal for Clinicians",
+      "issn_l": "0007-9235",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 4330.0
+    },
+    "apc_list": {
+      "value_usd": 4330.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Medicine"
+    }
+  },
+  "primary_field_name": "Medicine",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 165,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 16
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 38
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 47
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 59
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 81
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 117
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 122
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 106
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 117
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 116
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 125
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 130
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 143
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 130
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 40
+    }
+  ],
+  "citations_at_cutoff": 313,
+  "future_citations_5y": 371
+}

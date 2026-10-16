@@ -1,0 +1,110 @@
+{
+  "id": "https://openalex.org/W2997323331",
+  "title": "GTP Cyclohydrolase 1/Tetrahydrobiopterin Counteract Ferroptosis through Lipid Remodeling",
+  "doi": "https://doi.org/10.1021/acscentsci.9b01063",
+  "publication_year": 2019,
+  "publication_date": "2019-12-27",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "diamond",
+    "oa_url": "https://doi.org/10.1021/acscentsci.9b01063"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "ACS Central Science",
+      "issn_l": "2374-7943",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 1000.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Medicine"
+    }
+  },
+  "primary_field_name": "Medicine",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 51,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 214
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 259
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 307
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 241
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 169
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 67
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 32
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 1
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 3
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 1
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 105,
+  "future_citations_5y": 717
+}

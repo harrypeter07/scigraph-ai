@@ -1,0 +1,126 @@
+{
+  "id": "https://openalex.org/W1997511216",
+  "title": "Regulation of the Voltage Gated K+ Channel Kv1.3 by Recombinant Human Klotho Protein",
+  "doi": "https://doi.org/10.1159/000368472",
+  "publication_year": 2014,
+  "publication_date": "2014-01-01",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "gold",
+    "oa_url": "https://karger.com/kbr/article-pdf/39/6/609/3048974/000368472.pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Kidney & Blood Pressure Research",
+      "issn_l": "1420-4096",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 2780.0
+    },
+    "apc_list": {
+      "value_usd": 2780.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Biochemistry, Genetics and Molecular Biology"
+    }
+  },
+  "primary_field_name": "Biochemistry, Genetics and Molecular Biology",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 174,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 2
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 15
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 55
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 84
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 87
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 62
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 39
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 65
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 87
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 89
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 98
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 121
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 33
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 24
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 23
+    }
+  ],
+  "citations_at_cutoff": 299,
+  "future_citations_5y": 241
+}

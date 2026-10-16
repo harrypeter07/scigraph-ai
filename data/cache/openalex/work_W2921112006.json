@@ -1,0 +1,106 @@
+{
+  "id": "https://openalex.org/W2921112006",
+  "title": "Global, regional, and national burden of stroke, 1990–2016: a systematic analysis for the Global Burden of Disease Study 2016",
+  "doi": "https://doi.org/10.1016/s1474-4422(19)30034-1",
+  "publication_year": 2019,
+  "publication_date": "2019-03-11",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "hybrid",
+    "oa_url": "http://www.thelancet.com/article/S1474442219300341/pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "The Lancet Neurology",
+      "issn_l": "1474-4422",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 4820.0
+    },
+    "apc_list": {
+      "value_usd": 5000.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Medicine"
+    }
+  },
+  "primary_field_name": "Medicine",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 46,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 147
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 306
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 361
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 459
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 593
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 772
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 483
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 113
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 23
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 2
+    }
+  ],
+  "citations_at_cutoff": 1393,
+  "future_citations_5y": 1413
+}

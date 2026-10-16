@@ -1,189 +1,191 @@
 {
-  "dataset_size": 16500,
-  "provenance": "data/works.parquet (OpenAlex 2010-2020 multi-disciplinary corpus)",
+  "metadata": {
+    "timestamp_utc": "2026-10-16T16:06:49.383736+00:00",
+    "sample_size": 16500,
+    "dependent_variable": "ln(1 + future_citations_5y)",
+    "methodology": "Ordinary Least Squares (OLS) with asymptotic standard errors and t-distribution 95% CIs",
+    "reference_category_subtypes": "closed"
+  },
   "global_advantage": {
-    "n_oa": 11878,
-    "n_closed": 4622,
-    "median_oa_cits": 401.0,
-    "median_closed_cits": 336.0,
-    "mean_oa_cits": 684.46,
-    "mean_closed_cits": 478.28,
-    "median_diff": 65.0,
-    "median_diff_ci_95": [
-      55.0,
-      75.0
-    ],
-    "median_advantage_pct": 19.3
+    "crude": {
+      "coefficient": 0.21178,
+      "std_error": 0.01368,
+      "ci_95": [
+        0.18496,
+        0.2386
+      ],
+      "p_value": 1.2048e-53,
+      "multiplier_pct": 23.59,
+      "r_squared": 0.0143
+    },
+    "adjusted": {
+      "coefficient": 0.10271,
+      "std_error": 0.01288,
+      "ci_95": [
+        0.07746,
+        0.12795
+      ],
+      "p_value": 1.6262e-15,
+      "multiplier_pct": 10.82,
+      "r_squared": 0.3091,
+      "attenuation_pct": 51.5
+    }
+  },
+  "subtypes": {
+    "crude": {
+      "gold": {
+        "coefficient": 0.31525,
+        "std_error": 0.01892,
+        "t_statistic": 16.662,
+        "p_value": 7.9441e-62,
+        "ci_95": [
+          0.27816,
+          0.35233
+        ],
+        "multiplier_pct": 37.06
+      },
+      "green": {
+        "coefficient": 0.13728,
+        "std_error": 0.01666,
+        "t_statistic": 8.239,
+        "p_value": 1.8679e-16,
+        "ci_95": [
+          0.10462,
+          0.16994
+        ],
+        "multiplier_pct": 14.72
+      },
+      "hybrid": {
+        "coefficient": 0.28512,
+        "std_error": 0.01972,
+        "t_statistic": 14.455,
+        "p_value": 4.5217e-47,
+        "ci_95": [
+          0.24646,
+          0.32378
+        ],
+        "multiplier_pct": 32.99
+      },
+      "bronze": {
+        "coefficient": 0.15235,
+        "std_error": 0.01918,
+        "t_statistic": 7.944,
+        "p_value": 2.0788e-15,
+        "ci_95": [
+          0.11476,
+          0.18995
+        ],
+        "multiplier_pct": 16.46
+      }
+    },
+    "adjusted": {
+      "gold": {
+        "coefficient": 0.12863,
+        "std_error": 0.01792,
+        "t_statistic": 7.179,
+        "p_value": 7.3473e-13,
+        "ci_95": [
+          0.0935,
+          0.16375
+        ],
+        "multiplier_pct": 13.73
+      },
+      "green": {
+        "coefficient": 0.08628,
+        "std_error": 0.0145,
+        "t_statistic": 5.949,
+        "p_value": 2.7551e-09,
+        "ci_95": [
+          0.05785,
+          0.11471
+        ],
+        "multiplier_pct": 9.01
+      },
+      "hybrid": {
+        "coefficient": 0.1011,
+        "std_error": 0.01806,
+        "t_statistic": 5.599,
+        "p_value": 2.1898e-08,
+        "ci_95": [
+          0.0657,
+          0.13649
+        ],
+        "multiplier_pct": 10.64
+      },
+      "bronze": {
+        "coefficient": 0.09999,
+        "std_error": 0.01798,
+        "t_statistic": 5.561,
+        "p_value": 2.7303e-08,
+        "ci_95": [
+          0.06474,
+          0.13523
+        ],
+        "multiplier_pct": 10.52
+      }
+    }
   },
   "by_field": {
     "Biochemistry, Genetics and Molecular Biology": {
-      "n_oa": 2924,
-      "n_closed": 376,
-      "median_oa": 413.0,
-      "median_closed": 313.0,
-      "mean_oa": 639.75,
-      "mean_closed": 392.49,
-      "median_advantage_pct": 31.9,
+      "n_papers": 3300,
+      "adjusted_coefficient": 0.22981,
+      "std_error": 0.0381,
       "ci_95": [
-        78.99,
-        117.0
-      ]
+        0.15511,
+        0.30451
+      ],
+      "p_value": 1.8008e-09,
+      "multiplier_pct": 25.84,
+      "r_squared": 0.1955
     },
     "Computer Science": {
-      "n_oa": 1830,
-      "n_closed": 1470,
-      "median_oa": 524.0,
-      "median_closed": 325.0,
-      "mean_oa": 891.45,
-      "mean_closed": 579.88,
-      "median_advantage_pct": 61.2,
+      "n_papers": 3300,
+      "adjusted_coefficient": 0.0615,
+      "std_error": 0.03019,
       "ci_95": [
-        172.46,
-        218.5
-      ]
+        0.0023,
+        0.1207
+      ],
+      "p_value": 0.04173,
+      "multiplier_pct": 6.34,
+      "r_squared": 0.3298
     },
     "Engineering": {
-      "n_oa": 1623,
-      "n_closed": 1677,
-      "median_oa": 406.0,
-      "median_closed": 363.0,
-      "mean_oa": 490.17,
-      "mean_closed": 428.15,
-      "median_advantage_pct": 11.8,
+      "n_papers": 3300,
+      "adjusted_coefficient": 0.04424,
+      "std_error": 0.01926,
       "ci_95": [
-        30.0,
-        57.0
-      ]
+        0.00648,
+        0.08199
+      ],
+      "p_value": 0.021663,
+      "multiplier_pct": 4.52,
+      "r_squared": 0.2133
     },
     "Medicine": {
-      "n_oa": 2758,
-      "n_closed": 542,
-      "median_oa": 533.0,
-      "median_closed": 476.0,
-      "mean_oa": 804.4,
-      "mean_closed": 657.08,
-      "median_advantage_pct": 12.0,
+      "n_papers": 3300,
+      "adjusted_coefficient": -0.01899,
+      "std_error": 0.03164,
       "ci_95": [
-        29.5,
-        85.0
-      ]
+        -0.08103,
+        0.04305
+      ],
+      "p_value": 0.54848,
+      "multiplier_pct": -1.88,
+      "r_squared": 0.2032
     },
     "Physics and Astronomy": {
-      "n_oa": 2743,
-      "n_closed": 557,
-      "median_oa": 215.0,
-      "median_closed": 189.0,
-      "mean_oa": 588.4,
-      "mean_closed": 244.98,
-      "median_advantage_pct": 13.8,
+      "n_papers": 3300,
+      "adjusted_coefficient": 0.11897,
+      "std_error": 0.03074,
       "ci_95": [
-        13.0,
-        39.0
-      ]
+        0.05871,
+        0.17924
+      ],
+      "p_value": 0.00011071,
+      "multiplier_pct": 12.63,
+      "r_squared": 0.1052
     }
   },
-  "by_oa_status": {
-    "bronze": {
-      "count": 2520,
-      "percentage_of_corpus": 15.27,
-      "median_citations_5y": 369.5,
-      "mean_citations_5y": 602.96,
-      "std_citations_5y": 1237.79,
-      "apc_paid_count": 5,
-      "apc_paid_median_usd": 1856.0,
-      "apc_paid_mean_usd": 2298.8,
-      "apc_list_median_usd": 3970.0
-    },
-    "closed": {
-      "count": 4622,
-      "percentage_of_corpus": 28.01,
-      "median_citations_5y": 336.0,
-      "mean_citations_5y": 478.28,
-      "std_citations_5y": 724.69,
-      "apc_paid_count": 0,
-      "apc_paid_median_usd": null,
-      "apc_paid_mean_usd": null,
-      "apc_list_median_usd": 4480.0
-    },
-    "diamond": {
-      "count": 431,
-      "percentage_of_corpus": 2.61,
-      "median_citations_5y": 332.0,
-      "mean_citations_5y": 2394.99,
-      "std_citations_5y": 38532.42,
-      "apc_paid_count": 2,
-      "apc_paid_median_usd": 209.5,
-      "apc_paid_mean_usd": 209.5,
-      "apc_list_median_usd": 0.0
-    },
-    "gold": {
-      "count": 2625,
-      "percentage_of_corpus": 15.91,
-      "median_citations_5y": 451.0,
-      "mean_citations_5y": 668.27,
-      "std_citations_5y": 1202.79,
-      "apc_paid_count": 2551,
-      "apc_paid_median_usd": 3380.0,
-      "apc_paid_mean_usd": 3528.54,
-      "apc_list_median_usd": 3499.0
-    },
-    "green": {
-      "count": 3983,
-      "percentage_of_corpus": 24.14,
-      "median_citations_5y": 375.0,
-      "mean_citations_5y": 582.64,
-      "std_citations_5y": 1419.44,
-      "apc_paid_count": 0,
-      "apc_paid_median_usd": null,
-      "apc_paid_mean_usd": null,
-      "apc_list_median_usd": 3750.0
-    },
-    "hybrid": {
-      "count": 2319,
-      "percentage_of_corpus": 14.05,
-      "median_citations_5y": 428.0,
-      "mean_citations_5y": 648.34,
-      "std_citations_5y": 928.61,
-      "apc_paid_count": 1744,
-      "apc_paid_median_usd": 4190.0,
-      "apc_paid_mean_usd": 4888.28,
-      "apc_list_median_usd": 4290.0
-    }
-  },
-  "by_venue_tier": {
-    "Mid/Low-Tier (Q2-Q4 / CORE B-C)": {
-      "n_oa": 1933,
-      "n_closed": 1044,
-      "median_oa": 448.0,
-      "median_closed": 357.0,
-      "median_advantage_pct": 25.5,
-      "ci_95": [
-        60.98,
-        114.02
-      ]
-    },
-    "Top-Tier (Q1 / CORE A-A*)": {
-      "n_oa": 8934,
-      "n_closed": 2668,
-      "median_oa": 395.0,
-      "median_closed": 353.0,
-      "median_advantage_pct": 11.9,
-      "ci_95": [
-        30.0,
-        53.0
-      ]
-    },
-    "Unranked / Non-Indexed": {
-      "n_oa": 1011,
-      "n_closed": 910,
-      "median_oa": 358.0,
-      "median_closed": 259.0,
-      "median_advantage_pct": 38.2,
-      "ci_95": [
-        79.0,
-        126.5
-      ]
-    }
-  },
-  "scientometric_notice": "Empirical Association, Not Causation. The observed Open Access citation differential is confounded by author self-selection bias (authors preferentially publish high-caliber findings as OA) and funding availability. Reported medians reflect raw cohort differences."
+  "scientometric_conclusion": "The crude Open Access citation advantage of +23.6% (b = 0.2118) attenuates to +10.8% (b = 0.1027) after adjusting for scientific field, publication cohort, author team scale, and venue prestige metrics (SJR and Core/SCImago tier). This demonstrates that a substantial fraction of the crude advantage is driven by confounding and author self-selection rather than pure open accessibility."
 }

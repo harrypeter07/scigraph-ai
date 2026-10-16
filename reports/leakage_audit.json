@@ -1,0 +1,49 @@
+{
+  "audit_name": "WP2 Temporal Leakage Audit",
+  "timestamp_utc": "2026-10-16T15:38:35.911054+00:00",
+  "git_commit": "in_progress",
+  "audits": {
+    "future_poison_test": {
+      "status": "PASSED",
+      "target_work_id": "https://openalex.org/W2194775991",
+      "pub_year": 2016,
+      "cutoff_year": 2018,
+      "max_diff": 0.0,
+      "byte_identical": true
+    },
+    "edge_time_audit": {
+      "status": "AUDITED",
+      "total_in_corpus_edges": 87709,
+      "valid_as_of_cutoff_edges": 43893,
+      "leaked_future_edges": 43816,
+      "leak_percentage": 49.96,
+      "remediation": "Filtered in ml/gnn/graph_builder.py to only retain edges with citing_year <= referenced_cutoff"
+    },
+    "label_shuffle_sanity": {
+      "status": "PASSED",
+      "true_val_macro_f1": 0.5656,
+      "true_val_accuracy": 0.5953,
+      "shuffled_val_macro_f1": 0.3079,
+      "shuffled_val_accuracy": 0.482,
+      "chance_threshold": 0.4,
+      "is_below_threshold": true
+    },
+    "counts_year_truncation": {
+      "status": "AUDITED",
+      "counts_min_year": 2012,
+      "counts_max_year": 2026,
+      "total_works": 16500,
+      "truncated_works_count": 3000,
+      "truncated_works_percentage": 18.18,
+      "decision": "Drop publication_year < 2012 from training split (train = 2012-2016, 7,500 works) to guarantee zero truncation in training data."
+    },
+    "oa_apc_ablation": {
+      "status": "COMPLETED",
+      "full_features_val_macro_f1": 0.5656,
+      "no_oa_apc_val_macro_f1": 0.5654,
+      "delta_macro_f1": 0.0002,
+      "notes": "Contemporary OA status and APC provide slight incremental gain (+0.00 to +0.01 F1). Documented as residual as-of-today fields."
+    }
+  },
+  "duration_seconds": 44.77
+}

@@ -1,0 +1,110 @@
+{
+  "id": "https://openalex.org/W2047925917",
+  "title": "Does the Use of Chitosan Contribute to Oxalate Kidney Stone Formation?",
+  "doi": "https://doi.org/10.3390/md13010141",
+  "publication_year": 2014,
+  "publication_date": "2014-12-29",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "gold",
+    "oa_url": "https://www.mdpi.com/1660-3397/13/1/141/pdf?version=1424783581"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Marine Drugs",
+      "issn_l": "1660-3397",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 3499.0
+    },
+    "apc_list": {
+      "value_usd": 3499.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Medicine"
+    }
+  },
+  "primary_field_name": "Medicine",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 52,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 117
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 206
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 222
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 214
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 162
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 141
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 91
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 50
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 10
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 4
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 3
+    }
+  ],
+  "citations_at_cutoff": 3,
+  "future_citations_5y": 64
+}

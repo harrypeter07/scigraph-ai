@@ -1,0 +1,82 @@
+{
+  "id": "https://openalex.org/W2962942350",
+  "title": "Why does bulk boundary correspondence fail in some non-hermitian topological models",
+  "doi": "https://doi.org/10.1088/2399-6528/aab64a",
+  "publication_year": 2018,
+  "publication_date": "2018-03-13",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "gold",
+    "oa_url": "https://iopscience.iop.org/article/10.1088/2399-6528/aab64a/pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Journal of Physics Communications",
+      "issn_l": "2399-6528",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 1880.0
+    },
+    "apc_list": {
+      "value_usd": 1880.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Physics and Astronomy"
+    }
+  },
+  "primary_field_name": "Physics and Astronomy",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    }
+  ],
+  "referenced_works_count": 55,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 32
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 59
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 78
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 65
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 66
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 76
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 85
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 66
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 24
+    }
+  ],
+  "citations_at_cutoff": 175,
+  "future_citations_5y": 207
+}

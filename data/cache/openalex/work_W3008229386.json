@@ -1,0 +1,98 @@
+{
+  "id": "https://openalex.org/W3008229386",
+  "title": "Microbiota as Predictor of Mortality in Allogeneic Hematopoietic-Cell Transplantation",
+  "doi": "https://doi.org/10.1056/nejmoa1900623",
+  "publication_year": 2020,
+  "publication_date": "2020-02-26",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "bronze",
+    "oa_url": "https://www.nejm.org/doi/pdf/10.1056/NEJMoa1900623?articleTools=true"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "New England Journal of Medicine",
+      "issn_l": "0028-4793",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Biochemistry, Genetics and Molecular Biology"
+    }
+  },
+  "primary_field_name": "Biochemistry, Genetics and Molecular Biology",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 46,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 106
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 117
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 92
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 134
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 127
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 104
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 77
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 309,
+  "future_citations_5y": 343
+}

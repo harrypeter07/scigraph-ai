@@ -1,0 +1,106 @@
+{
+  "id": "https://openalex.org/W1562448677",
+  "title": "Quasi-exactly solvable models in quantum mechanics",
+  "doi": "https://doi.org/10.1201/9780203741450",
+  "publication_year": 2017,
+  "publication_date": "2017-07-12",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "CRC Press eBooks",
+      "issn_l": null,
+      "type": "ebook platform"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": NaN
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Physics and Astronomy"
+    }
+  },
+  "primary_field_name": "Physics and Astronomy",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    }
+  ],
+  "referenced_works_count": 0,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 2
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 6
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 12
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 14
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 15
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 15
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 18
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 8
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 14
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 9
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 15
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 10
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 12
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 9
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 11
+    }
+  ],
+  "citations_at_cutoff": 88,
+  "future_citations_5y": 48
+}

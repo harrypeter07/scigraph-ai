@@ -1,0 +1,121 @@
+{
+  "id": "https://openalex.org/W2412446857",
+  "title": "Molecular Similarity in Medicinal Chemistry",
+  "doi": "https://doi.org/10.1021/jm401411z",
+  "publication_year": 2013,
+  "publication_date": "2013-10-23",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Journal of Medicinal Chemistry",
+      "issn_l": "0022-2623",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 4500.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    }
+  ],
+  "referenced_works_count": 57,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 52
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 67
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 85
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 49
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 58
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 51
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 75
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 43
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 44
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 34
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 48
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 36
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 20
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 1
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 58,
+  "future_citations_5y": 126
+}

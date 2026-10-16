@@ -1,0 +1,118 @@
+{
+  "id": "https://openalex.org/W2318514767",
+  "title": "Carbon Nanotube/Polymer Composites as a Highly Stable Hole Collection Layer in Perovskite Solar Cells",
+  "doi": "https://doi.org/10.1021/nl501982b",
+  "publication_year": 2014,
+  "publication_date": "2014-09-22",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Nano Letters",
+      "issn_l": "1530-6984",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 4500.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Engineering"
+    }
+  },
+  "primary_field_name": "Engineering",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 33,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 24
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 41
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 56
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 60
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 68
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 104
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 108
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 108
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 167
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 158
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 183
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 125
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 7
+    }
+  ],
+  "citations_at_cutoff": 315,
+  "future_citations_5y": 433
+}

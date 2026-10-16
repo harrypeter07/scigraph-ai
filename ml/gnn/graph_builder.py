@@ -53,56 +53,20 @@ def build_heterogeneous_graph(data_dir: Optional[Path] = None) -> HeteroData:
 
     data = HeteroData()
 
-    # 2. Construct Paper Node Features (strictly as-of-cutoff!)
-    logger.info("Computing paper node features (strictly as-of-cutoff)...")
-    # Title SVD embeddings (32-dim)
-    tfidf = TfidfVectorizer(max_features=5000, stop_words="english")
-    tfidf_matrix = tfidf.fit_transform(df_works["title"].fillna("Untitled"))
-    svd = TruncatedSVD(n_components=32, random_state=42)
-    title_embeddings = svd.fit_transform(tfidf_matrix)
-
-    # Tabular cutoff features
-    cits_cutoff = np.log1p(df_works["citations_at_cutoff"].clip(lower=0).values)[:, None]
-    pub_offset = ((df_works["publication_year"].values - settings.MIN_PUB_YEAR) / 10.0)[:, None]
-    ref_count = np.log1p(df_works["referenced_works_count"].clip(lower=0).values)[:, None]
-    num_auth = (df_works["num_authors"].clip(lower=1, upper=50).values / 10.0)[:, None]
-    is_oa = df_works["is_oa"].astype(float).values[:, None]
-
-    # OA status one-hot
-    oa_statuses = ["gold", "green", "hybrid", "bronze", "closed"]
-    oa_one_hot = np.zeros((len(df_works), len(oa_statuses)), dtype=np.float32)
-    for i, st in enumerate(oa_statuses):
-        oa_one_hot[:, i] = (df_works["oa_status"].str.lower() == st).astype(float).values
-
-    # APC and Venue metrics
-    apc_paid = np.log1p(df_works["apc_paid_usd"].fillna(0.0).clip(lower=0).values)[:, None]
-    sjr = df_works["venue_sjr"].fillna(0.0).values[:, None]
-    is_top_tier = (
-        (df_works["venue_scimago_quartile"] == "Q1") | 
-        (df_works["venue_core_rank"].isin(["A*", "A"]))
-    ).astype(float).values[:, None]
-
-    paper_features = np.hstack([
-        cits_cutoff,
-        pub_offset,
-        ref_count,
-        num_auth,
-        is_oa,
-        oa_one_hot,
-        apc_paid,
-        sjr,
-        is_top_tier,
-        title_embeddings
-    ]).astype(np.float32)
+    # 2. Construct Paper Node Features (strictly as-of-cutoff via central builder!)
+    logger.info("Computing paper node features (strictly as-of-cutoff via ml.features.builder)...")
+    from ml.features.builder import build_paper_features_batch
+    paper_features, _ = build_paper_features_batch(df_works)
 
     data["paper"].x = torch.from_numpy(paper_features)
     data["paper"].y = torch.tensor(df_works["impact_class"].values, dtype=torch.long)
     data["paper"].y_reg = torch.tensor(np.log1p(df_works["future_citations_5y"].values), dtype=torch.float)
 
-    # Split masks
-    data["paper"].train_mask = torch.tensor((df_works["temporal_split"] == "train").values, dtype=torch.bool)
-    data["paper"].val_mask = torch.tensor((df_works["temporal_split"] == "val").values, dtype=torch.bool)
-    data["paper"].test_mask = torch.tensor((df_works["temporal_split"] == "test").values, dtype=torch.bool)
+    # Split masks: exclude truncated 2010-2011 from training (train = 2012-2016: 7,500 works)
+    clean_train = (df_works["publication_year"] >= 2012) & (df_works["publication_year"] <= 2016)
+    data["paper"].train_mask = torch.tensor(clean_train.values, dtype=torch.bool)
+    data["paper"].val_mask = torch.tensor((df_works["publication_year"] == 2017).values, dtype=torch.bool)
+    data["paper"].test_mask = torch.tensor((df_works["publication_year"] >= 2018).values, dtype=torch.bool)
 
     # 3. Auxiliary Node Types (Vectorized)
     # Authors: 8-dim feature (log paper count)
@@ -126,15 +90,24 @@ def build_heterogeneous_graph(data_dir: Optional[Path] = None) -> HeteroData:
     topic_features = np.zeros((len(df_topics), 8), dtype=np.float32)
     data["topic"].x = torch.from_numpy(topic_features)
 
-    # 4. Construct Relational Edges (with bidirectional reverses)
-    logger.info("Constructing heterogeneous edge indexes (vectorized)...")
+    # 4. Construct Relational Edges (with bidirectional reverses & temporal guard)
+    logger.info("Constructing heterogeneous edge indexes (vectorized with temporal cutoff filtering)...")
 
     # (paper, cites, paper) internal citation edges
+    pub_years = df_works["publication_year"].values
+    cutoff_years = df_works["cutoff_year"].values
+
     s_mapped = df_citation_edges["citing_work_id"].map(paper_id_map)
     d_mapped = df_citation_edges["referenced_work_id"].map(paper_id_map)
     valid_cites = s_mapped.notnull() & d_mapped.notnull()
-    cites_src = s_mapped[valid_cites].astype(int).values
-    cites_dst = d_mapped[valid_cites].astype(int).values
+
+    # Strict Temporal Cutoff Guard: edge exists only if citing_year <= referenced_cutoff_year
+    s_idx = s_mapped[valid_cites].astype(int).values
+    d_idx = d_mapped[valid_cites].astype(int).values
+    temporal_valid = pub_years[s_idx] <= cutoff_years[d_idx]
+
+    cites_src = s_idx[temporal_valid]
+    cites_dst = d_idx[temporal_valid]
 
     if len(cites_src) > 0:
         edge_cites = torch.from_numpy(np.vstack([cites_src, cites_dst])).long()

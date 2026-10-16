@@ -1,0 +1,114 @@
+{
+  "id": "https://openalex.org/W2041713059",
+  "title": "The Oracle Problem in Software Testing: A Survey",
+  "doi": "https://doi.org/10.1109/tse.2014.2372785",
+  "publication_year": 2014,
+  "publication_date": "2014-11-20",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "hybrid",
+    "oa_url": "https://ieeexplore.ieee.org/ielx7/32/7106034/06963470.pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "IEEE Transactions on Software Engineering",
+      "issn_l": "0098-5589",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 1354.0
+    },
+    "apc_list": {
+      "value_usd": 2645.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 270,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 109
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 131
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 116
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 96
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 104
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 115
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 102
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 88
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 98
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 56
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 58
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 16
+    }
+  ],
+  "citations_at_cutoff": 74,
+  "future_citations_5y": 242
+}

@@ -1,0 +1,122 @@
+{
+  "id": "https://openalex.org/W3004280078",
+  "title": "A pneumonia outbreak associated with a new coronavirus of probable bat origin",
+  "doi": "https://doi.org/10.1038/s41586-020-2012-7",
+  "publication_year": 2020,
+  "publication_date": "2020-02-03",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "hybrid",
+    "oa_url": "https://www.nature.com/articles/s41586-020-2012-7.pdf"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Nature",
+      "issn_l": "0028-0836",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": 12690.0
+    },
+    "apc_list": {
+      "value_usd": 12690.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Medicine"
+    }
+  },
+  "primary_field_name": "Medicine",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 5"
+      }
+    }
+  ],
+  "referenced_works_count": 21,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 334
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 758
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 1355
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 2079
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 3751
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 6154
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 7462
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 14
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 4
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 1
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 1
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 1
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 3
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 1
+    }
+  ],
+  "citations_at_cutoff": 17392,
+  "future_citations_5y": 4192
+}

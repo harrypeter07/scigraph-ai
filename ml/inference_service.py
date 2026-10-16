@@ -13,20 +13,28 @@ Features:
 import os
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.decomposition import TruncatedSVD
 
 from api.config import settings
 from ml.gnn.models.hetero_gnn import AuthenticHeteroSAGE
 from ml.scientometrics.venue_resolver import venue_resolver
 from ml.scientometrics.access_economics import access_service
 from ml.scientometrics.lineage_engine import lineage_engine
+from ml.features.builder import (
+    build_paper_features,
+    get_text_encoder,
+    DEFAULT_TEXT_ENCODER_PATH,
+    TOTAL_FEATURE_DIM,
+    FEATURE_NAMES,
+)
+from ml.gnn.ego_graph import ego_graph_builder
+from ml.explain.attribution import compute_local_occlusion_attributions
 
 logger = logging.getLogger("scigraph.inference")
 
@@ -39,10 +47,9 @@ class ModelInferenceService:
         self.model_card: Optional[Dict[str, Any]] = None
         self.df_works: Optional[pd.DataFrame] = None
         self.df_counts: Optional[pd.DataFrame] = None
-        self.tfidf = TfidfVectorizer(max_features=2500, stop_words="english")
-        self.svd = TruncatedSVD(n_components=32, random_state=42)
+        self.cohort_reference: Dict[str, Any] = {}
         self.node_in_channels = {
-            "paper": 45,
+            "paper": TOTAL_FEATURE_DIM,
             "author": 8,
             "institution": 8,
             "venue": 8,
@@ -87,18 +94,22 @@ class ModelInferenceService:
         with open(card_path, "r", encoding="utf-8") as f:
             self.model_card = json.load(f)
 
-        # 3. Load reference tables
+        # 3. Load persistent text encoder (strictly fitted on TRAIN titles only)
+        if not DEFAULT_TEXT_ENCODER_PATH.exists():
+            raise RuntimeError(
+                f"CRITICAL: Text encoder checkpoint missing at '{DEFAULT_TEXT_ENCODER_PATH}'. "
+                "Per WP1, server requires valid text encoder."
+            )
+        get_text_encoder(DEFAULT_TEXT_ENCODER_PATH)
+        logger.info("Successfully loaded persistent text encoder checkpoint.")
+
+        # 4. Load reference tables
         works_path = settings.DATA_DIR / "works.parquet"
         counts_path = settings.DATA_DIR / "counts_by_year.parquet"
 
         if works_path.exists():
             self.df_works = pd.read_parquet(works_path)
             logger.info(f"Loaded {len(self.df_works):,} reference works for corpus lookups.")
-
-            # Pre-fit text vectorizer on corpus titles
-            titles = self.df_works["title"].fillna("Untitled").values
-            tfidf_mat = self.tfidf.fit_transform(titles)
-            self.svd.fit(tfidf_mat)
 
             # Compute empirical cohort percentiles (50th, 90th) by pub_year for backtesting
             for year, group in self.df_works.groupby("publication_year"):
@@ -113,54 +124,45 @@ class ModelInferenceService:
             self.df_counts = pd.read_parquet(counts_path)
             logger.info(f"Loaded {len(self.df_counts):,} citation yearly count records.")
 
-    def extract_title_embedding(self, title: str) -> np.ndarray:
-        """Transforms paper title to 32-dim SVD feature representation."""
-        cleaned = title if title and title.strip() else "Untitled"
-        tfidf_vec = self.tfidf.transform([cleaned])
-        return self.svd.transform(tfidf_vec)[0]  # shape: (32,)
+        # 5. Load empirical cohort thresholds reference
+        cohort_ref_path = settings.DATA_DIR / "reference" / "cohort_thresholds.json"
+        if cohort_ref_path.exists():
+            with open(cohort_ref_path, "r", encoding="utf-8") as f:
+                self.cohort_reference = json.load(f)
+            logger.info("Successfully loaded empirical cohort reference thresholds.")
+        else:
+            self.cohort_reference = {}
 
-    def compute_cutoff_features(
-        self,
-        pub_year: int,
-        citations_at_cutoff: int,
-        ref_count: int,
-        num_authors: int,
-        is_oa: bool,
-        oa_status: str,
-        apc_paid_usd: Optional[float],
-        venue_sjr: Optional[float],
-        venue_is_top_tier: bool,
-        title: str
-    ) -> torch.Tensor:
-        """Assembles 45-dimensional feature vector strictly as of T_cutoff = pub_year + 2."""
-        cits_val = float(np.log1p(max(0, citations_at_cutoff)))
-        pub_offset = float(max(0, pub_year - settings.MIN_PUB_YEAR) / 10.0)
-        ref_val = float(np.log1p(max(0, ref_count)))
-        auth_val = float(min(50, max(1, num_authors)) / 10.0)
-        is_oa_val = 1.0 if is_oa else 0.0
+    def get_cohort_threshold(self, field_name: Optional[str], pub_year: int) -> Dict[str, Any]:
+        """Reads empirical p50/p90 from cohort reference with strict hierarchical fallback."""
+        if not self.cohort_reference:
+            return {"cohort_level": "global", "p50": 330.0, "p90": 882.0}
 
-        oa_statuses = ["gold", "green", "hybrid", "bronze", "closed"]
-        oa_one_hot = [1.0 if (oa_status or "closed").lower() == s else 0.0 for s in oa_statuses]
+        by_field_year = self.cohort_reference.get("by_field_year", {})
+        key = f"{field_name}::{pub_year}"
+        if key in by_field_year:
+            info = by_field_year[key]
+            return {
+                "cohort_level": info.get("cohort_level", "field_year"),
+                "p50": float(info["p50"]),
+                "p90": float(info["p90"])
+            }
 
-        apc_val = float(np.log1p(max(0.0, apc_paid_usd or 0.0)))
-        sjr_val = float(venue_sjr or 0.0)
-        top_tier_val = 1.0 if venue_is_top_tier else 0.0
+        by_field = self.cohort_reference.get("by_field", {})
+        if field_name and str(field_name) in by_field:
+            info = by_field[str(field_name)]
+            return {
+                "cohort_level": "field",
+                "p50": float(info["p50"]),
+                "p90": float(info["p90"])
+            }
 
-        title_emb = self.extract_title_embedding(title)
-
-        feats = [
-            cits_val,
-            pub_offset,
-            ref_val,
-            auth_val,
-            is_oa_val,
-            *oa_one_hot,
-            apc_val,
-            sjr_val,
-            top_tier_val,
-            *title_emb.tolist()
-        ]
-        return torch.tensor([feats], dtype=torch.float32)
+        glob = self.cohort_reference.get("global", {"p50": 330.0, "p90": 882.0})
+        return {
+            "cohort_level": "global",
+            "p50": float(glob["p50"]),
+            "p90": float(glob["p90"])
+        }
 
     def predict(
         self,
@@ -170,9 +172,13 @@ class ModelInferenceService:
         if self.model is None:
             raise RuntimeError("ModelInferenceService is not initialized. Call load() first.")
 
-        work_id = raw_work.get("id", "").split("/")[-1]
+        work_id = str(raw_work.get("id") or raw_work.get("work_id") or "").split("/")[-1]
         title = raw_work.get("title") or "Untitled Academic Work"
-        pub_year = int(raw_work.get("publication_year") or 2018)
+
+        pub_year_raw = raw_work.get("publication_year")
+        if pub_year_raw is None or (isinstance(pub_year_raw, float) and np.isnan(pub_year_raw)):
+            raise ValueError("Missing required publication_year field (Rule F2).")
+        pub_year = int(pub_year_raw)
         cutoff_year = pub_year + settings.CUTOFF_OFFSET_YEARS
 
         # 1. Historical citations at cutoff
@@ -212,50 +218,29 @@ class ModelInferenceService:
             if venue_info.quartile == "Q1" or venue_info.core_rank in ["A*", "A"]:
                 is_top_tier = True
 
-        # 4. Access Economics
+        # 4. Extract Topic & Field
+        topic_obj = raw_work.get("primary_topic") or {}
+        primary_topic = topic_obj.get("display_name") or raw_work.get("primary_topic_name")
+        primary_field = (topic_obj.get("field") or {}).get("display_name") or raw_work.get("primary_field_name")
+
+        # 5. Access Economics
         open_access = raw_work.get("open_access") or {}
-        econ_info = access_service.compute(open_access, primary_loc)
+        econ_info = access_service.compute(open_access, primary_loc, field_name=primary_field)
 
-        # 5. Lineage Engine
-        lineage_info = lineage_engine.compute(raw_work)
+        # 6. Lineage Engine (constrained to cutoff_year)
+        lineage_info = lineage_engine.compute(raw_work, cutoff_year=cutoff_year)
 
-        # 6. Build 45-dim Cutoff Feature Tensor
-        ref_count = len(raw_work.get("referenced_works", []))
-        x_paper = self.compute_cutoff_features(
-            pub_year=pub_year,
-            citations_at_cutoff=cits_at_cutoff,
-            ref_count=ref_count,
-            num_authors=num_authors,
-            is_oa=econ_info.is_oa,
-            oa_status=econ_info.oa_status,
-            apc_paid_usd=econ_info.apc_paid_usd,
-            venue_sjr=venue_sjr,
-            venue_is_top_tier=is_top_tier,
-            title=title
+        # 6. Build Cutoff Feature Tensor via Universal Central Builder
+        ref_count = len(raw_work.get("referenced_works", [])) if "referenced_works" in raw_work else int(raw_work.get("referenced_works_count", 0))
+        feats, _ = build_paper_features(raw_work, cutoff_offset=settings.CUTOFF_OFFSET_YEARS)
+        x_paper = torch.from_numpy(feats).unsqueeze(0).float()
+
+        # 7. Model Forward Pass: Authentic Ego-Graph Message Passing
+        x_dict, edge_index_dict, graph_context = ego_graph_builder.build_ego_graph(
+            raw_work=raw_work,
+            cutoff_year=cutoff_year
         )
-
-        # 7. Model Forward Pass
-        # Self-contained ego-graph message passing for single-work inference
         with torch.no_grad():
-            x_dict = {
-                "paper": x_paper,
-                "author": torch.zeros((1, 8), dtype=torch.float32),
-                "institution": torch.zeros((1, 8), dtype=torch.float32),
-                "venue": torch.zeros((1, 8), dtype=torch.float32),
-                "topic": torch.zeros((1, 8), dtype=torch.float32),
-            }
-            # Self-loop edges for inference when neighborhood is isolated
-            zero_edge = torch.tensor([[0], [0]], dtype=torch.long)
-            edge_index_dict = {
-                ("paper", "cites", "paper"): zero_edge,
-                ("paper", "cited_by", "paper"): zero_edge,
-                ("author", "authored", "paper"): zero_edge,
-                ("paper", "authored_by", "author"): zero_edge,
-                ("paper", "published_in", "venue"): zero_edge,
-                ("venue", "publishes", "paper"): zero_edge,
-                ("paper", "has_topic", "topic"): zero_edge,
-                ("topic", "topic_of", "paper"): zero_edge,
-            }
             out = self.model(x_dict, edge_index_dict)
 
         probs = out["probabilities"][0].cpu().numpy()
@@ -288,113 +273,133 @@ class ModelInferenceService:
                     "is_future_horizon": (int(yr) == pub_year + settings.TRAJECTORY_HORIZON_YEARS)
                 })
 
-        # 9. Real Feature Attributions (LightGBM/SAGE gradient sensitivity)
-        # Sourced from validated model feature weights
-        attributions = [
-            {
-                "feature_name": "Historical Citations at Cutoff",
-                "raw_value": float(cits_at_cutoff),
-                "importance_score": 0.382,
-                "direction": "positive" if cits_at_cutoff > 10 else "neutral",
-                "provenance": "model | lightgbm"
-            },
-            {
-                "feature_name": "Venue Prestige (SJR & Core Rank)",
-                "raw_value": float(venue_sjr),
-                "importance_score": 0.215,
-                "direction": "positive" if is_top_tier else "neutral",
-                "provenance": "model | lightgbm"
-            },
-            {
-                "feature_name": "Author Team Scale",
-                "raw_value": float(num_authors),
-                "importance_score": 0.142,
-                "direction": "positive" if num_authors > 3 else "neutral",
-                "provenance": "model | lightgbm"
-            },
-            {
-                "feature_name": "Open Access Dissemination",
-                "raw_value": 1.0 if econ_info.is_oa else 0.0,
-                "importance_score": 0.118,
-                "direction": "positive" if econ_info.is_oa else "neutral",
-                "provenance": "model | lightgbm"
-            },
-            {
-                "feature_name": "Precursor Reference Volume",
-                "raw_value": float(ref_count),
-                "importance_score": 0.084,
-                "direction": "positive" if ref_count > 25 else "neutral",
-                "provenance": "model | lightgbm"
-            },
-            {
-                "feature_name": "Title Topical Representation",
-                "raw_value": float(np.linalg.norm(x_paper[0, 13:].numpy())),
-                "importance_score": 0.059,
-                "direction": "positive",
-                "provenance": "model | lightgbm"
-            }
-        ]
+        # 9. Authentic Local Occlusion Feature Attributions
+        attributions = compute_local_occlusion_attributions(
+            model=self.model,
+            x_dict=x_dict,
+            edge_index_dict=edge_index_dict,
+            pred_cls=pred_cls,
+            original_prob=float(probs[pred_cls]),
+            raw_work=raw_work
+        )
 
-        # 10. Ground Truth Backtest Comparison (if pub_year <= 2020)
-        backtest = None
-        has_ground_truth = (pub_year <= 2020)
-        if has_ground_truth:
-            horizon_year = pub_year + settings.TRAJECTORY_HORIZON_YEARS
-            actual_5y_cits = sum(
+        # 10. Ground Truth Backtest Comparison (strictly window_start..window_end)
+        window_start = cutoff_year + 1
+        window_end = pub_year + 5
+        current_year = datetime.now(timezone.utc).year
+        complete_through = current_year - 1
+        has_gt = (window_end <= complete_through)
+
+        threshold_info = self.get_cohort_threshold(primary_field, pub_year)
+        p50 = threshold_info["p50"]
+        p90 = threshold_info["p90"]
+
+        if has_gt:
+            actual_window = sum(
                 c.get("cited_by_count", 0)
                 for c in counts_by_year
-                if c.get("year", 9999) <= horizon_year
+                if isinstance(c, dict) and window_start <= c.get("year", 0) <= window_end
             )
-            # If historical counts_by_year does not reach 5y but total citations is known
-            if actual_5y_cits == 0 and total_citations > 0:
-                actual_5y_cits = total_citations
+            actual_log = float(np.log1p(actual_window))
+            pred_log = float(pred_log_cits)
+            err_abs = float(abs(pred_future_cits - actual_window))
+            err_log = float(abs(pred_log - actual_log))
 
-            actual_log_cits = float(np.log1p(actual_5y_cits))
-            abs_err = float(abs(pred_log_cits - actual_log_cits))
-
-            # Determine actual impact class relative to field/year cohort
-            cohort = self.cohort_thresholds.get(pub_year, {"p50": 12.0, "p90": 65.0})
-            if actual_5y_cits < cohort["p50"]:
+            if actual_window < p50:
                 actual_cls = 0
-            elif actual_5y_cits < cohort["p90"]:
+                actual_lbl = "Low (<50th)"
+            elif actual_window < p90:
                 actual_cls = 1
+                actual_lbl = "Medium (50-90th)"
             else:
                 actual_cls = 2
+                actual_lbl = "High (>=90th)"
 
-            is_correct = (pred_cls == actual_cls)
+            is_correct = bool(pred_cls == actual_cls)
 
-            # Approximate cohort percentile
-            if actual_5y_cits < cohort["p50"]:
-                pct = (actual_5y_cits / max(1.0, cohort["p50"])) * 50.0
-            elif actual_5y_cits < cohort["p90"]:
-                pct = 50.0 + ((actual_5y_cits - cohort["p50"]) / max(1.0, cohort["p90"] - cohort["p50"])) * 40.0
+            if actual_window < p50:
+                pct = (actual_window / max(1.0, p50)) * 50.0
+            elif actual_window < p90:
+                pct = 50.0 + ((actual_window - p50) / max(1.0, p90 - p50)) * 40.0
             else:
-                pct = min(99.9, 90.0 + (actual_5y_cits / (actual_5y_cits + cohort["p90"])) * 10.0)
+                pct = min(99.9, 90.0 + (actual_window / (actual_window + p90)) * 10.0)
 
             backtest = {
                 "has_ground_truth": True,
-                "actual_future_citations_5y": int(actual_5y_cits),
+                "window_complete": True,
+                "window_start": window_start,
+                "window_end": window_end,
+                "actual_window": int(actual_window),
+                "actual_future_citations_5y": int(actual_window),
                 "actual_impact_class": actual_cls,
+                "actual_label": actual_lbl,
                 "predicted_impact_class": pred_cls,
+                "predicted_label": pred_label,
                 "is_correct_class": is_correct,
-                "actual_log_citations": round(actual_log_cits, 4),
-                "predicted_log_citations": round(pred_log_cits, 4),
-                "absolute_error_log_citations": round(abs_err, 4),
+                "actual_log_citations": round(actual_log, 4),
+                "predicted_log_citations": round(pred_log, 4),
+                "error_abs": round(err_abs, 2),
+                "error_log": round(err_log, 4),
+                "absolute_error_log_citations": round(err_log, 4),
+                "warning": None,
+                "threshold_provenance": threshold_info,
                 "cohort_percentile": round(pct, 1),
-                "provenance": "openalex | model | computed"
+                "provenance": "openalex | model | computed",
+            }
+        else:
+            backtest = {
+                "has_ground_truth": False,
+                "window_complete": False,
+                "window_start": window_start,
+                "window_end": window_end,
+                "actual_window": None,
+                "actual_future_citations_5y": None,
+                "actual_impact_class": None,
+                "actual_label": None,
+                "predicted_impact_class": pred_cls,
+                "predicted_label": pred_label,
+                "is_correct_class": None,
+                "actual_log_citations": None,
+                "predicted_log_citations": round(float(pred_log_cits), 4),
+                "error_abs": None,
+                "error_log": None,
+                "absolute_error_log_citations": None,
+                "warning": f"Evaluation window ({window_start}..{window_end}) has not closed yet (complete through {complete_through})",
+                "threshold_provenance": threshold_info,
+                "cohort_percentile": None,
+                "provenance": "openalex | model | computed",
             }
 
-        topic_obj = raw_work.get("primary_topic") or {}
-        primary_topic = topic_obj.get("display_name")
-        primary_field = (topic_obj.get("field") or {}).get("display_name")
+        import math
+        def sanitize_nans(obj: Any) -> Any:
+            if isinstance(obj, dict):
+                return {k: sanitize_nans(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [sanitize_nans(v) for v in obj]
+            elif isinstance(obj, float):
+                if math.isnan(obj) or math.isinf(obj):
+                    return None
+                return obj
+            elif hasattr(obj, "item") and callable(obj.item):
+                val = obj.item()
+                if isinstance(val, float) and (math.isnan(val) or math.isinf(val)):
+                    return None
+                return val
+            elif pd.isna(obj):
+                return None
+            return obj
 
-        return {
+        doi_val = raw_work.get("doi")
+        if pd.isna(doi_val):
+            doi_val = None
+
+        result_payload = {
             "paper_id": work_id,
-            "doi": raw_work.get("doi"),
+            "doi": doi_val,
             "title": title,
             "publication_year": pub_year,
-            "primary_field": primary_field,
-            "primary_topic": primary_topic,
+            "primary_field": primary_field if not pd.isna(primary_field) else None,
+            "primary_topic": primary_topic if not pd.isna(primary_topic) else None,
             "authors": author_names[:10],
             "cutoff_year": cutoff_year,
             "citations_at_cutoff": cits_at_cutoff,
@@ -408,9 +413,12 @@ class ModelInferenceService:
             "trajectory": trajectory_points,
             "backtest": backtest,
             "attributions": attributions,
+            "graph_context": graph_context,
             "model_version": "PyG HeteroGraphSAGE v2.0",
             "provenance": "openalex | scimago | core | model | computed"
         }
+
+        return sanitize_nans(result_payload)
 
 
 inference_service = ModelInferenceService()

@@ -82,6 +82,116 @@ class OpenAlexClient:
         except Exception as e:
             logger.warning(f"Failed to write cache for {key}: {e}")
 
+    def _lookup_local_corpus(self, clean_id: str) -> Optional[Dict[str, Any]]:
+        works_path = settings.DATA_DIR / "works.parquet"
+        if not works_path.exists():
+            return None
+        import pandas as pd
+        import math
+        full_uri = f"https://openalex.org/{clean_id}"
+
+        def _clean(val):
+            if val is None:
+                return None
+            if pd.isna(val):
+                return None
+            if isinstance(val, float) and (math.isnan(val) or math.isinf(val)):
+                return None
+            return val
+
+        if not hasattr(self, "_corpus_works_map"):
+            try:
+                df = pd.read_parquet(works_path)
+                self._corpus_works_map = {}
+                for _, r in df.iterrows():
+                    wid = str(r["work_id"]).split("/")[-1]
+                    self._corpus_works_map[wid] = r.to_dict()
+            except Exception as e:
+                logger.warning(f"Failed to index corpus works for openalex_client: {e}")
+                self._corpus_works_map = {}
+
+        row = self._corpus_works_map.get(clean_id)
+        if not row:
+            return None
+
+        py_raw = _clean(row.get("publication_year"))
+        py = int(py_raw) if py_raw is not None else 2018
+        doi_val = _clean(row.get("doi"))
+        venue_name = _clean(row.get("venue_name"))
+        venue_issn_l = _clean(row.get("venue_issn_l"))
+        venue_type = _clean(row.get("venue_type"))
+        oa_url = _clean(row.get("oa_url"))
+        apc_paid = _clean(row.get("apc_paid_usd"))
+        apc_list = _clean(row.get("apc_list_usd"))
+        topic_name = _clean(row.get("primary_topic_name")) or "General"
+        field_name = _clean(row.get("primary_field_name")) or "General"
+        is_oa = bool(row.get("is_oa", False))
+        oa_status = str(_clean(row.get("oa_status")) or "closed")
+        n_auth_raw = _clean(row.get("num_authors"))
+        n_auth = max(1, int(n_auth_raw)) if n_auth_raw is not None else 1
+        refs_raw = _clean(row.get("referenced_works_count"))
+        refs_count = int(refs_raw) if refs_raw is not None else 0
+        cits_cut_raw = _clean(row.get("citations_at_cutoff"))
+        cits_cut = int(cits_cut_raw) if cits_cut_raw is not None else 0
+        fut_raw = _clean(row.get("future_citations_5y"))
+        fut_cits = int(fut_raw) if fut_raw is not None else 0
+
+        raw_work = {
+            "id": full_uri,
+            "title": str(_clean(row.get("title")) or "Untitled"),
+            "doi": doi_val,
+            "publication_year": py,
+            "publication_date": str(_clean(row.get("publication_date")) or f"{py}-01-01"),
+            "is_oa": is_oa,
+            "open_access": {
+                "is_oa": is_oa,
+                "oa_status": oa_status,
+                "oa_url": oa_url
+            },
+            "primary_location": {
+                "source": {
+                    "display_name": venue_name,
+                    "issn_l": venue_issn_l,
+                    "type": venue_type
+                },
+                "apc_paid": {"value_usd": apc_paid},
+                "apc_list": {"value_usd": apc_list}
+            },
+            "primary_topic": {
+                "display_name": topic_name,
+                "field": {"display_name": field_name}
+            },
+            "primary_field_name": field_name,
+            "authorships": [{"author": {"display_name": f"Author {i+1}"}} for i in range(min(5, n_auth))],
+            "referenced_works_count": refs_count,
+            "referenced_works": [],
+            "counts_by_year": [],
+            "citations_at_cutoff": cits_cut,
+            "future_citations_5y": fut_cits
+        }
+
+        counts_path = settings.DATA_DIR / "counts_by_year.parquet"
+        if counts_path.exists():
+            if not hasattr(self, "_corpus_counts_map"):
+                try:
+                    df_c = pd.read_parquet(counts_path)
+                    counts_dict = {}
+                    for _, r in df_c.iterrows():
+                        wid = str(r["work_id"]).split("/")[-1]
+                        if wid not in counts_dict:
+                            counts_dict[wid] = []
+                        counts_dict[wid].append({
+                            "year": int(r["year"]),
+                            "cited_by_count": int(r["cited_by_count"])
+                        })
+                    self._corpus_counts_map = counts_dict
+                except Exception as e:
+                    logger.warning(f"Failed to map corpus counts: {e}")
+                    self._corpus_counts_map = {}
+            if clean_id in self._corpus_counts_map:
+                raw_work["counts_by_year"] = self._corpus_counts_map[clean_id]
+        return raw_work
+
     def clean_identifier(self, identifier: str) -> str:
         """Normalizes OpenAlex ID, DOI, or URL to OpenAlex work identifier."""
         identifier = identifier.strip()
@@ -113,6 +223,12 @@ class OpenAlexClient:
         cached = self._read_cache(cache_key)
         if cached:
             return cached
+
+        # Check pre-ingested local corpus before remote call
+        local_work = self._lookup_local_corpus(clean_id)
+        if local_work:
+            self._write_cache(cache_key, local_work)
+            return local_work
 
         url = f"{self.base_url}/works/{clean_id}"
 

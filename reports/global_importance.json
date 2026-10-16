@@ -1,0 +1,109 @@
+{
+  "metadata": {
+    "evaluation_set": "Held-out Test Split (>= 2018, 4,500 works)",
+    "n_repeats": 10,
+    "random_state": 42,
+    "base_test_macro_f1": 0.2233,
+    "num_feature_groups": 14
+  },
+  "feature_groups": {
+    "log_cits_cutoff": {
+      "display_name": "Early Citation Acceleration",
+      "mean_f1_drop": 0.0001,
+      "std_f1_drop": 0.0002,
+      "n_repeats": 10,
+      "normalized_importance": 0.0714
+    },
+    "pub_offset": {
+      "display_name": "Publication Year Cohort",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "log_refs": {
+      "display_name": "Foundational Reference Depth",
+      "mean_f1_drop": 0.0001,
+      "std_f1_drop": 0.0002,
+      "n_repeats": 10,
+      "normalized_importance": 0.0714
+    },
+    "author_scale": {
+      "display_name": "Author Collaboration Scale",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0001,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "is_oa": {
+      "display_name": "Open Access Dissemination",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "oa_gold": {
+      "display_name": "Gold Open Access Status",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "oa_green": {
+      "display_name": "Green Open Access Status",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "oa_hybrid": {
+      "display_name": "Hybrid Open Access Status",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "oa_bronze": {
+      "display_name": "Bronze Open Access Status",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "oa_closed": {
+      "display_name": "Closed Access Status",
+      "mean_f1_drop": 0.0004,
+      "std_f1_drop": 0.0001,
+      "n_repeats": 10,
+      "normalized_importance": 0.2857
+    },
+    "log_apc": {
+      "display_name": "Article Processing Charges (APC)",
+      "mean_f1_drop": 0.0002,
+      "std_f1_drop": 0.0002,
+      "n_repeats": 10,
+      "normalized_importance": 0.1429
+    },
+    "sjr": {
+      "display_name": "SCImago Journal Rank (SJR)",
+      "mean_f1_drop": 0.0006,
+      "std_f1_drop": 0.0004,
+      "n_repeats": 10,
+      "normalized_importance": 0.4286
+    },
+    "tier_top": {
+      "display_name": "Top Tier Venue Prestige (Q1 / A*)",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    },
+    "title_svd": {
+      "display_name": "Topical Semantic Representation",
+      "mean_f1_drop": 0.0,
+      "std_f1_drop": 0.0001,
+      "n_repeats": 10,
+      "normalized_importance": 0.0
+    }
+  }
+}

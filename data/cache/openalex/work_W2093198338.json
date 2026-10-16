@@ -1,0 +1,121 @@
+{
+  "id": "https://openalex.org/W2093198338",
+  "title": "Biological Interactions of Graphene-Family Nanomaterials: An Interdisciplinary Review",
+  "doi": "https://doi.org/10.1021/tx200339h",
+  "publication_year": 2011,
+  "publication_date": "2011-09-28",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "green",
+    "oa_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/3259226"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "Chemical Research in Toxicology",
+      "issn_l": "0893-228X",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": NaN
+    },
+    "apc_list": {
+      "value_usd": 4500.0
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Engineering"
+    }
+  },
+  "primary_field_name": "Engineering",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Author 1"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 2"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 3"
+      }
+    },
+    {
+      "author": {
+        "display_name": "Author 4"
+      }
+    }
+  ],
+  "referenced_works_count": 152,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 30
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 42
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 62
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 74
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 89
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 85
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 117
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 116
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 122
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 113
+    },
+    {
+      "year": 2016,
+      "cited_by_count": 124
+    },
+    {
+      "year": 2015,
+      "cited_by_count": 110
+    },
+    {
+      "year": 2014,
+      "cited_by_count": 71
+    },
+    {
+      "year": 2013,
+      "cited_by_count": 80
+    },
+    {
+      "year": 2012,
+      "cited_by_count": 26
+    }
+  ],
+  "citations_at_cutoff": 106,
+  "future_citations_5y": 305
+}

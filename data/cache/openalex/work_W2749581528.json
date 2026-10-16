@@ -1,0 +1,158 @@
+{
+  "id": "https://openalex.org/W2749581528",
+  "title": "Super-convergence: very fast training of neural networks using large learning rates",
+  "doi": "https://doi.org/10.1117/12.2520589",
+  "publication_year": 2019,
+  "publication_date": "2019-05-10",
+  "is_oa": true,
+  "open_access": {
+    "is_oa": true,
+    "oa_status": "green",
+    "oa_url": "https://arxiv.org/pdf/1708.07120"
+  },
+  "primary_location": {
+    "source": {
+      "display_name": null,
+      "issn_l": null,
+      "type": null
+    },
+    "apc_paid": {
+      "value_usd": null
+    },
+    "apc_list": {
+      "value_usd": null
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Leslie N. Smith",
+        "id": "https://openalex.org/A5102486693"
+      },
+      "author_position": "first"
+    },
+    {
+      "author": {
+        "display_name": "Nicholay Topin",
+        "id": "https://openalex.org/A5051795411"
+      },
+      "author_position": "last"
+    }
+  ],
+  "referenced_works_count": 66,
+  "referenced_works": [
+    "https://openalex.org/W4919037",
+    "https://openalex.org/W6908809",
+    "https://openalex.org/W104184427",
+    "https://openalex.org/W196761320",
+    "https://openalex.org/W1522301498",
+    "https://openalex.org/W1553069021",
+    "https://openalex.org/W1813485996",
+    "https://openalex.org/W1850240193",
+    "https://openalex.org/W1904924995",
+    "https://openalex.org/W1955857676",
+    "https://openalex.org/W2120420045",
+    "https://openalex.org/W2146502635",
+    "https://openalex.org/W2194775991",
+    "https://openalex.org/W2296073425",
+    "https://openalex.org/W2436219157",
+    "https://openalex.org/W2518108298",
+    "https://openalex.org/W2523060838",
+    "https://openalex.org/W2544860310",
+    "https://openalex.org/W2564807118",
+    "https://openalex.org/W2617242334",
+    "https://openalex.org/W2622263826",
+    "https://openalex.org/W2682189153",
+    "https://openalex.org/W2724169821",
+    "https://openalex.org/W2731468224",
+    "https://openalex.org/W2765393161",
+    "https://openalex.org/W2766164908",
+    "https://openalex.org/W2766196653",
+    "https://openalex.org/W2768267830",
+    "https://openalex.org/W2795247881",
+    "https://openalex.org/W2912811302",
+    "https://openalex.org/W2949568260",
+    "https://openalex.org/W2950220847",
+    "https://openalex.org/W2952221746",
+    "https://openalex.org/W2964054038",
+    "https://openalex.org/W6600213771",
+    "https://openalex.org/W6600284362",
+    "https://openalex.org/W6604254268",
+    "https://openalex.org/W6608133726",
+    "https://openalex.org/W6631190155",
+    "https://openalex.org/W6633169802",
+    "https://openalex.org/W6638531310",
+    "https://openalex.org/W6638926925",
+    "https://openalex.org/W6639794760",
+    "https://openalex.org/W6674330103",
+    "https://openalex.org/W6677872732",
+    "https://openalex.org/W6681435938",
+    "https://openalex.org/W6687483927",
+    "https://openalex.org/W6694260854",
+    "https://openalex.org/W6718220094",
+    "https://openalex.org/W6726983090",
+    "https://openalex.org/W6728713152",
+    "https://openalex.org/W6729595453",
+    "https://openalex.org/W6730437881",
+    "https://openalex.org/W6734322541",
+    "https://openalex.org/W6738534199",
+    "https://openalex.org/W6739622702",
+    "https://openalex.org/W6740092555",
+    "https://openalex.org/W6741194474",
+    "https://openalex.org/W6745410505",
+    "https://openalex.org/W6745746363",
+    "https://openalex.org/W6746206791",
+    "https://openalex.org/W6749845547",
+    "https://openalex.org/W6761030284",
+    "https://openalex.org/W6763485134",
+    "https://openalex.org/W6766511095",
+    "https://openalex.org/W6780226713"
+  ],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 118
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 263
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 275
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 229
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 165
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 152
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 76
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 39
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 10
+    }
+  ],
+  "citations_at_cutoff": 277,
+  "future_citations_5y": 669
+}

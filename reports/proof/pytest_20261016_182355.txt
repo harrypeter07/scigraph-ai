@@ -1,0 +1,60 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-9.1.1, pluggy-1.5.0 -- C:\Users\ASUS\miniconda3\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\ASUS\Documents\SECOND SEMISTER\INTERNSHIP\scigraph
+configfile: pytest.ini
+plugins: anyio-4.10.0, asyncio-1.4.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 39 items
+
+tests/test_attributions_vary.py::test_global_importance_report_exists PASSED [  2%]
+tests/test_attributions_vary.py::test_attributions_vary_across_5_diverse_papers PASSED [  5%]
+tests/test_audit_verification.py::test_served_model_not_constant PASSED  [  7%]
+tests/test_audit_verification.py::test_no_fake_authors PASSED            [ 10%]
+tests/test_audit_verification.py::test_corpus_sample_test_split_only PASSED [ 12%]
+tests/test_audit_verification.py::test_no_hardcoded_numbers PASSED       [ 15%]
+tests/test_audit_verification.py::test_verification_summary_endpoint PASSED [ 17%]
+tests/test_audit_verification.py::test_verification_examples_endpoint PASSED [ 20%]
+tests/test_audit_verification.py::test_verification_poison_endpoint PASSED [ 23%]
+tests/test_backend_api.py::test_health_check PASSED                      [ 25%]
+tests/test_backend_api.py::test_dataset_stats PASSED                     [ 28%]
+tests/test_backend_api.py::test_model_card_endpoint PASSED               [ 30%]
+tests/test_backend_api.py::test_corpus_sample_endpoint PASSED            [ 33%]
+tests/test_backend_api.py::test_predict_paper_endpoint PASSED            [ 35%]
+tests/test_backend_api.py::test_error_handling_not_found PASSED          [ 38%]
+tests/test_backtest_window.py::test_resnet_2016_backtest_window PASSED   [ 41%]
+tests/test_backtest_window.py::test_ton_iot_2021_incomplete_window PASSED [ 43%]
+tests/test_backtest_window.py::test_2024_recent_paper_incomplete_window PASSED [ 46%]
+tests/test_feature_parity.py::test_feature_groups_structure PASSED       [ 48%]
+tests/test_feature_parity.py::test_text_encoder_persistence PASSED       [ 51%]
+tests/test_feature_parity.py::test_missingness_not_zero PASSED           [ 53%]
+tests/test_feature_parity.py::test_200_works_parity_parquet_vs_raw_openalex PASSED [ 56%]
+tests/test_lineage_scientometrics.py::test_cd_index_analytical_toy_graph PASSED [ 58%]
+tests/test_lineage_scientometrics.py::test_inflow_citations_cutoff_temporal_constraint PASSED [ 61%]
+tests/test_lineage_scientometrics.py::test_unknown_or_malformed_paper_graceful_handling PASSED [ 64%]
+tests/test_phase2_scientometrics.py::test_venue_resolver_scimago_issn PASSED [ 66%]
+tests/test_phase2_scientometrics.py::test_venue_resolver_core_conference PASSED [ 69%]
+tests/test_phase2_scientometrics.py::test_venue_resolver_unknown_returns_none PASSED [ 71%]
+tests/test_phase2_scientometrics.py::test_access_economics_gold_oa_with_apc PASSED [ 74%]
+tests/test_phase2_scientometrics.py::test_access_economics_closed_paywall PASSED [ 76%]
+tests/test_phase2_scientometrics.py::test_bidirectional_lineage_computation PASSED [ 79%]
+tests/test_phase3_model.py::test_heterogeneous_graph_structure PASSED    [ 82%]
+tests/test_phase3_model.py::test_model_forward_pass_and_calibration PASSED [ 84%]
+tests/test_phase3_model.py::test_checkpoint_and_model_card_integrity PASSED [ 87%]
+tests/test_phase3_model.py::test_loud_failure_on_missing_weights PASSED  [ 89%]
+tests/test_temporal_cutoff.py::test_future_poison_invariance PASSED      [ 92%]
+tests/test_temporal_cutoff.py::test_citation_edges_strictly_as_of_cutoff PASSED [ 94%]
+tests/test_temporal_cutoff.py::test_label_shuffle_sanity PASSED          [ 97%]
+tests/test_temporal_cutoff.py::test_no_truncated_works_in_train_mask PASSED [100%]
+
+============================== warnings summary ===============================
+tests/test_attributions_vary.py: 161 warnings
+tests/test_audit_verification.py: 160 warnings
+tests/test_backend_api.py: 160 warnings
+tests/test_backtest_window.py: 160 warnings
+tests/test_phase3_model.py: 160 warnings
+  C:\Users\ASUS\miniconda3\Lib\site-packages\torch_geometric\inspector.py:433: DeprecationWarning: Failing to pass a value to the 'type_params' parameter of 'typing._eval_type' is deprecated, as it leads to incorrect behaviour when calling typing._eval_type on a stringified annotation that references a PEP 695 type parameter. It will be disallowed in Python 3.15.
+    return typing._eval_type(value, _globals, None)  # type: ignore
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 39 passed, 801 warnings in 120.34s (0:02:00) =================

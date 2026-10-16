@@ -173,11 +173,11 @@ class ScientometricVenueResolver:
         for issn in issns:
             if issn in self.scimago_lookup:
                 year_map = self.scimago_lookup[issn]
-                if pub_year in year_map:
-                    entry = year_map[pub_year]
-                else:
-                    closest_yr = min(year_map.keys(), key=lambda y: abs(y - pub_year))
-                    entry = year_map[closest_yr]
+                valid_years = [y for y in year_map.keys() if y <= pub_year]
+                if not valid_years:
+                    continue
+                latest_yr = max(valid_years)
+                entry = year_map[latest_yr]
                 return VenueRankingResult(
                     venue_name=vname,
                     venue_type=venue_type or "journal",

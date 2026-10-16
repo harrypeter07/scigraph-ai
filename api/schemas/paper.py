@@ -111,6 +111,9 @@ class PaperPredictionResponse(BaseModel):
     predicted_impact_label: Literal["Low (<50th)", "Medium (50-90th)", "High (>=90th)"]
     calibrated_probabilities: Dict[str, float]
     predicted_future_citations_5y: float
+    citations_in_window: Optional[float] = None
+    split: Optional[str] = None
+    in_training_data: Optional[bool] = None
     venue: Optional[VenueMetadata] = None
     access_economics: AccessEconomicsMetadata
     lineage: BidirectionalLineageMetadata
@@ -118,7 +121,7 @@ class PaperPredictionResponse(BaseModel):
     backtest: Optional[BacktestComparison] = None
     attributions: List[FeatureAttribution] = Field(default_factory=list)
     graph_context: Literal["full", "partial", "none"] = "partial"
-    model_version: str = "PyG HeteroGraphSAGE v2.0"
+    model_version: str = "M1_LogisticRegression (Primary) + HeteroSAGE v2.0"
     provenance: str = "openalex | scimago | core | model | computed"
 
 

@@ -128,7 +128,25 @@ class ScientometricLineageEngine:
         self.works_path = works_path or (settings.DATA_DIR / "works.parquet")
 
         self.works_cache: Dict[str, Dict[str, Any]] = {}
+        self._citers_map: Optional[Dict[str, Set[str]]] = None
         self._load_works_cache()
+
+    def _get_citers_map(self) -> Dict[str, Set[str]]:
+        if self._citers_map is None:
+            self._citers_map = {}
+            if self.edges_path.exists():
+                try:
+                    df = pd.read_parquet(self.edges_path)
+                    for citing, cited in zip(df['citing_work_id'].values, df['referenced_work_id'].values):
+                        citing_c = str(citing).split('/')[-1]
+                        cited_c = str(cited).split('/')[-1]
+                        if cited_c not in self._citers_map:
+                            self._citers_map[cited_c] = set()
+                        self._citers_map[cited_c].add(citing_c)
+                    logger.info(f"LineageEngine: Indexed {len(self._citers_map):,} cited entities for fast CD calculation.")
+                except Exception as e:
+                    logger.warning(f"LineageEngine: Failed to index citation edges: {e}")
+        return self._citers_map
 
     def compute(self, raw_work: Optional[Dict[str, Any]] = None, cutoff_year: Optional[int] = None) -> BidirectionalLineageResult:
         if not raw_work or not isinstance(raw_work, dict):
@@ -262,11 +280,34 @@ class ScientometricLineageEngine:
         # 4. OpenAlex Normalized Percentile
         norm_pct = citation_normalized_percentile or target_info.get("percentile")
 
-        # 5. CD Disruption Index:
-        # If corpus citation graph is too small to observe all citers of referenced works (k),
-        # return None with clear status notice to avoid synthetic fabrication.
-        cd_index = None
-        cd_status = "insufficient_reference_subgraph"
+        # 5. CD Disruption Index (Wu et al. 2019):
+        # When >= 5 foundational references are observed within the indexed citation graph,
+        # compute authentic CD index = (n_i - n_j) / (n_i + n_j + n_k).
+        if tracked_refs_count >= 5:
+            citers_map = self._get_citers_map()
+            focal_clean = clean_id
+            refs_clean = {str(r).split("/")[-1] for r in refs if r}
+
+            citers_focal = citers_map.get(focal_clean, set()) - {focal_clean}
+            citers_refs = set()
+            for r in refs_clean:
+                citers_refs.update(citers_map.get(r, set()))
+            citers_refs.discard(focal_clean)
+
+            set_i = citers_focal - citers_refs
+            set_j = citers_focal & citers_refs
+            set_k = citers_refs - citers_focal
+            denom = len(set_i) + len(set_j) + len(set_k)
+
+            if denom > 0:
+                cd_index = round(float(len(set_i) - len(set_j)) / float(denom), 4)
+                cd_status = "computed"
+            else:
+                cd_index = None
+                cd_status = "zero_citers_observed"
+        else:
+            cd_index = None
+            cd_status = "insufficient_reference_subgraph"
 
         return BidirectionalLineageResult(
             target_work_id=clean_id,

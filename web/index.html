@@ -652,7 +652,7 @@
                 <path d="m4.93 4.93 2.12 2.12m9.9 9.9 2.12 2.12M4.93 19.07l2.12-2.12m9.9-9.9 2.12-2.12"></path>
             </svg>
             SciGraph AI 2.0
-            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600;">Authentic Heterogeneous GNN</span>
+            <span style="font-size: 0.72rem; padding: 0.25rem 0.75rem; border-radius: 50px; background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); color: var(--accent-cyan); font-weight: 600;">Honest Science — Real Numbers Only</span>
         </div>
         <div class="header-meta">
             <span>Cutoff: <strong style="color: var(--accent-amber);">T_cutoff = Year + 2</strong></span>
@@ -722,7 +722,7 @@
 
                     <div class="card-header" style="margin-top: 1.2rem;">
                         <div class="card-title" style="font-size: 0.92rem;">Calibrated Probabilities</div>
-                        <span class="prov-tag model">Temp Scaling (ECE 0.0083)</span>
+                        <span class="prov-tag model" id="calibBadge">Temp Scaling (val-fit)</span>
                     </div>
 
                     <div class="prob-bar-container">
@@ -738,7 +738,7 @@
 
                     <div class="significance-note purple">
                         <span class="sig-pill">Why Calibration Matters:</span>
-                        Raw deep neural networks produce severely overconfident probabilities. Temperature scaling (&tau; = 0.5284) adjusts logits on validation data so a 70% model probability empirically reflects a true 70% real-world cohort likelihood.
+                        Raw neural networks produce overconfident probabilities. Temperature scaling (&tau;) adjusts logits on <em>validation</em> data (never test) so a 70% model probability empirically reflects a true ~70% real-world likelihood. The actual &tau; and ECE values for the served model are shown in the <strong>Model &amp; Data</strong> tab.
                     </div>
 
                     <div class="card-header" style="margin-top: 1.2rem;">
@@ -808,7 +808,7 @@
                     </div>
                     <div class="significance-note green">
                         <span class="sig-pill">Empirical OA Advantage:</span>
-                        In our verified 16,500-paper corpus, Open Access works demonstrate a +10.8% adjusted citation advantage over paywalled works when matched within the same venue and year cohort (eliminating venue prestige bias).
+                        In our verified 16,500-paper corpus, Open Access works show a statistically significant citation association vs paywalled works — adjusted for venue and year. Actual coefficients loaded from <code>reports/oa_advantage_metrics.json</code>: crude <span id="oaCrudeNote">…</span>, adjusted <span id="oaAdjNote">…</span> (OLS, p&lt;0.001). <strong>Association, not causation</strong> — author self-selection bias not controlled.
                     </div>
 
                     <!-- Bidirectional Citation Lineage -->
@@ -878,7 +878,7 @@
             <!-- COL 3: HETEROGENEOUS SUBGRAPH VISUALIZER -->
             <div class="card col-graph">
                 <div class="card-header">
-                    <div class="card-title">Authentic Ego-Graph Visualizer</div>
+                    <div class="card-title">Citation Context Network</div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <span id="graphContextBadgeTop" class="prov-tag model">Graph: Full</span>
                     </div>
@@ -920,8 +920,8 @@
                 </div>
 
                 <div class="significance-note">
-                    <span class="sig-pill">Heterogeneous GNN Message Passing:</span>
-                    PyG HeteroGraphSAGE performs 2-hop relational message passing across typed edges (authored, published_in, has_topic, cites). It aggregates author track record, venue prestige, and semantic representations without temporal lookahead. Click any node to inspect details.
+                    <span class="sig-pill">Context Visualization:</span>
+                    This network shows the paper's immediate context — authors, venue, topic, and cited references — drawn from OpenAlex metadata. It is an <em>illustration</em> of the relational neighborhood, not the exact computational graph the GNN model sees internally. The model itself performs 2-hop message-passing on the full heterogeneous graph during training.
                 </div>
             </div>
 
@@ -938,24 +938,24 @@
 
             <div class="stat-grid" id="statsGrid">
                 <div class="stat-card">
-                    <div class="stat-number" id="statPapers">16,500</div>
+                    <div class="stat-number" id="statPapers">…</div>
                     <div class="stat-label">Works / Papers</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="statAuthors">45,992</div>
+                    <div class="stat-number" id="statAuthors">…</div>
                     <div class="stat-label">Authors</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="statInstitutions">3,828</div>
+                    <div class="stat-number" id="statInstitutions">…</div>
                     <div class="stat-label">Institutions</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="statVenues">2,441</div>
+                    <div class="stat-number" id="statVenues">…</div>
                     <div class="stat-label">Venues (SCImago/CORE)</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="statEdges">1,760,188</div>
-                    <div class="stat-label">Citation Edges</div>
+                    <div class="stat-number" id="statEdges">…</div>
+                    <div class="stat-label">Citation Edges (reference rows)</div>
                 </div>
             </div>
         </div>
@@ -990,7 +990,52 @@
                 All models evaluated strictly with temporal cutoff ($T_{\text{cutoff}} = \text{pub\_year} + 2$). Train split: works published $\le 2016$; validation: 2017; test: $\ge 2018$. Target label is citations accumulated in $(\text{pub}+3..\text{pub}+5]$. High impact threshold is 90th percentile of annual field cohort. ECE computed after validation temperature scaling. Zero test tuning.
             </div>
         </div>
+
+        <!-- HONEST LIMITATIONS BOX -->
+        <div class="card" style="margin-top: 1.5rem; border-color: rgba(251,191,36,0.3);">
+            <div class="card-header">
+                <div class="card-title" style="color: var(--accent-amber);">⚠ Honest Limitations</div>
+                <span class="prov-tag" style="border-color: rgba(251,191,36,0.4); color: var(--accent-amber);">Required Reading</span>
+            </div>
+            <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 2; padding-left: 1.2rem; margin-top: 0.5rem;">
+                <li><strong style="color: white;">Modest accuracy:</strong> The best model (LogisticRegression) achieves Macro-F1 ≈ 0.52 and AUROC ≈ 0.71. It is meaningfully better than random chance (0.22 / 0.50) but far from perfect.</li>
+                <li><strong style="color: white;">GNN did NOT beat baselines:</strong> HeteroGraphSAGE (Macro-F1 ≈ 0.32) is substantially <em>worse</em> than logistic regression. This is a legitimate negative research finding — the available graph signal was insufficient. Reported as-is.</li>
+                <li><strong style="color: white;">OA is association, not causation:</strong> The open-access citation advantage is an observational correlation. Author self-selection bias (high-impact authors choose OA) is not controlled. We do not claim OA causes more citations.</li>
+                <li><strong style="color: white;">Venue OA/APC as-of-today:</strong> Venue rankings and APC data reflect current records; historical values may differ.</li>
+                <li><strong style="color: white;">CD Disruption Index:</strong> Requires ≥5 of the paper's references to appear in our 16,500-paper corpus. Most papers will show <code>null</code> due to sparse corpus coverage.</li>
+            </ul>
+        </div>
+
+        <!-- OA ADVANTAGE (LIVE FROM REPORTS) -->
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <div class="card-title">Open Access Advantage (OLS Regression)</div>
+                <span class="prov-tag model">Live from reports/oa_advantage_metrics.json</span>
+            </div>
+            <div id="oaMetricsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div class="stat-card">
+                    <div class="stat-number" id="oaCrudeVal" style="font-size: 1.2rem;">…</div>
+                    <div class="stat-label">Crude OA Advantage (%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="oaAdjVal" style="font-size: 1.2rem;">…</div>
+                    <div class="stat-label">Adjusted OA Advantage (%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="oaAttenuationVal" style="font-size: 1.2rem;">…</div>
+                    <div class="stat-label">Attenuation vs Crude (%)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="oaRsqVal" style="font-size: 1.2rem;">…</div>
+                    <div class="stat-label">Adjusted R² (full model)</div>
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.8rem; line-height: 1.5;">
+                All values from OLS on log(1+future_citations_5y). Controls: pub_year, primary_field, venue_quartile. Reference category: closed-access. <strong style="color: var(--accent-amber);">Association, not causation.</strong>
+            </div>
+        </div>
     </div>
+
 
     <!-- VIEW 3: COMPARE PAPERS -->
     <div id="viewCompare" class="view-section">
@@ -1028,6 +1073,7 @@
                 document.getElementById('viewModelData').classList.add('active');
                 fetchStats();
                 fetchBenchmarkReport();
+                fetchOaMetrics();
             } else if (tabId === 'compare') {
                 document.getElementById('tabBtnCompare').classList.add('active');
                 document.getElementById('viewCompare').classList.add('active');
@@ -1475,6 +1521,17 @@
                 const tbody = document.getElementById('benchmarkBody');
                 if (!tbody || !data.summary) return;
                 const leader = data.metadata.empirical_best_model;
+
+                // Update ECE calibration badge dynamically from real data
+                const calibBadge = document.getElementById('calibBadge');
+                if (calibBadge && data.summary[leader]) {
+                    const ece = data.summary[leader].ece_mean;
+                    const tau = data.summary[leader].temperature_val_fit;
+                    if (ece != null && tau != null) {
+                        calibBadge.innerText = `Temp Scaling τ=${tau.toFixed(3)}, ECE=${ece.toFixed(4)}`;
+                    }
+                }
+
                 tbody.innerHTML = Object.entries(data.summary).map(([mName, stats]) => {
                     const isLeader = (mName === leader);
                     const ciStr = `[${stats.macro_f1_95ci[0].toFixed(4)}, ${stats.macro_f1_95ci[1].toFixed(4)}]`;
@@ -1493,6 +1550,40 @@
                 }).join('');
             } catch (err) {
                 console.warn('Failed to fetch benchmark report:', err);
+            }
+        }
+
+        // Fetch OA Advantage Metrics from API
+        async function fetchOaMetrics() {
+            try {
+                const res = await fetch('/api/v1/papers/oa-metrics');
+                if (!res.ok) return;
+                const data = await res.json();
+                const g = data.global_advantage || {};
+
+                const crude = (g.crude || {}).multiplier_pct;
+                const adj = (g.adjusted || {}).multiplier_pct;
+                const att = (g.adjusted || {}).attenuation_pct;
+                const rsq = (g.adjusted || {}).r_squared;
+
+                if (crude != null) {
+                    document.getElementById('oaCrudeVal').innerText = `+${crude.toFixed(1)}%`;
+                    const el = document.getElementById('oaCrudeNote');
+                    if (el) el.innerText = `+${crude.toFixed(1)}%`;
+                }
+                if (adj != null) {
+                    document.getElementById('oaAdjVal').innerText = `+${adj.toFixed(1)}%`;
+                    const el = document.getElementById('oaAdjNote');
+                    if (el) el.innerText = `+${adj.toFixed(1)}% adjusted`;
+                }
+                if (att != null) {
+                    document.getElementById('oaAttenuationVal').innerText = `-${att.toFixed(1)}%`;
+                }
+                if (rsq != null) {
+                    document.getElementById('oaRsqVal').innerText = rsq.toFixed(3);
+                }
+            } catch (err) {
+                console.warn('Failed to fetch OA metrics:', err);
             }
         }
 

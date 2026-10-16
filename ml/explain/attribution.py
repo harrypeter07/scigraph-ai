@@ -123,12 +123,14 @@ def compute_local_occlusion_attributions(
         scores = [1.0 / len(deltas)] * len(deltas)
 
     attributions = []
-    for grp, score, direction in zip(group_keys, scores, directions):
+    for grp, score, delta, direction in zip(group_keys, scores, deltas, directions):
         display_name = FEATURE_DISPLAY_NAMES.get(grp, grp)
         attributions.append({
             "feature_name": display_name,
             "raw_value": None,
             "importance_score": round(float(score), 4),
+            "delta_probability": round(float(delta), 4),
+            "delta_percentage_points": round(float(delta * 100.0), 2),
             "direction": direction,
             "provenance": "model | local_occlusion"
         })

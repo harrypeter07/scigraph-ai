@@ -162,7 +162,7 @@ class OpenAlexClient:
                 "field": {"display_name": field_name}
             },
             "primary_field_name": field_name,
-            "authorships": [{"author": {"display_name": f"Author {i+1}"}} for i in range(min(5, n_auth))],
+            "authorships": [],
             "referenced_works_count": refs_count,
             "referenced_works": [],
             "counts_by_year": [],
@@ -170,6 +170,59 @@ class OpenAlexClient:
             "future_citations_5y": fut_cits
         }
 
+        # 1. Real Authorships from authorships.parquet + authors.parquet
+        if not hasattr(self, "_corpus_authors_map"):
+            authorships_path = settings.DATA_DIR / "authorships.parquet"
+            authors_path = settings.DATA_DIR / "authors.parquet"
+            self._corpus_authors_map = {}
+            if authorships_path.exists() and authors_path.exists():
+                try:
+                    df_a = pd.read_parquet(authors_path)
+                    a_name_map = dict(zip(df_a["author_id"].astype(str), df_a["display_name"].astype(str)))
+                    for aid, name in list(a_name_map.items()):
+                        a_name_map[aid.split("/")[-1]] = name
+
+                    df_auths = pd.read_parquet(authorships_path)
+                    for wid, aid, pos in zip(df_auths["work_id"].values, df_auths["author_id"].values, df_auths["author_position"].values):
+                        w_clean = str(wid).split("/")[-1]
+                        a_clean = str(aid).split("/")[-1] if aid else None
+                        dname = a_name_map.get(str(aid)) or a_name_map.get(a_clean) or "Unknown Author"
+                        if w_clean not in self._corpus_authors_map:
+                            self._corpus_authors_map[w_clean] = []
+                        self._corpus_authors_map[w_clean].append({
+                            "author": {"display_name": dname, "id": str(aid) if aid else None},
+                            "author_position": str(pos) if pos else "middle"
+                        })
+                    logger.info(f"Indexed {len(self._corpus_authors_map):,} works with genuine author names.")
+                except Exception as e:
+                    logger.warning(f"Failed to load corpus authorships: {e}")
+                    self._corpus_authors_map = {}
+
+        if clean_id in self._corpus_authors_map:
+            raw_work["authorships"] = self._corpus_authors_map[clean_id]
+
+        # 2. Real Referenced Works from citation_edges.parquet
+        if not hasattr(self, "_corpus_refs_map"):
+            edges_path = settings.DATA_DIR / "citation_edges.parquet"
+            self._corpus_refs_map = {}
+            if edges_path.exists():
+                try:
+                    df_edges = pd.read_parquet(edges_path)
+                    for citing, cited in zip(df_edges["citing_work_id"].values, df_edges["referenced_work_id"].values):
+                        citing_c = str(citing).split("/")[-1]
+                        if citing_c not in self._corpus_refs_map:
+                            self._corpus_refs_map[citing_c] = []
+                        self._corpus_refs_map[citing_c].append(str(cited))
+                    logger.info(f"Indexed {len(self._corpus_refs_map):,} works with genuine referenced works.")
+                except Exception as e:
+                    logger.warning(f"Failed to load corpus citation edges: {e}")
+                    self._corpus_refs_map = {}
+
+        if clean_id in self._corpus_refs_map:
+            raw_work["referenced_works"] = self._corpus_refs_map[clean_id]
+            raw_work["referenced_works_count"] = max(refs_count, len(raw_work["referenced_works"]))
+
+        # 3. Yearly Citation Counts
         counts_path = settings.DATA_DIR / "counts_by_year.parquet"
         if counts_path.exists():
             if not hasattr(self, "_corpus_counts_map"):

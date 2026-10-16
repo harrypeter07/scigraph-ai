@@ -1,0 +1,116 @@
+{
+  "id": "https://openalex.org/W4255535209",
+  "title": "Blockchain challenges and opportunities: a survey",
+  "doi": "https://doi.org/10.1504/ijwgs.2018.10016848",
+  "publication_year": 2018,
+  "publication_date": "2018-01-01",
+  "is_oa": false,
+  "open_access": {
+    "is_oa": false,
+    "oa_status": "closed",
+    "oa_url": null
+  },
+  "primary_location": {
+    "source": {
+      "display_name": "International Journal of Web and Grid Services",
+      "issn_l": "1741-1106",
+      "type": "journal"
+    },
+    "apc_paid": {
+      "value_usd": null
+    },
+    "apc_list": {
+      "value_usd": null
+    }
+  },
+  "primary_topic": {
+    "display_name": "General",
+    "field": {
+      "display_name": "Computer Science"
+    }
+  },
+  "primary_field_name": "Computer Science",
+  "authorships": [
+    {
+      "author": {
+        "display_name": "Huaimin Wang",
+        "id": "https://openalex.org/A5101522100"
+      },
+      "author_position": "first"
+    },
+    {
+      "author": {
+        "display_name": "Zibin Zheng",
+        "id": "https://openalex.org/A5000582109"
+      },
+      "author_position": "middle"
+    },
+    {
+      "author": {
+        "display_name": "Shaoan Xie",
+        "id": "https://openalex.org/A5101844572"
+      },
+      "author_position": "middle"
+    },
+    {
+      "author": {
+        "display_name": "Hong‐Ning Dai",
+        "id": "https://openalex.org/A5072659343"
+      },
+      "author_position": "middle"
+    },
+    {
+      "author": {
+        "display_name": "Xiangping Chen",
+        "id": "https://openalex.org/A5101601497"
+      },
+      "author_position": "last"
+    }
+  ],
+  "referenced_works_count": 0,
+  "referenced_works": [],
+  "counts_by_year": [
+    {
+      "year": 2026,
+      "cited_by_count": 3
+    },
+    {
+      "year": 2025,
+      "cited_by_count": 20
+    },
+    {
+      "year": 2024,
+      "cited_by_count": 66
+    },
+    {
+      "year": 2023,
+      "cited_by_count": 123
+    },
+    {
+      "year": 2022,
+      "cited_by_count": 125
+    },
+    {
+      "year": 2021,
+      "cited_by_count": 441
+    },
+    {
+      "year": 2020,
+      "cited_by_count": 447
+    },
+    {
+      "year": 2019,
+      "cited_by_count": 272
+    },
+    {
+      "year": 2018,
+      "cited_by_count": 79
+    },
+    {
+      "year": 2017,
+      "cited_by_count": 6
+    }
+  ],
+  "citations_at_cutoff": 804,
+  "future_citations_5y": 689
+}

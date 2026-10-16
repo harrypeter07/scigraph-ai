@@ -114,22 +114,37 @@ def get_corpus_sample(limit: int = Query(15, ge=1, le=50)):
         raise HTTPException(status_code=503, detail="Corpus data is not loaded.")
 
     df = inference_service.df_works
-    sample = df.sample(n=min(limit, len(df)), random_state=42)
+    # Restrict demo samples strictly to held-out test split (2018-2020) — never training data
+    df_test = df[df["publication_year"] >= 2018]
+    sample = df_test.sample(n=min(limit, len(df_test)), random_state=42)
     items = []
     for _, row in sample.iterrows():
         items.append({
-            "paper_id": str(row["work_id"]),
+            "paper_id": str(row["work_id"]).split("/")[-1],
             "title": str(row.get("title", "Untitled")),
             "publication_year": int(row.get("publication_year", 2018)),
-            "field": str(row.get("topic_field_name", "General")),
+            "field": str(row.get("topic_field_name") or row.get("primary_field_name") or "General"),
             "citations_at_cutoff": int(row.get("citations_at_cutoff", 0)),
             "future_citations_5y": int(row.get("future_citations_5y", 0)),
             "impact_class": int(row.get("impact_class", 0)),
             "venue_name": str(row.get("venue_name") or ""),
             "venue_quartile": str(row.get("venue_scimago_quartile") or row.get("venue_core_rank") or ""),
             "oa_status": str(row.get("oa_status", "closed")),
+            "split": "test",
+            "in_training_data": False,
         })
-    return {"total": len(df), "sample": items}
+    return {"total": len(df), "test_split_count": len(df_test), "sample": items}
+
+
+@router.get("/oa-metrics")
+def get_oa_advantage_metrics():
+    """Return open-access citation advantage metrics from reports/oa_advantage_metrics.json."""
+    oa_path = settings.BASE_DIR / "reports" / "oa_advantage_metrics.json"
+    if oa_path.exists():
+        with open(oa_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    raise HTTPException(status_code=503, detail="OA advantage report not generated yet. Run scripts/compute_oa_advantage.py.")
+
 
 
 @router.get("/predict/{paper_id:path}", response_model=PaperPredictionResponse)

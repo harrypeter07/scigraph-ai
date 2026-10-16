@@ -44,6 +44,10 @@ class ModelInferenceService:
 
     def __init__(self):
         self.model: Optional[AuthenticHeteroSAGE] = None
+        self.primary_payload: Optional[Dict[str, Any]] = None
+        self.primary_model = None
+        self.primary_scaler = None
+        self.primary_temperature: float = 1.0
         self.model_card: Optional[Dict[str, Any]] = None
         self.df_works: Optional[pd.DataFrame] = None
         self.df_counts: Optional[pd.DataFrame] = None
@@ -74,7 +78,19 @@ class ModelInferenceService:
                 "Per Rule R2, server requires valid model metadata."
             )
 
-        # 1. Initialize architecture
+        # 0. Load Primary Served Model: M1_LogisticRegression (Best empirical performer)
+        primary_ckpt = settings.CHECKPOINTS_DIR / "primary_model.joblib"
+        if not primary_ckpt.exists():
+            from ml.evaluation.fit_primary_model import fit_and_save_primary_model
+            fit_and_save_primary_model()
+        import joblib
+        self.primary_payload = joblib.load(primary_ckpt)
+        self.primary_model = self.primary_payload["model"]
+        self.primary_scaler = self.primary_payload["scaler"]
+        self.primary_temperature = float(self.primary_payload.get("temperature", 1.0))
+        logger.info(f"Successfully loaded primary model (M1_LogisticRegression) with T={self.primary_temperature:.4f}")
+
+        # 1. Initialize HeteroSAGE architecture (for graph relational comparative analysis)
         self.model = AuthenticHeteroSAGE(
             node_in_channels=self.node_in_channels,
             hidden_channels=64,
@@ -243,10 +259,20 @@ class ModelInferenceService:
         with torch.no_grad():
             out = self.model(x_dict, edge_index_dict)
 
-        probs = out["probabilities"][0].cpu().numpy()
         pred_log_cits = float(out["predicted_log_citations"][0].cpu().item())
         pred_future_cits = float(np.expm1(max(0.0, pred_log_cits)))
-        pred_cls = int(np.argmax(probs))
+
+        # Primary Model: Logistic Regression (Empirical Best on held-out test set)
+        if self.primary_model is not None and self.primary_scaler is not None:
+            feats_scaled = self.primary_scaler.transform(feats.reshape(1, -1))
+            logits = self.primary_model.decision_function(feats_scaled)
+            scaled_logits = logits / max(self.primary_temperature, 1e-4)
+            exp_z = np.exp(scaled_logits - np.max(scaled_logits, axis=1, keepdims=True))
+            probs = (exp_z / np.sum(exp_z, axis=1, keepdims=True))[0]
+            pred_cls = int(np.argmax(probs))
+        else:
+            probs = out["probabilities"][0].cpu().numpy()
+            pred_cls = int(np.argmax(probs))
 
         label_map = {0: "Low (<50th)", 1: "Medium (50-90th)", 2: "High (>=90th)"}
         pred_label = label_map[pred_cls]
@@ -317,12 +343,17 @@ class ModelInferenceService:
 
             is_correct = bool(pred_cls == actual_cls)
 
-            if actual_window < p50:
-                pct = (actual_window / max(1.0, p50)) * 50.0
-            elif actual_window < p90:
-                pct = 50.0 + ((actual_window - p50) / max(1.0, p90 - p50)) * 40.0
+            # Empirical percentile rank from cohort distribution
+            if self.df_works is not None and "future_citations_5y" in self.df_works.columns:
+                cohort_vals = self.df_works[
+                    self.df_works["publication_year"] == pub_year
+                ]["future_citations_5y"].dropna().values
+                if len(cohort_vals) > 0:
+                    pct = float(np.mean(cohort_vals <= actual_window)) * 100.0
+                else:
+                    pct = 50.0
             else:
-                pct = min(99.9, 90.0 + (actual_window / (actual_window + p90)) * 10.0)
+                pct = 50.0
 
             backtest = {
                 "has_ground_truth": True,
@@ -393,6 +424,20 @@ class ModelInferenceService:
         if pd.isna(doi_val):
             doi_val = None
 
+        # Temporal split and training set membership
+        if pub_year <= 2016:
+            split_name = "train"
+            in_train = True
+        elif pub_year == 2017:
+            split_name = "val"
+            in_train = False
+        elif pub_year >= 2018:
+            split_name = "test"
+            in_train = False
+        else:
+            split_name = "external"
+            in_train = False
+
         result_payload = {
             "paper_id": work_id,
             "doi": doi_val,
@@ -407,6 +452,9 @@ class ModelInferenceService:
             "predicted_impact_label": pred_label,
             "calibrated_probabilities": calibrated_probs,
             "predicted_future_citations_5y": round(pred_future_cits, 1),
+            "citations_in_window": round(pred_future_cits, 1),
+            "split": split_name,
+            "in_training_data": in_train,
             "venue": venue_info.model_dump() if venue_info else None,
             "access_economics": econ_info.model_dump(),
             "lineage": lineage_info.model_dump(),
@@ -414,7 +462,7 @@ class ModelInferenceService:
             "backtest": backtest,
             "attributions": attributions,
             "graph_context": graph_context,
-            "model_version": "PyG HeteroGraphSAGE v2.0",
+            "model_version": "M1_LogisticRegression (Primary) + HeteroSAGE v2.0",
             "provenance": "openalex | scimago | core | model | computed"
         }
 

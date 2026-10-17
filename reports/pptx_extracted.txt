@@ -1,0 +1,225 @@
+Total slides: 10
+
+==============================
+=== SLIDE 1 ===
+==============================
+PROJECT TITLE
+SciGraph AI: Predicting Future Scientific Impact using Heterogeneous Graph Neural Networks
+Team Members: Gauri Joshi (B-08), Hassan Mansuri (B-16), Ritika Jain (B-60), Samiksha Gaiki (B-63)
+Guide / Mentor: Dr. Rina Damdoo
+Department / School: Computer Science & Engineering (CSE), 4th Year
+Academic Year: 2026–27 (Semester VII)
+
+==============================
+=== SLIDE 2 ===
+==============================
+PROBLEM STATEMENT
+What problem are we addressing? Predicting whether a new paper will reach Low, Medium or High citation impact in the label window (years 3 to 5 after publication), using only what is known 2 years after publication.
+Who is affected? Researchers, reviewers, funding bodies and universities that must judge new work before citations accumulate.
+Current challenges: Tools only count citations after they happen; leakage is a known problem in citation forecasting; raw counts are unfair across fields.
+Why is it important? Early, fair and leakage-audited forecasts support better evaluation, funding and discovery of influential research.
+250M+
+scholarly works in OpenAlex (as of Oct 2026)
+0
+citations a paper has on publication day
+3 years
+label window after the T+2 cutoff (years 3 to 5 after publication)
+Slide 2 of 10
+
+==============================
+=== SLIDE 3 ===
+==============================
+EXISTING SOLUTION / LITERATURE REVIEW
+[TABLE]
+Existing method / product | Limitation | SciGraph AI 2.0
+Citation counting (Google Scholar, Semantic Scholar) | Measures impact only after it happens; no forecast | Predicts the impact class in the label window from the T+2 snapshot
+Traditional ML on paper features | Ignores authors, venues and citation links | Heterogeneous graph: {{node_types}} node types, {{edge_types}} edge types
+Temporal GNNs (Holm et al., 2020) | Temporal graph models; we add an explicit leakage audit | Cutoff rule + out-of-time split (train {{train_years}}, test {{test_years}})
+Heterogeneous / contrastive GNNs (H2CGL, 2023) | Complex graph construction | Reproducible OpenAlex → Parquet → PyG pipeline
+Research gap
+No open, multi-discipline forecaster that publishes its own leakage audit, calibrated confidence, cold-start results and honest baseline comparisons.
+Slide 3 of 10
+
+==============================
+=== SLIDE 4 ===
+==============================
+PROPOSED SOLUTION
+1
+Project idea
+Forecast a paper’s citation impact class (Low / Medium / High) in the label window, years 3 to 5 after publication, using only data available 2 years after publication.
+2
+Proposed approach
+Ingest {{n_works}} OpenAlex works, build a heterogeneous graph, train a 2-hop PyG HeteroGraphSAGE against five baselines (majority, cohort-rank, LR, LightGBM, MLP).
+3
+Key innovation
+T_cutoff protocol with automated leakage tests, venue ranks (SCImago, CORE), DOAJ fees and calibrated probabilities in one graph model.
+4
+Expected outcome
+A reproducible, explainable system (API + web UI), compared fairly against tabular baselines with confidence intervals. We report the result either way.
+Slide 4 of 10
+
+==============================
+=== SLIDE 5 ===
+==============================
+OBJECTIVES
+01
+Build a leakage-audited, multi-disciplinary corpus ({{n_works}} works, {{n_fields}} fields) with strict T_cutoff = publication year + 2.
+02
+Construct a heterogeneous knowledge graph of works, authors, institutions, venues and topics ({{in_corpus_paper_to_paper_edges}} in-corpus citation edges).
+03
+Train a 2-hop HeteroGraphSAGE and compare it with five baselines on an out-of-time test set.
+04
+Deliver a calibrated, explainable system with open-access economics and post-cutoff citation lineage (display-only).
+Measurable targets
+{{mean}} ± {{std}}
+Macro-F1 over 5 seeds (a seed is one random start of training)
+95% CI [{{ci_lo}}, {{ci_hi}}]
+{{ece_test}}
+ECE on test set, after temperature scaling fit on validation only
+{{p50}} / {{p95}} ms
+API latency (P50 / P95), cached requests
+{{n_pass}} / {{n_total}}
+automated tests passing
+Slide 5 of 10
+
+==============================
+=== SLIDE 6 ===
+==============================
+SYSTEM ARCHITECTURE / METHODOLOGY
+INPUT
+OpenAlex API: {{n_works}} works
+SCImago + CORE venue ranks
+DOAJ fees, OA status
+PROCESSING
+{{n_tables}} Parquet tables
+Mask citations after T_cutoff
+{{n_features}} cutoff features
+14 feature groups, one shared builder (train + serve)
+AI / ALGORITHM
+2-hop HeteroGraphSAGE (PyG)
+Baselines: Majority, Cohort-rank, LR, LightGBM, MLP
+Temperature calibration
+Occlusion-based attributions
+OUTPUT
+Impact class + probability
+Citation lineage (display-only, after cutoff)
+FastAPI + web dashboard
+Components
+Python, PyTorch, PyG, scikit-learn, LightGBM, FastAPI, Cytoscape.js
+Training: Colab CUDA GPU; demo on a local server
+Serving: paper-level features only
+Workflow
+1
+Ingest
+2
+Mask at T_cutoff
+3
+Build graph
+4
+Train + calibrate
+5
+Serve + evaluate
+Evaluation protocol & leakage audit
+Cutoff = publication year + 2
+Label window: years 3 to 5 after publication
+Split: train {{train_years}}, test {{test_years}}
+Tests: future-poison, edge-time check, label-shuffle
+Slide 6 of 10
+
+==============================
+=== SLIDE 7 ===
+==============================
+IMPLEMENTATION
+Technologies: Python, PyTorch, PyTorch Geometric, FastAPI, Uvicorn
+Hardware: Google Colab CUDA GPU (training); local server for the demo
+Software / tools: OpenAlex API, Apache Parquet, Pandas, scikit-learn, LightGBM, Pydantic V2, pytest, Git/GitHub
+Algorithm / model: HeteroConv layers, {{hidden}} hidden units, {{dropout}} dropout; 3-class head + log-citation regression head
+Prototype: Web dashboard + REST API: search, prediction, lineage, OA economics, scoreboard tab (live evaluation)
+Graph input
+{{node_types}} node types, {{edge_types}} edge types
+Message passing (2 hops)
+{{edge_type_list}}
+Dual head
+impact class + log-citations
+Serving parity
+macro-F1 via API {{api_f1}} vs benchmark {{bench_f1}}, gap {{gap}}
+Slide 7 of 10
+
+==============================
+=== SLIDE 8 ===
+==============================
+RESULTS / PROTOTYPE
+[TABLE]
+Model | Macro-F1 mean ± std | 95% CI | ECE (test)
+Majority class | {{mean}} ± {{std}} | [{{lo}}, {{hi}}] | {{ece}}
+Cohort-rank rule | {{mean}} ± {{std}} | [{{lo}}, {{hi}}] | {{ece}}
+Logistic regression | {{mean}} ± {{std}} | [{{lo}}, {{hi}}] | {{ece}}
+LightGBM | {{mean}} ± {{std}} | [{{lo}}, {{hi}}] | {{ece}}
+MLP (no graph) | {{mean}} ± {{std}} | [{{lo}}, {{hi}}] | {{ece}}
+HeteroGraphSAGE | {{mean}} ± {{std}} | [{{lo}}, {{hi}}] | {{ece}}
+Δ macro-F1 vs best baseline = {{delta}}, 95% CI [{{lo}}, {{hi}}]: {{significant / not significantly different}}
+ECE (gap between stated confidence and real accuracy; lower is better) measured on the test set, temperature scaling applied to every model
+API latency, cached requests: P50 {{p50}} ms, P95 {{p95}} ms
+Landmark illustration (not evidence): ResNet, He et al. 2016
+Early citations at cutoff 2018: 13,237
+Actual citations in label window 2019–2021: 69,790
+Predicted: {{pred_class}} ({{prob}}); cohort percentile {{pct}}
+Split membership: {{split}}
+Paper is from 2016, so it is not an out-of-sample test.
+Where it fails
+High-class recall: {{high_class_recall}}
+Cold-start macro-F1: {{cold_start_f1}}
+LightGBM has lower log-citation error (MAE {{lgbm_mae}}).
+Limits: OA/APC values are as of today; 5 fields only; one corpus.
+Slide 8 of 10
+
+==============================
+=== SLIDE 9 ===
+==============================
+INNOVATION, IMPACT, DELIVERABLES & FUTURE SCOPE
+Innovation
+T_cutoff protocol + automated leakage tests
+Heterogeneous GNN with edge-type ablations
+Venue rank by ISSN-L; unknown stays null
+Calibrated probabilities
+Impact
+Fairer early evaluation across fields
+OA association: crude {{oa_crude}}%, adjusted for field/year/venue {{oa_adj}}% (95% CI [{{lo}}, {{hi}}]) – association, not causation
+Deliverables
+{{n_works}}-work corpus in {{n_tables}} Parquet tables
+Trained model checkpoint
+FastAPI service + web dashboard
+{{n_pass}} automated tests
+Post-cutoff lineage (display-only)
+Model card + proof pack (raw test and benchmark output)
+Future scope
+Prospective prediction log scored after citations arrive
+Author/institution features at serving time
+Cold-start improvements
+More disciplines, larger corpus
+HeteroGAT and temporal GNN variants
+Deeper per-paper explainability
+Hosted public deployment
+Slide 9 of 10
+
+==============================
+=== SLIDE 10 ===
+==============================
+CONCLUSION & REFERENCES
+Conclusion
+Leakage-audited T+2 forecasting on {{n_works}} OpenAlex papers across {{n_fields}} fields.
+GNN macro-F1 {{x}} (CI) vs best baseline {{y}}: {{significantly better / not significantly different}}.
+Early citation rank carries most of the signal; relational context adds {{delta}}.
+System is reproducible: {{n_pass}}/{{n_total}} tests, every number traceable to a report.
+References
+A. N. Holm et al., “Longitudinal Citation Prediction using Temporal Graph Neural Networks,” arXiv, 2020.
+G. He et al., “H2CGL: Modeling Dynamics of Citation Network for Impact Prediction,” arXiv:2305.01572, 2023.
+W. Hu et al., “Open Graph Benchmark: Datasets for Machine Learning on Graphs,” NeurIPS, 2020.
+W. Hamilton, Z. Ying, J. Leskovec, “Inductive Representation Learning on Large Graphs,” NeurIPS, 2017.
+M. Fey, J. E. Lenssen, “Fast Graph Representation Learning with PyTorch Geometric,” ICLR Workshop, 2019.
+J. Priem, H. Piwowar, R. Orr, “OpenAlex: A fully-open index of scholarly works,” arXiv, 2022.
+C. Guo et al., “On Calibration of Modern Neural Networks,” ICML, 2017.
+G. Ke et al., “LightGBM: A Highly Efficient Gradient Boosting Decision Tree,” NeurIPS, 2017.
+L. Wu, D. Wang, J. A. Evans, “Large teams develop and small teams disrupt science and technology,” Nature, 2019.
+Slide 10 of 10
+

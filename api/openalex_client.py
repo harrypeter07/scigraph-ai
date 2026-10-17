@@ -14,7 +14,10 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+try:
+    from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+except ImportError:
+    retry = None
 
 from api.config import settings
 

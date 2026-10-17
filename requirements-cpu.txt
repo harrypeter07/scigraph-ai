@@ -14,3 +14,7 @@ matplotlib>=3.8.0
 seaborn>=0.13.0
 tqdm>=4.66.0
 pydantic>=2.5.0
+tenacity>=8.2.0
+lightgbm>=4.0.0
+scipy>=1.10.0
+nest-asyncio>=1.5.0

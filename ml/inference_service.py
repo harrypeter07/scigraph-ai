@@ -141,8 +141,8 @@ class ModelInferenceService:
 
         if not counts_path.exists():
             raise RuntimeError(f"CRITICAL: Reference yearly citation records missing at '{counts_path}'.")
-        self.df_counts = pd.read_parquet(counts_path)
-        logger.info(f"Loaded {len(self.df_counts):,} citation yearly count records.")
+        self.df_counts = None
+        logger.info("Verified citation yearly records table exists on disk.")
 
         # 5. Load empirical cohort thresholds reference (single source of truth: label_thresholds.json)
         cohort_ref_path = settings.DATA_DIR / "reference" / "label_thresholds.json"

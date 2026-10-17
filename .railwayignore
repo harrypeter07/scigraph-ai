@@ -1,0 +1,15 @@
+.git
+.venv
+venv
+__pycache__
+data/cache
+data/raw
+data/interim
+data/dense
+*.npy
+*.log
+legacy_archive
+reports/screenshots
+.cursor
+agent-transcripts
+scigraph_project.zip

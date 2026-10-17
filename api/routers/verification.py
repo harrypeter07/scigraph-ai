@@ -166,13 +166,25 @@ async def reveal_blind_forecast(work_id: str):
     return inference_service.predict(raw_work)
 
 
+async def _load_live_work(work_id: str) -> tuple[str, dict]:
+    clean_id = openalex_client.clean_identifier(work_id)
+    try:
+        raw_work = await openalex_client.get_work(clean_id)
+        return clean_id, raw_work
+    except OpenAlexNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Work '{clean_id}' not found.")
+    except OpenAlexValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch work: {exc}")
+
+
 @router.post("/receipt/{work_id}")
 async def create_verification_receipt(work_id: str):
     """Generate a tamper-evident prediction receipt frozen strictly as-of cutoff."""
-    clean_id = openalex_client.clean_identifier(work_id)
+    clean_id, raw_work = await _load_live_work(work_id)
     try:
-        receipt = build_receipt(clean_id)
-        return receipt
+        return build_receipt(clean_id, raw_work=raw_work)
     except Exception as exc:
         logger.error(f"Failed to build receipt for {clean_id}: {exc}")
         raise HTTPException(status_code=500, detail=str(exc))
@@ -181,12 +193,58 @@ async def create_verification_receipt(work_id: str):
 @router.get("/reveal/{work_id}")
 async def reveal_ground_truth(work_id: str):
     """Reveal post-cutoff ground truth citations (years pub+3..pub+5) and compare against receipt."""
-    clean_id = openalex_client.clean_identifier(work_id)
+    clean_id, raw_work = await _load_live_work(work_id)
     try:
-        reveal_data = build_reveal(clean_id)
-        return reveal_data
+        receipt = build_receipt(clean_id, raw_work=raw_work)
+        return build_reveal(clean_id, receipt=receipt, raw_work=raw_work)
     except Exception as exc:
         logger.error(f"Failed to reveal ground truth for {clean_id}: {exc}")
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/compare/{work_id}")
+async def compare_predicted_and_actual(work_id: str):
+    """Live model prediction and observed outcome in one payload for teacher verification."""
+    clean_id, raw_work = await _load_live_work(work_id)
+    try:
+        prediction = inference_service.predict(raw_work)
+        receipt = build_receipt(clean_id, raw_work=raw_work, prediction=prediction)
+        reveal = build_reveal(clean_id, receipt=receipt, raw_work=raw_work)
+        bt = prediction.get("backtest") or {}
+        return {
+            "work_id": clean_id,
+            "title": prediction.get("title"),
+            "publication_year": prediction.get("publication_year"),
+            "primary_field": prediction.get("primary_field"),
+            "venue": prediction.get("venue"),
+            "cutoff_year": prediction.get("cutoff_year"),
+            "split": prediction.get("split"),
+            "in_training_data": prediction.get("in_training_data"),
+            "prediction": prediction,
+            "receipt": receipt,
+            "reveal": reveal,
+            "side_by_side": {
+                "citations_at_cutoff": prediction.get("citations_at_cutoff"),
+                "early_trajectory": receipt.get("frozen_inputs", {}).get(
+                    "historical_citation_trajectory_to_cutoff", []
+                ),
+                "predicted_tier": prediction.get("predicted_impact_label"),
+                "predicted_class": prediction.get("predicted_impact_class"),
+                "probabilities": prediction.get("calibrated_probabilities"),
+                "predicted_window_citations": prediction.get("predicted_future_citations_5y"),
+                "actual_tier": reveal.get("actual_tier") or bt.get("actual_label"),
+                "actual_class": reveal.get("actual_impact_class"),
+                "actual_window_citations": reveal.get("window_total_citations"),
+                "yearly_actual": reveal.get("yearly_citations_breakdown"),
+                "cohort_thresholds": reveal.get("cohort_thresholds"),
+                "is_correct": reveal.get("is_correct"),
+                "receipt_sha256": receipt.get("receipt_sha256"),
+            },
+        }
+    except RuntimeError as r_err:
+        raise HTTPException(status_code=503, detail=str(r_err))
+    except Exception as exc:
+        logger.error(f"Failed live compare for {clean_id}: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
 
 

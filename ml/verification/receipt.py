@@ -45,37 +45,47 @@ def canonical_json_hash(data: Dict[str, Any]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
-def build_receipt(work_id: str, raw_work: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def _fetch_openalex_work_sync(clean_id: str) -> Dict[str, Any]:
+    """Fetch a full OpenAlex work in both sync and already-running-loop contexts."""
+    from api.openalex_client import openalex_client
+    import asyncio
+
+    async def _get():
+        return await openalex_client.get_work(clean_id)
+
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, _get()).result(timeout=30)
+
+    return asyncio.run(_get())
+
+
+def build_receipt(
+    work_id: str,
+    raw_work: Optional[Dict[str, Any]] = None,
+    prediction: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Generates a tamper-evident prediction receipt frozen strictly as-of cutoff."""
     clean_id = str(work_id).split("/")[-1]
 
-    # Ensure inference service is loaded
-    if inference_service.model is None or inference_service.primary_model is None:
+    if inference_service.primary_model is None:
         inference_service.load()
 
-    # If raw_work not provided, lookup in corpus or fetch
+    # If raw_work not provided, fetch a live OpenAlex record (needed for counts_by_year).
     if raw_work is None:
-        corpus_row = None
-        if inference_service.df_works is not None:
-            matches = inference_service.df_works[inference_service.df_works["work_id"] == clean_id]
-            if len(matches) > 0:
-                corpus_row = matches.iloc[0].to_dict()
+        raw_work = _fetch_openalex_work_sync(clean_id)
 
-        if corpus_row is not None:
-            raw_work = corpus_row
-        else:
-            from api.openalex_client import openalex_client
-            import asyncio
-            try:
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    import nest_asyncio
-                    nest_asyncio.apply()
-                raw_work = loop.run_until_complete(openalex_client.get_work(clean_id))
-            except Exception:
-                raw_work = {"id": clean_id, "publication_year": 2018, "title": "Unknown"}
+    if not raw_work.get("publication_year"):
+        raise ValueError(f"Work '{clean_id}' is missing publication_year; cannot freeze a receipt.")
 
-    prediction = inference_service.predict(raw_work)
+    if prediction is None:
+        prediction = inference_service.predict(raw_work)
     pub_year = int(prediction["publication_year"])
     cutoff_year = int(prediction["cutoff_year"])
     split = str(prediction.get("split", "unindexed"))
@@ -99,11 +109,11 @@ def build_receipt(work_id: str, raw_work: Optional[Dict[str, Any]] = None) -> Di
         "title": prediction["title"],
         "publication_year": pub_year,
         "cutoff_year": cutoff_year,
-        "primary_field": prediction.get("field", "Computer Science"),
-        "venue_name": prediction.get("venue", {}).get("name", "Unknown"),
-        "venue_ranking": prediction.get("venue", {}).get("ranking", "No ranking found in SCImago or CORE"),
+        "primary_field": prediction.get("primary_field") or prediction.get("field"),
+        "venue_name": (prediction.get("venue") or {}).get("venue_name") or (prediction.get("venue") or {}).get("name"),
+        "venue_ranking": (prediction.get("venue") or {}).get("quartile") or (prediction.get("venue") or {}).get("core_rank"),
         "author_count": len(prediction.get("authors", [])),
-        "is_open_access": bool(prediction.get("oa_economics", {}).get("is_open_access", False)),
+        "is_open_access": bool((prediction.get("access_economics") or {}).get("is_oa", False)),
         "citations_at_cutoff": int(prediction.get("citations_at_cutoff", 0)),
         "historical_citation_trajectory_to_cutoff": frozen_citations,
     }
@@ -178,12 +188,19 @@ def check_receipt(receipt_sha256: str) -> Dict[str, Any]:
     return {"valid": False, "reason": f"Receipt hash '{receipt_sha256}' not found in ledger."}
 
 
-def build_reveal(work_id: str, receipt: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def build_reveal(
+    work_id: str,
+    receipt: Optional[Dict[str, Any]] = None,
+    raw_work: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
     """Reveals actual citations in years pub+3..pub+5 and compares against frozen prediction."""
     clean_id = str(work_id).split("/")[-1]
 
+    if raw_work is None:
+        raw_work = _fetch_openalex_work_sync(clean_id)
+
     if receipt is None:
-        receipt = build_receipt(clean_id)
+        receipt = build_receipt(clean_id, raw_work=raw_work)
 
     pub_year = int(receipt["pub_year"])
     cutoff_year = int(receipt["cutoff_year"])
@@ -195,74 +212,68 @@ def build_reveal(work_id: str, receipt: Optional[Dict[str, Any]] = None) -> Dict
     recomputed_hash = canonical_json_hash(recomp_core)
     receipt_unchanged = (recomputed_hash == receipt.get("receipt_sha256"))
 
-    # Fetch ground truth post-cutoff counts
-    raw_counts = []
-    actual_window = 0
-    actual_class = 0
-    actual_label = "Low (<50th)"
-    cohort_info = {}
+    label_map = {0: "Low (<50th)", 1: "Medium (50-90th)", 2: "High (>=90th)"}
+    counts_by_year = raw_work.get("counts_by_year") or []
+    if isinstance(counts_by_year, str):
+        try:
+            counts_by_year = json.loads(counts_by_year)
+        except Exception:
+            counts_by_year = []
 
-    # Check corpus first
+    by_yr = {
+        int(c.get("year", 0)): int(c.get("cited_by_count", 0))
+        for c in counts_by_year
+        if isinstance(c, dict) and c.get("year") is not None
+    }
+
+    if not by_yr:
+        counts_path = settings.DATA_DIR / "counts_by_year.parquet"
+        if counts_path.exists():
+            try:
+                wids = [clean_id, f"https://openalex.org/{clean_id}"]
+                df_c = pd.read_parquet(
+                    counts_path,
+                    columns=["year", "cited_by_count"],
+                    filters=[("work_id", "in", wids)],
+                )
+                if not df_c.empty:
+                    by_yr = dict(zip(df_c["year"].astype(int), df_c["cited_by_count"].astype(int)))
+            except Exception:
+                by_yr = {}
+
+    window_years_breakdown = [
+        {"year": yr, "cited_by_count": int(by_yr.get(yr, 0))}
+        for yr in range(window_start, window_end + 1)
+    ]
+    actual_window = sum(item["cited_by_count"] for item in window_years_breakdown)
+
     stored_row = None
     if inference_service.df_works is not None:
-        matches = inference_service.df_works[inference_service.df_works["work_id"] == clean_id]
+        matches = inference_service.df_works[
+            inference_service.df_works["work_id"].astype(str).str.endswith(clean_id)
+        ]
         if len(matches) > 0:
             stored_row = matches.iloc[0].to_dict()
 
-    if stored_row is not None and "future_citations_5y" in stored_row:
-        actual_window = int(stored_row.get("future_citations_5y", 0))
-        actual_class = int(stored_row.get("impact_class", 0))
-        label_map = {0: "Low (<50th)", 1: "Medium (50-90th)", 2: "High (>=90th)"}
+    if stored_row is not None and pd.notnull(stored_row.get("impact_class")) and actual_window == 0:
+        actual_window = int(stored_row.get("future_citations_5y") or 0)
+        actual_class = int(stored_row["impact_class"])
         actual_label = label_map.get(actual_class, "Low (<50th)")
         provenance = "ground truth from corpus (works.parquet)"
     else:
-        # Fallback to API / counts_by_year
-        if inference_service.df_counts is not None:
-            c_matches = inference_service.df_counts[inference_service.df_counts["work_id"] == clean_id]
-            raw_counts = c_matches.to_dict(orient="records")
-
-        window_counts = [
-            int(c.get("cited_by_count", 0))
-            for c in raw_counts
-            if window_start <= int(c.get("year", 0)) <= window_end
-        ]
-        actual_window = sum(window_counts)
-
         threshold_info = inference_service.get_cohort_threshold(
-            receipt["frozen_inputs"]["primary_field"], pub_year
+            receipt["frozen_inputs"].get("primary_field"), pub_year
         )
         p50 = threshold_info["p50"]
         p90 = threshold_info["p90"]
-
         if actual_window < p50:
             actual_class = 0
-            actual_label = "Low (<50th)"
         elif actual_window < p90:
             actual_class = 1
-            actual_label = "Medium (50-90th)"
         else:
             actual_class = 2
-            actual_label = "High (>=90th)"
-        provenance = "estimated using cohort thresholds from 2012-2017"
-
-    # Year-by-year counts for the 3-year window (years pub+3..pub+5)
-    window_years_breakdown = []
-    by_yr = {}
-    counts_path = settings.DATA_DIR / "counts_by_year.parquet"
-    if counts_path.exists():
-        try:
-            wids = [clean_id, f"https://openalex.org/{clean_id}"]
-            df_c = pd.read_parquet(counts_path, columns=["year", "cited_by_count"], filters=[("work_id", "in", wids)])
-            if not df_c.empty:
-                by_yr = dict(zip(df_c["year"].astype(int), df_c["cited_by_count"].astype(int)))
-        except Exception:
-            pass
-    for yr in range(window_start, window_end + 1):
-        window_years_breakdown.append({"year": yr, "cited_by_count": by_yr.get(yr, 0)})
-
-    sum_breakdown = sum(item["cited_by_count"] for item in window_years_breakdown)
-    if sum_breakdown > 0 or not actual_window:
-        actual_window = sum_breakdown
+        actual_label = label_map[actual_class]
+        provenance = "live OpenAlex counts_by_year labeled with empirical cohort thresholds"
 
     threshold_info = inference_service.get_cohort_threshold(
         receipt["frozen_inputs"]["primary_field"], pub_year

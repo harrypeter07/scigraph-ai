@@ -15,9 +15,9 @@ class VenueMetadata(BaseModel):
     venue_name: str
     issn_l: Optional[str] = None
     venue_type: Optional[str] = None
-    ranking_system: Optional[Literal["SCImago", "CORE"]] = None
-    quartile: Optional[Literal["Q1", "Q2", "Q3", "Q4"]] = None
-    core_rank: Optional[Literal["A*", "A", "B", "C", "Unranked", "Australasian"]] = None
+    ranking_system: Optional[str] = None
+    quartile: Optional[str] = None
+    core_rank: Optional[str] = None
     sjr: Optional[float] = None
     h_index: Optional[float] = None
     is_in_doaj: Optional[bool] = None
@@ -26,7 +26,7 @@ class VenueMetadata(BaseModel):
 
 class AccessEconomicsMetadata(BaseModel):
     is_oa: bool
-    oa_status: Literal["gold", "green", "hybrid", "bronze", "closed", "diamond"]
+    oa_status: str
     oa_url: Optional[str] = None
     apc_paid_usd: Optional[float] = None
     apc_list_usd: Optional[float] = None
@@ -98,7 +98,14 @@ class FeatureAttribution(BaseModel):
     direction: Literal["positive", "negative", "neutral"]
     delta_probability: Optional[float] = None
     delta_percentage_points: Optional[float] = None
-    provenance: Literal["model | lightgbm", "model | shap | lightgbm", "model | gnn", "model | local_occlusion", "model | permutation"] = "model | local_occlusion"
+    provenance: Literal[
+        "model | lightgbm",
+        "model | shap | lightgbm",
+        "model | gnn",
+        "model | local_occlusion",
+        "model | permutation",
+        "model | linear_attribution",
+    ] = "model | local_occlusion"
 
 
 class PaperPredictionResponse(BaseModel):
@@ -112,22 +119,25 @@ class PaperPredictionResponse(BaseModel):
     author_details: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
     cutoff_year: int
     citations_at_cutoff: int
+    cutoff_citations: Optional[int] = None
     predicted_impact_class: int
     predicted_impact_label: Literal["Low (<50th)", "Medium (50-90th)", "High (>=90th)"]
+    predicted_label: Optional[str] = None
     calibrated_probabilities: Dict[str, float]
     predicted_future_citations_5y: float
     citations_in_window: Optional[float] = None
     citations_window: Optional[float] = None
     split: Optional[str] = None
     in_training_data: Optional[bool] = None
+    in_train_split: Optional[bool] = None
     venue: Optional[VenueMetadata] = None
     access_economics: AccessEconomicsMetadata
     lineage: BidirectionalLineageMetadata
     trajectory: List[CitationTrajectoryPoint] = Field(default_factory=list)
     backtest: Optional[BacktestComparison] = None
     attributions: List[FeatureAttribution] = Field(default_factory=list)
-    graph_context: Literal["full", "partial", "none"] = "partial"
-    model_version: str = "M1_LogisticRegression (Primary) + HeteroSAGE v2.0"
+    graph_context: Optional[Any] = None
+    model_version: str = "M1_LogisticRegression"
     provenance: str = "openalex | scimago | core | model | computed"
 
 

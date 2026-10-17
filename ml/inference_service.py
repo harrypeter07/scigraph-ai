@@ -37,7 +37,7 @@ class ModelInferenceService:
     """Production ML inference engine for citation impact trajectory."""
 
     def __init__(self):
-        self.model: Optional[AuthenticHeteroSAGE] = None
+        self.model = None  # Optional GNN; served predictions use primary_model
         self.primary_payload: Optional[Dict[str, Any]] = None
         self.primary_model = None
         self.primary_scaler = None
@@ -154,42 +154,62 @@ class ModelInferenceService:
 
     def get_cohort_threshold(self, field_name: Optional[str], pub_year: int) -> Dict[str, Any]:
         """Reads empirical p50/p90 from cohort reference with strict hierarchical fallback."""
-        if not self.cohort_reference:
-            return {"cohort_level": "global", "p50": 330.0, "p90": 882.0}
+        if self.cohort_reference:
+            by_field_year = self.cohort_reference.get("by_field_year", {})
+            key = f"{field_name}::{pub_year}"
+            if key in by_field_year:
+                info = by_field_year[key]
+                return {
+                    "cohort_level": info.get("cohort_level", "field_year"),
+                    "p50": float(info["p50"]),
+                    "p90": float(info["p90"])
+                }
 
-        by_field_year = self.cohort_reference.get("by_field_year", {})
-        key = f"{field_name}::{pub_year}"
-        if key in by_field_year:
-            info = by_field_year[key]
+            by_field = self.cohort_reference.get("by_field", {})
+            if field_name and str(field_name) in by_field:
+                info = by_field[str(field_name)]
+                return {
+                    "cohort_level": "field",
+                    "p50": float(info["p50"]),
+                    "p90": float(info["p90"])
+                }
+
+            glob = self.cohort_reference.get("global")
+            if glob and glob.get("p50") is not None:
+                return {
+                    "cohort_level": "global",
+                    "p50": float(glob["p50"]),
+                    "p90": float(glob["p90"])
+                }
+
+        year_info = self.cohort_thresholds.get(int(pub_year))
+        if year_info:
+            return {"cohort_level": "year", "p50": float(year_info["p50"]), "p90": float(year_info["p90"])}
+
+        if self.cohort_thresholds:
+            p50s = [v["p50"] for v in self.cohort_thresholds.values()]
+            p90s = [v["p90"] for v in self.cohort_thresholds.values()]
             return {
-                "cohort_level": info.get("cohort_level", "field_year"),
-                "p50": float(info["p50"]),
-                "p90": float(info["p90"])
+                "cohort_level": "empirical_mean",
+                "p50": float(np.mean(p50s)),
+                "p90": float(np.mean(p90s)),
             }
 
-        by_field = self.cohort_reference.get("by_field", {})
-        if field_name and str(field_name) in by_field:
-            info = by_field[str(field_name)]
-            return {
-                "cohort_level": "field",
-                "p50": float(info["p50"]),
-                "p90": float(info["p90"])
-            }
-
-        glob = self.cohort_reference.get("global", {"p50": 330.0, "p90": 882.0})
-        return {
-            "cohort_level": "global",
-            "p50": float(glob["p50"]),
-            "p90": float(glob["p90"])
-        }
+        raise RuntimeError(
+            "Cohort thresholds are not loaded. Place data/reference/label_thresholds.json "
+            "or load works.parquet before serving predictions."
+        )
 
     def predict(
         self,
         raw_work: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Runs full end-to-end scientometric inference and ground truth backtest."""
-        if self.model is None:
-            raise RuntimeError("ModelInferenceService is not initialized. Call load() first.")
+        if self.primary_model is None or self.primary_scaler is None:
+            raise RuntimeError(
+                "Primary served model is not initialized. Call load() first "
+                "(GNN weights are optional and not required for live predictions)."
+            )
 
         work_id = str(raw_work.get("id") or raw_work.get("work_id") or "").split("/")[-1]
         title = raw_work.get("title") or "Untitled Academic Work"
@@ -201,13 +221,17 @@ class ModelInferenceService:
         cutoff_year = pub_year + settings.CUTOFF_OFFSET_YEARS
 
         # 1. Historical citations at cutoff
-        counts_by_year = raw_work.get("counts_by_year", [])
+        counts_by_year = raw_work.get("counts_by_year", []) or []
         cits_at_cutoff = sum(
-            c.get("cited_by_count", 0)
+            int(c.get("cited_by_count", 0) or 0)
             for c in counts_by_year
-            if c.get("year", 9999) <= cutoff_year
+            if isinstance(c, dict) and int(c.get("year", 9999) or 9999) <= cutoff_year
         )
-        total_citations = int(raw_work.get("cited_by_count", 0))
+        if cits_at_cutoff == 0 and self.df_works is not None:
+            stored_rows = self.df_works[self.df_works["work_id"].astype(str).str.endswith(work_id)]
+            if len(stored_rows) > 0 and pd.notnull(stored_rows.iloc[0].get("citations_at_cutoff")):
+                cits_at_cutoff = int(stored_rows.iloc[0]["citations_at_cutoff"])
+        total_citations = int(raw_work.get("cited_by_count", 0) or 0)
 
         # 2. Extract author information
         authorships = raw_work.get("authorships", [])
@@ -253,17 +277,13 @@ class ModelInferenceService:
         ref_count = len(raw_work.get("referenced_works", [])) if "referenced_works" in raw_work else int(raw_work.get("referenced_works_count", 0))
         feats, _ = build_paper_features(raw_work, cutoff_offset=settings.CUTOFF_OFFSET_YEARS)
 
-        # Primary Model: Logistic Regression (Empirical Best on held-out test set)
-        if self.primary_model is not None and self.primary_scaler is not None:
-            feats_scaled = self.primary_scaler.transform(feats.reshape(1, -1))
-            logits = self.primary_model.decision_function(feats_scaled)
-            scaled_logits = logits / max(self.primary_temperature, 1e-4)
-            exp_z = np.exp(scaled_logits - np.max(scaled_logits, axis=1, keepdims=True))
-            probs = (exp_z / np.sum(exp_z, axis=1, keepdims=True))[0]
-            pred_cls = int(np.argmax(probs))
-        else:
-            probs = np.array([0.5, 0.4, 0.1], dtype=np.float32)
-            pred_cls = 0
+        # Primary Model: Logistic Regression (temperature-calibrated on validation)
+        feats_scaled = self.primary_scaler.transform(feats.reshape(1, -1))
+        logits = self.primary_model.decision_function(feats_scaled)
+        scaled_logits = logits / max(self.primary_temperature, 1e-4)
+        exp_z = np.exp(scaled_logits - np.max(scaled_logits, axis=1, keepdims=True))
+        probs = (exp_z / np.sum(exp_z, axis=1, keepdims=True))[0]
+        pred_cls = int(np.argmax(probs))
 
         label_map = {0: "Low (<50th)", 1: "Medium (50-90th)", 2: "High (>=90th)"}
         pred_label = label_map[pred_cls]
@@ -296,19 +316,19 @@ class ModelInferenceService:
                 self.model = None
 
         if pred_future_cits is None:
-            cits_cut = float(cits_at_cutoff)
             t_info = self.get_cohort_threshold(primary_field, pub_year)
-            p50_val = float(t_info.get("p50", 330.0))
-            p90_val = float(t_info.get("p90", 882.0))
-            if pred_cls == 0:
-                pred_future_cits = max(0.0, min(p50_val * 0.75, cits_cut * 1.1 + 8.0))
-            elif pred_cls == 1:
-                pred_future_cits = max(p50_val, min(p90_val * 0.95, cits_cut * 1.8 + 35.0))
-            else:
-                pred_future_cits = max(p90_val, cits_cut * 2.8 + 120.0)
-            pred_log_cits = float(np.log1p(pred_future_cits))
+            p50_val = float(t_info["p50"])
+            p90_val = float(t_info["p90"])
+            # Expected window count from live class probabilities and empirical cohort cutpoints
+            low_center = max(0.0, p50_val * 0.5)
+            med_center = (p50_val + p90_val) / 2.0
+            high_center = p90_val * 1.25
+            pred_future_cits = float(
+                probs[0] * low_center + probs[1] * med_center + probs[2] * high_center
+            )
+            pred_log_cits = float(np.log1p(max(0.0, pred_future_cits)))
 
-            # Lightweight ego-graph visualization context for frontend Cytoscape
+        if not isinstance(graph_context, dict) or "nodes" not in graph_context:
             graph_nodes = [{"data": {"id": work_id, "label": title[:30], "type": "paper"}}]
             graph_edges = []
             for i, auth in enumerate(author_names[:4]):
@@ -550,14 +570,17 @@ class ModelInferenceService:
             "author_details": author_details,
             "cutoff_year": cutoff_year,
             "citations_at_cutoff": cits_at_cutoff,
+            "cutoff_citations": cits_at_cutoff,
             "predicted_impact_class": pred_cls,
             "predicted_impact_label": pred_label,
+            "predicted_label": pred_label,
             "calibrated_probabilities": calibrated_probs,
             "predicted_future_citations_5y": round(pred_future_cits, 1),
             "citations_in_window": round(pred_future_cits, 1),
             "citations_window": round(pred_future_cits, 1),
             "split": split_name,
             "in_training_data": in_train,
+            "in_train_split": in_train,
             "venue": venue_info.model_dump() if venue_info else None,
             "access_economics": econ_info.model_dump(),
             "lineage": lineage_info.model_dump(),
@@ -565,7 +588,7 @@ class ModelInferenceService:
             "backtest": backtest,
             "attributions": attributions,
             "graph_context": graph_context,
-            "model_version": "M1_LogisticRegression (Primary) + HeteroSAGE v2.0",
+            "model_version": "M1_LogisticRegression",
             "provenance": "openalex | scimago | core | model | computed"
         }
 

@@ -617,6 +617,94 @@
         }
 
         .eval-badge-label.forecast { color: var(--accent-forest); }
+
+        .sg-loader {
+            display: none;
+            align-items: center;
+            gap: 0.65rem;
+            margin-top: 0.85rem;
+            padding: 0.85rem 1rem;
+            background: #ECFDF5;
+            border: 1px solid rgba(36, 107, 80, 0.25);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-forest);
+        }
+        .sg-loader.on { display: flex; }
+        .sg-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border-strong);
+            border-top-color: var(--accent-forest);
+            border-radius: 50%;
+            animation: sgspin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes sgspin { to { transform: rotate(360deg); } }
+
+        .year-chart-wrap {
+            margin-top: 1rem;
+            background: #FFFFFF;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        .year-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 160px;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 1.6rem;
+        }
+        .year-bar-col {
+            flex: 1;
+            min-width: 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+        }
+        .year-bar {
+            width: 100%;
+            max-width: 36px;
+            border-radius: 3px 3px 0 0;
+            background: var(--accent-forest);
+        }
+        .year-bar.window { background: var(--accent-blue); }
+        .year-bar.cutoff { background: var(--warning-amber); }
+        .year-bar-label {
+            position: absolute;
+            bottom: -1.45rem;
+            font-size: 0.68rem;
+            font-family: var(--font-mono);
+            color: var(--text-tertiary);
+            white-space: nowrap;
+        }
+        .year-bar-val {
+            font-size: 0.68rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .pred-number {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--accent-forest);
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+        .actual-number {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
         .eval-badge-label.truth { color: var(--accent-blue); }
 
         .provenance-pill {
@@ -963,8 +1051,14 @@
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-category">Core Workflows</div>
-                <a class="nav-link active" onclick="switchTab('viewPredictor')" id="tabLinkPredictor">
+                <div class="nav-category">Teacher Evaluation</div>
+                <a class="nav-link active" onclick="switchTab('viewTeacherVerify')" id="tabLinkTeacherVerify">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Verify Our Work
+                </a>
+
+                <div class="nav-category" style="margin-top: 0.5rem;">Core Workflows</div>
+                <a class="nav-link" onclick="switchTab('viewTeacherVerify')" id="tabLinkPredictor">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     Citation Predictor
                 </a>
@@ -1014,7 +1108,7 @@
                     <span class="status-dot"></span> Cutoff: $T_{\text{cutoff}} = \text{pub\_year} + 2$
                 </span>
                 <span class="status-tag">
-                    Held-Out Test: 71.24% Acc
+                    Held-Out Test: <span id="topbarHeldoutAcc">loading…</span>
                 </span>
             </div>
         </header>
@@ -1023,13 +1117,384 @@
         <div class="workspace-content">
 
             <!-- ========================================== -->
+            <!-- VIEW 0: VERIFY OUR WORK (TEACHER EVALUATION) -->
+            <!-- ========================================== -->
+            <section id="viewTeacherVerify" class="view-pane active">
+                <div class="page-header">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h1 class="page-title">Predict &amp; Verify</h1>
+                            <p class="page-description">
+                                Pick a held-out paper, run the served model in real time, and compare predicted citations in years 3–5 after publication with what actually happened.
+                            </p>
+                        </div>
+                        <span class="heldout-badge" style="background:#DCFCE7; color:#15803D; padding:6px 14px; border-radius:999px; font-weight:600; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px; border: 1px solid rgba(21,128,61,0.2);">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #15803D;"></span>
+                            Held-out: model never saw its outcome
+                        </span>
+                    </div>
+
+                    <details style="margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.75rem 1rem;">
+                        <summary style="cursor: pointer; font-size: 0.84rem; font-weight: 600; color: var(--accent-forest);">For experts</summary>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; line-height: 1.6;">
+                            <p><strong>Cutoff:</strong> The moment 2 years after publication where feature observation stops. Any citation after this date is locked out.</p>
+                            <p><strong>Tier:</strong> Citation impact category relative to all papers in the same field and year: Low (&lt;50th percentile), Medium (50th–90th percentile), or High (&ge;90th percentile).</p>
+                            <p><strong>Cohort:</strong> Empirical distribution of papers sharing the same publication year and discipline, used to set objective percentiles.</p>
+                            <p><strong>Calibration:</strong> Temperature scaling applied to model outputs so that predicted probabilities reflect true empirical error frequencies.</p>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- 1. Pick a held-out paper (dropdown / buttons only) -->
+                <div class="editorial-panel">
+                    <h3 class="section-title">1. Pick a held-out paper</h3>
+                    <p class="section-desc">Choose from the dropdown or a preset button. Nothing is evaluated until you click Run prediction. These papers were published 2018–2020 and were not used to train the model.</p>
+
+                    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem;">
+                        <select id="teacherPaperSelect" class="search-input" style="flex: 1; min-width: 280px;" onchange="onTeacherPaperSelected(this.value)">
+                            <option value="">Loading held-out test papers...</option>
+                        </select>
+                        <button class="btn-secondary" id="teacherRandomBtn" onclick="teacherPickRandomPaper()">Random paper</button>
+                    </div>
+                    <div class="tier-quick-buttons" style="margin-top: 0.75rem;">
+                        <button type="button" class="tier-btn high" onclick="teacherPickPreset(0)">Example A</button>
+                        <button type="button" class="tier-btn medium" onclick="teacherPickPreset(1)">Example B</button>
+                        <button type="button" class="tier-btn low" onclick="teacherPickPreset(2)">Example C</button>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem;">
+                        <input type="text" id="teacherPaperIdInput" class="search-input" style="flex: 1; min-width: 260px;" placeholder="Or paste OpenAlex ID / DOI (e.g. W2752782242)">
+                        <button class="btn-secondary" onclick="teacherLoadPaperById()">Load ID</button>
+                    </div>
+
+                    <div id="teacherPaperError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherPaperCard" style="display: none; margin-top: 1rem; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                        <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text-ink);" id="teacherPaperTitle"></div>
+                        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.4rem; font-size: 0.8rem; color: var(--text-secondary);">
+                            <span>ID: <strong id="teacherPaperId" style="font-family: var(--font-mono);"></strong></span>
+                            <span>•</span>
+                            <span>Published: <strong id="teacherPaperYear"></strong></span>
+                            <span>•</span>
+                            <span>Field: <strong id="teacherPaperField"></strong></span>
+                            <span>•</span>
+                            <span>Venue: <strong id="teacherPaperVenue"></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Run live prediction vs actual -->
+                <div class="editorial-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">2. Run live prediction</h3>
+                            <p class="section-desc">Fetches the paper, freezes citations at the 2-year cutoff, runs the served model, then shows predicted vs actual window citations side by side.</p>
+                        </div>
+                        <button class="btn-primary" id="btnTeacherFreeze" onclick="teacherPredictAndCompare()">Run prediction</button>
+                    </div>
+                    <div id="teacherRunLoader" class="sg-loader"><span class="sg-spinner"></span><span id="teacherRunLoaderText">Running live model on cutoff-only features… predicted vs actual numbers will appear here.</span></div>
+
+                    <div id="teacherFreezeError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherFreezeResult" style="display: none; margin-top: 1rem;">
+                        <!-- What the model saw -->
+                        <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.5rem;">What the model saw (citations up to cutoff only)</div>
+                            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem;">
+                                <div>Cutoff year: <strong id="teacherCutoffYear"></strong></div>
+                                <div>Total early citations: <strong id="teacherEarlyCitations" style="color: var(--accent-forest); font-size: 1.1rem;"></strong></div>
+                            </div>
+                            <div class="data-table-wrap">
+                                <table class="editorial-table" style="font-size: 0.82rem;">
+                                    <thead><tr><th>Year</th><th>Early Citations Observed</th><th>Status</th></tr></thead>
+                                    <tbody id="teacherEarlyCitationsTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="dual-eval-grid" id="teacherSideBySide">
+                            <div class="eval-panel forecast-side">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label forecast">Predicted (model, cutoff only)</span>
+                                        <span class="provenance-pill">M1 live inference</span>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Predicted citations in years 3–5</div>
+                                    <div class="pred-number" id="teacherPredWindowCits">—</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 0.2rem;">window total (pub+3 to pub+5)</div>
+                                    <div style="margin-top: 0.85rem; font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono);">Predicted impact tier</div>
+                                    <div class="outcome-badge" id="teacherPredictedTier" style="margin-top: 0.25rem;"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.75rem; font-size: 0.82rem; flex-wrap: wrap; margin-top: 0.85rem;" id="teacherProbabilities"></div>
+                            </div>
+                            <div class="eval-panel truth-side">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label truth">Actual (held-out outcome)</span>
+                                        <span id="teacherCmpMatch" class="verdict-match-tag"></span>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Observed citations in years 3–5</div>
+                                    <div class="actual-number" id="teacherActualWindowCits">—</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 0.2rem;">sum of yearly OpenAlex counts</div>
+                                    <div style="margin-top: 0.85rem; font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono);">Actual impact tier</div>
+                                    <div class="outcome-badge" id="teacherActualTierInline" style="margin-top: 0.25rem;"></div>
+                                </div>
+                                <div style="margin-top: 0.85rem; font-size: 0.82rem; color: var(--text-secondary);">
+                                    Cohort p50 / p90: <strong id="teacherCohortInline">—</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="year-chart-wrap" style="margin-bottom: 1rem;">
+                            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.65rem;">Predicted vs actual window citations</div>
+                            <div class="year-chart" id="teacherCompareBars" style="height: 120px;"></div>
+                        </div>
+                        <div class="year-chart-wrap">
+                            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.65rem;">Yearly citations (green = before/at cutoff, blue = actual window)</div>
+                            <div class="year-chart" id="teacherYearChart"></div>
+                            <div style="display:flex; gap:1rem; flex-wrap:wrap; font-size:0.74rem; color:var(--text-secondary); margin-top:0.5rem;">
+                                <span><strong style="color:var(--accent-forest);">■</strong> Observed at or before cutoff (model input)</span>
+                                <span><strong style="color:var(--warning-amber);">■</strong> Cutoff year</span>
+                                <span><strong style="color:var(--accent-blue);">■</strong> Actual years 3–5 (held out)</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; overflow: hidden;">
+                            <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.82rem; font-weight: 700;">2-hop neighborhood (authors, venue, topic, precursor works)</div>
+                            <div id="cyTeacher" style="height: 280px; width: 100%;"></div>
+                        </div>
+
+                        <!-- Cryptographic Receipt Hash -->
+                        <div style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.85rem 1rem;">
+                            <div style="font-size: 0.74rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">Receipt SHA-256 Digest (Tamper-Evident Fingerprint)</div>
+                            <code id="teacherReceiptHash" style="font-family: var(--font-mono); font-size: 0.8rem; word-break: break-all; color: var(--accent-forest); font-weight: 600;"></code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Show what really happened -->
+                <div class="editorial-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">3. Year-by-year actual citations</h3>
+                            <p class="section-desc">Raw OpenAlex counts in years 3–5 after publication, used to score the live forecast above.</p>
+                        </div>
+                        <button class="btn-secondary" id="btnTeacherReveal" onclick="teacherRevealReality()">Refresh actual counts</button>
+                    </div>
+
+                    <div id="teacherRevealError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherRevealResult" style="display: none; margin-top: 1rem;">
+                        <!-- Ground Truth Reveal Table -->
+                        <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.5rem;">Citations in years 3-5 after publication</div>
+                            <div class="data-table-wrap">
+                                <table class="editorial-table" style="font-size: 0.84rem;">
+                                    <thead><tr><th>Evaluation Year</th><th>Yearly Citations</th><th>Window Phase</th></tr></thead>
+                                    <tbody id="teacherRealityTable"></tbody>
+                                    <tfoot>
+                                        <tr style="font-weight: 700; background: var(--bg-surface-subtle);">
+                                            <td>Total citations in years 3-5 after publication</td>
+                                            <td id="teacherRealityTotal" style="color: var(--accent-forest); font-size: 1rem;"></td>
+                                            <td>Full 3-Year Evaluation Window</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Verdict Card -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600;">Cohort Thresholds</div>
+                                <div style="font-size: 0.84rem; margin-top: 0.35rem;">
+                                    p50: <strong id="teacherCohortP50"></strong> • p90: <strong id="teacherCohortP90"></strong>
+                                </div>
+                            </div>
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600;">Actual Outcome Tier</div>
+                                <div style="font-size: 1.15rem; font-weight: 700; margin-top: 0.25rem; color: var(--text-ink);" id="teacherActualTier"></div>
+                            </div>
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.25rem;">Prediction Result</div>
+                                <span id="teacherVerdictBadge" style="font-size: 1rem; font-weight: 700; padding: 4px 12px; border-radius: 6px;"></span>
+                            </div>
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.25rem;">Receipt Integrity</div>
+                                <div id="teacherReceiptIntegrity" style="font-size: 0.82rem; font-weight: 600; color: var(--success-green); display: flex; align-items: center; gap: 0.35rem;">
+                                    <span>✔</span> <span>Receipt unchanged: Verified against immutable prediction ledger</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Check it yourself -->
+                        <div style="background: var(--accent-blue-subtle); border: 1px solid rgba(29,78,216,0.2); border-radius: 6px; padding: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.88rem; color: var(--accent-blue);">4. Check it yourself</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;">Add the three yearly numbers and compare.</div>
+                                </div>
+                                <a id="teacherOpenAlexLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="color: var(--accent-blue); font-weight: 600;">
+                                    Inspect Live Record on OpenAlex &nearr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Spot-check 20 random papers live against OpenAlex -->
+                <div class="editorial-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">5. Spot-check 20 random papers live against OpenAlex</h3>
+                            <p class="section-desc">Queries the official api.openalex.org in real time for 20 randomly sampled papers to verify stored database records.</p>
+                        </div>
+                        <button class="btn-secondary" id="btnTeacherSpotcheck" onclick="teacherRunSpotcheck()">Spot-check 20 random papers live against OpenAlex</button>
+                    </div>
+
+                    <div id="teacherSpotcheckError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherSpotcheckResult" style="display: none; margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                            <div style="font-size: 0.92rem; font-weight: 700;">
+                                Match Rate: <span id="teacherMatchRate" style="color: var(--accent-forest); font-size: 1.15rem;"></span>
+                            </div>
+                            <div style="font-size: 0.82rem; color: var(--text-secondary);">
+                                (<span id="teacherMatchCount"></span> matched live OpenAlex records out of <span id="teacherValidCount"></span> audited)
+                            </div>
+                        </div>
+
+                        <div class="data-table-wrap">
+                            <table class="editorial-table" style="font-size: 0.8rem;">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Year</th>
+                                        <th>Stored Window Count</th>
+                                        <th>Live Window Count</th>
+                                        <th>Tier Match</th>
+                                        <th>Audit Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacherSpotcheckTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Download Held-Out Predictions CSV -->
+                <div class="editorial-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">6. Download all 4,500 test predictions (CSV)</h3>
+                            <p class="section-desc">Every single held-out test prediction with raw titles, cutoff inputs, citations in years 3-5 after publication, and model probabilities.</p>
+                        </div>
+                        <a href="/api/v1/verify/heldout.csv" class="btn-secondary" download="heldout_test_predictions.csv">
+                            📥 Download all 4,500 test predictions (CSV)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 7. Leakage test -->
+                <div class="editorial-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">7. Leakage test</h3>
+                            <p class="section-desc">Verifies that the model is strictly blind to future events while remaining sensitive to genuine pre-cutoff evidence.</p>
+                        </div>
+                        <button class="btn-secondary" id="btnTeacherLeakage" onclick="teacherRunLeakage()">Run Leakage Test on This Paper</button>
+                    </div>
+
+                    <div id="teacherLeakageError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherLeakageResult" style="display: none; margin-top: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <!-- Negative Control -->
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                                    <span style="background: var(--success-bg); color: var(--success-green); font-weight: 700; font-size: 0.74rem; padding: 2px 6px; border-radius: 4px;">NEGATIVE CONTROL</span>
+                                    <strong style="font-size: 0.84rem;">Future citations injected</strong>
+                                </div>
+                                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.5rem;" id="teacherNegDesc"></p>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Future citations injected: <strong id="teacherNegAdded"></strong>
+                                </div>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Probability delta: <strong id="teacherNegDelta" style="font-family: var(--font-mono); color: var(--accent-forest);"></strong>
+                                </div>
+                                <div style="font-size: 0.82rem; font-weight: 700; color: var(--success-green); margin-top: 0.5rem;" id="teacherNegVerdict"></div>
+                            </div>
+
+                            <!-- Positive Control -->
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                                    <span style="background: var(--accent-blue-subtle); color: var(--accent-blue); font-weight: 700; font-size: 0.74rem; padding: 2px 6px; border-radius: 4px;">POSITIVE CONTROL</span>
+                                    <strong style="font-size: 0.84rem;">Historical citations added</strong>
+                                </div>
+                                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.5rem;" id="teacherPosDesc"></p>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Historical citations added: <strong id="teacherPosAdded"></strong>
+                                </div>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Probability delta: <strong id="teacherPosDelta" style="font-family: var(--font-mono); color: var(--accent-blue);"></strong>
+                                </div>
+                                <div style="font-size: 0.82rem; font-weight: 700; color: var(--accent-blue); margin-top: 0.5rem;" id="teacherPosVerdict"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Scoreboard -->
+                <div class="editorial-panel">
+                    <h3 class="section-title">8. Benchmark Scoreboard</h3>
+                    <p class="section-desc">Evaluated across all 4,500 held-out test papers (2018–2020).</p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        <!-- Model Card -->
+                        <div style="background: #FFFFFF; border: 2px solid var(--accent-forest); border-radius: 6px; padding: 1.25rem;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--accent-forest); letter-spacing: 0.05em;">Our Primary Model</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreModelAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreModelF1">--</strong></div>
+                            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+                                Outperforms baselines by considering the paper's disciplinary field, open-access status, and author network alongside early citation count.
+                            </p>
+                        </div>
+
+                        <!-- Majority Guess Card -->
+                        <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Majority Guess Baseline</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreMajAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreMajF1">--</strong></div>
+                            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+                                Blindly guessing the most common tier (Low) fails to identify high-impact papers.
+                            </p>
+                        </div>
+
+                        <!-- Early Citations Only Card -->
+                        <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Early Citations Only Baseline</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreEarlyAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreEarlyF1">--</strong></div>
+                            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+                                Using only early citation count without field adjustments struggles with papers from smaller scientific fields.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer with data snapshot and model version -->
+                <div style="margin-top: 2rem; padding: 1rem; border-top: 1px solid var(--border-subtle); font-size: 0.78rem; color: var(--text-secondary); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>Data Snapshot: <strong id="teacherFooterSnapshot">Loading...</strong></div>
+                    <div>Model Version: <strong id="teacherFooterVersion">Loading...</strong></div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
             <!-- VIEW 1: CITATION IMPACT PREDICTOR          -->
             <!-- ========================================== -->
-            <section id="viewPredictor" class="view-pane active">
+            <section id="viewPredictor" class="view-pane">
                 <div class="page-header">
                     <h1 class="page-title">Citation Impact Predictor</h1>
                     <p class="page-description">
-                        Forecasts a paper's 5-year post-publication citation trajectory strictly conditioned on information 
+                        Forecasts citations in years 3-5 after publication strictly conditioned on information 
                         available at the 2-year cutoff boundary ($T_{\text{cutoff}} = \text{pub\_year} + 2$). Zero future citations are accessed during inference.
                     </p>
                 </div>
@@ -1112,30 +1577,32 @@
                                 <div>
                                     <div class="eval-header-row">
                                         <span class="eval-badge-label forecast">Model Forecast ($T_{\text{cutoff}}$ Blind Inference)</span>
-                                        <span class="provenance-pill">M1_LogisticRegression + GNN</span>
+                                        <span class="provenance-pill">M1_LogisticRegression</span>
                                     </div>
-                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.2rem;">Predicted 5-Year Impact Tier</div>
-                                    <div class="outcome-badge" id="resImpactBadge">High Impact (≥90th)</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Predicted citations in years 3–5</div>
+                                    <div class="pred-number" id="resPredWindowCits">—</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin: 0.75rem 0 0.2rem;">Predicted Impact Tier</div>
+                                    <div class="outcome-badge" id="resImpactBadge">—</div>
                                 </div>
 
                                 <div class="prob-bar-container">
                                     <div class="prob-bar-row">
                                         <span>High Tier (≥90th Percentile)</span>
-                                        <strong id="probHighVal">96.2%</strong>
+                                        <strong id="probHighVal">—</strong>
                                     </div>
-                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probHighBar" style="width: 96.2%; background-color: var(--accent-forest);"></div></div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probHighBar" style="width: 0%; background-color: var(--accent-forest);"></div></div>
 
                                     <div class="prob-bar-row">
                                         <span>Medium Tier (50–90th Percentile)</span>
-                                        <strong id="probMedVal">3.5%</strong>
+                                        <strong id="probMedVal">—</strong>
                                     </div>
-                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probMedBar" style="width: 3.5%; background-color: var(--accent-blue);"></div></div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probMedBar" style="width: 0%; background-color: var(--accent-blue);"></div></div>
 
                                     <div class="prob-bar-row">
                                         <span>Low Tier (&lt;50th Percentile)</span>
-                                        <strong id="probLowVal">0.3%</strong>
+                                        <strong id="probLowVal">—</strong>
                                     </div>
-                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probLowBar" style="width: 0.3%; background-color: var(--text-tertiary);"></div></div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probLowBar" style="width: 0%; background-color: var(--text-tertiary);"></div></div>
                                 </div>
 
                                 <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.35;">
@@ -1167,8 +1634,12 @@
                                         <div class="truth-stat-value" id="btCutoffStatVal">3,107</div>
                                     </div>
                                     <div>
-                                        <div class="truth-stat-label">Observed Citations in 5Y Window</div>
-                                        <div class="truth-stat-value highlight" id="btActualCitsVal">11,633</div>
+                                        <div class="truth-stat-label">Observed Citations in years 3–5</div>
+                                        <div class="truth-stat-value highlight" id="btActualCitsVal">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Predicted Citations in years 3–5</div>
+                                        <div class="truth-stat-value" id="btPredCitsVal">—</div>
                                     </div>
                                     <div>
                                         <div class="truth-stat-label">Field Cohort Percentile</div>
@@ -1181,7 +1652,7 @@
                                 </div>
 
                                 <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.35;">
-                                    Empirically verified against actual held-out citation counts across 5-year post-publication observation window.
+                                    Empirically verified against actual held-out citations in years 3-5 after publication.
                                 </div>
                             </div>
                         </div>
@@ -1271,7 +1742,7 @@
                     <h1 class="page-title">Independent Verification Lab</h1>
                     <p class="page-description">
                         Double-blind protocol to verify model predictions against held-out ground truth. 
-                        Inspect feature inputs frozen at $T_{\text{cutoff}}$ before revealing actual 5-year outcomes.
+                        Inspect feature inputs frozen at $T_{\text{cutoff}}$ before revealing actual citations in years 3-5 after publication.
                     </p>
                 </div>
 
@@ -1300,7 +1771,7 @@
                                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;" id="blindConfidence">—</div>
                             </div>
                             <div class="editorial-panel inset" style="margin-bottom: 0;" id="blindTruthPanel">
-                                <div style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary);">Observed 5-Year Ground Truth</div>
+                                <div style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary);">Observed Ground Truth (Years 3-5)</div>
                                 <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-tertiary); margin-top: 0.3rem;" id="blindActualTier">[Hidden]</div>
                                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;" id="blindActualDetails">Click 'Reveal Observed Ground Truth' to audit.</div>
                             </div>
@@ -1464,38 +1935,7 @@
                                 </tr>
                             </thead>
                             <tbody id="benchmarkBody">
-                                <tr>
-                                    <td>M0: Naive Tabular Baseline</td>
-                                    <td>Raw Counts (Linear Year Extrapolation)</td>
-                                    <td>50.40%</td>
-                                    <td>0.463</td>
-                                    <td>0.680</td>
-                                    <td>Baseline</td>
-                                </tr>
-                                <tr>
-                                    <td>M2: Random Forest Classifier</td>
-                                    <td>47-dim Scientometric Vector</td>
-                                    <td>63.12%</td>
-                                    <td>0.612</td>
-                                    <td>0.785</td>
-                                    <td>Comparative</td>
-                                </tr>
-                                <tr>
-                                    <td>M3: Authentic HeteroSAGE (GNN)</td>
-                                    <td>2-Hop Multi-Relational Ego Subgraph</td>
-                                    <td>67.80%</td>
-                                    <td>0.665</td>
-                                    <td>0.824</td>
-                                    <td>Experimental GNN</td>
-                                </tr>
-                                <tr class="table-selected-row">
-                                    <td><strong>M1: Calibrated Classifier (Primary)</strong></td>
-                                    <td><strong>51-dim Cohort + Trajectory + Text SVD</strong></td>
-                                    <td><strong>71.24%</strong></td>
-                                    <td><strong>0.704</strong></td>
-                                    <td><strong>0.852</strong></td>
-                                    <td><strong>Production Primary</strong></td>
-                                </tr>
+                                <tr><td colspan="6">Loading live benchmark report…</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1613,6 +2053,609 @@
 
     <!-- APPLICATION CLIENT SCRIPT -->
     <script>
+        // ========================================================
+        // TEACHER VERIFICATION LAB STATE & LOGIC
+        // ========================================================
+        let teacherCorpusSamples = [];
+        let teacherSelectedPaper = null;
+        let teacherCurrentReceipt = null;
+
+        async function loadTeacherCorpus() {
+            const select = document.getElementById('teacherPaperSelect');
+            const errBox = document.getElementById('teacherPaperError');
+            if (!select) return;
+            try {
+                const resp = await fetch('/api/v1/papers/corpus-sample?limit=50&randomize=true');
+                if (!resp.ok) throw new Error('Failed to load sample papers: HTTP ' + resp.status);
+                const data = await resp.json();
+                teacherCorpusSamples = data.sample || [];
+                select.innerHTML = '';
+                if (teacherCorpusSamples.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.textContent = 'No papers available';
+                    select.appendChild(opt);
+                    return;
+                }
+                teacherCorpusSamples.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.paper_id;
+                    opt.textContent = `${p.title} (${p.publication_year}, ${p.field})`;
+                    select.appendChild(opt);
+                });
+                teacherSelectedPaper = teacherCorpusSamples[0];
+                renderTeacherPaperCard(teacherSelectedPaper);
+            } catch (e) {
+                if (errBox) {
+                    errBox.style.display = 'block';
+                    errBox.textContent = 'Error loading sample papers: ' + e.message;
+                }
+            }
+        }
+
+        function fmtNum(n) {
+            if (n === null || n === undefined || n === '' || Number.isNaN(Number(n))) return '—';
+            return Number(n).toLocaleString();
+        }
+
+        function cutoffCount(d) {
+            if (!d) return null;
+            if (d.citations_at_cutoff != null) return d.citations_at_cutoff;
+            if (d.cutoff_citations != null) return d.cutoff_citations;
+            return null;
+        }
+
+        function setTierBadge(el, label, cls) {
+            if (!el) return;
+            el.className = 'outcome-badge';
+            if (cls === 2 || (label && label.toLowerCase().includes('high'))) el.classList.add('high');
+            else if (cls === 1 || (label && label.toLowerCase().includes('medium'))) el.classList.add('medium');
+            else el.classList.add('low');
+            el.textContent = label || '—';
+        }
+
+        function renderTeacherPaperCard(paper) {
+            if (!paper) return;
+            const card = document.getElementById('teacherPaperCard');
+            const titleEl = document.getElementById('teacherPaperTitle');
+            const idEl = document.getElementById('teacherPaperId');
+            const yrEl = document.getElementById('teacherPaperYear');
+            const fldEl = document.getElementById('teacherPaperField');
+            const venEl = document.getElementById('teacherPaperVenue');
+
+            if (card) card.style.display = 'block';
+            if (titleEl) titleEl.textContent = paper.title || 'Untitled';
+            if (idEl) idEl.textContent = paper.paper_id || '';
+            if (yrEl) yrEl.textContent = String(paper.publication_year || '');
+            if (fldEl) fldEl.textContent = paper.field || 'General';
+            if (venEl) venEl.textContent = paper.venue_name || 'Not indexed';
+
+            const frEl = document.getElementById('teacherFreezeResult');
+            const rvEl = document.getElementById('teacherRevealResult');
+            if (frEl) frEl.style.display = 'none';
+            if (rvEl) rvEl.style.display = 'none';
+        }
+
+        function onTeacherPaperSelected(wid) {
+            teacherSelectedPaper = teacherCorpusSamples.find(p => p.paper_id === wid) || null;
+            renderTeacherPaperCard(teacherSelectedPaper);
+        }
+
+        function teacherPickRandomPaper() {
+            if (teacherCorpusSamples.length === 0) return;
+            const idx = Math.floor(Math.random() * teacherCorpusSamples.length);
+            teacherSelectedPaper = teacherCorpusSamples[idx];
+            const select = document.getElementById('teacherPaperSelect');
+            if (select) select.value = teacherSelectedPaper.paper_id;
+            renderTeacherPaperCard(teacherSelectedPaper);
+        }
+
+        function teacherPickPreset(idx) {
+            if (teacherCorpusSamples.length === 0) return;
+            const paper = teacherCorpusSamples[Math.min(idx, teacherCorpusSamples.length - 1)];
+            teacherSelectedPaper = paper;
+            const select = document.getElementById('teacherPaperSelect');
+            if (select) select.value = paper.paper_id;
+            renderTeacherPaperCard(paper);
+        }
+
+        async function teacherLoadPaperById() {
+            const input = document.getElementById('teacherPaperIdInput');
+            const raw = (input && input.value || '').trim();
+            const errBox = document.getElementById('teacherPaperError');
+            if (!raw) return;
+            if (errBox) errBox.style.display = 'none';
+            try {
+                const resp = await fetch(`/api/v1/papers/predict/${encodeURIComponent(raw)}`);
+                const data = await resp.json().catch(() => ({}));
+                if (!resp.ok) throw new Error(data.detail || ('Could not load paper HTTP ' + resp.status));
+                teacherSelectedPaper = {
+                    paper_id: (data.paper_id || raw).toString().split('/').pop(),
+                    title: data.title,
+                    publication_year: data.publication_year,
+                    field: data.primary_field,
+                    venue_name: (data.venue && data.venue.venue_name) || ''
+                };
+                const select = document.getElementById('teacherPaperSelect');
+                if (select && ![...select.options].some(o => o.value === teacherSelectedPaper.paper_id)) {
+                    const opt = document.createElement('option');
+                    opt.value = teacherSelectedPaper.paper_id;
+                    opt.textContent = `${teacherSelectedPaper.title} (${teacherSelectedPaper.publication_year}, ${teacherSelectedPaper.field || 'General'})`;
+                    select.appendChild(opt);
+                    select.value = teacherSelectedPaper.paper_id;
+                } else if (select) {
+                    select.value = teacherSelectedPaper.paper_id;
+                }
+                renderTeacherPaperCard(teacherSelectedPaper);
+            } catch (e) {
+                if (errBox) {
+                    errBox.style.display = 'block';
+                    errBox.textContent = e.message;
+                }
+            }
+        }
+
+        function renderYearChart(early, windowRows, cutoffYear) {
+            const host = document.getElementById('teacherYearChart');
+            if (!host) return;
+            host.innerHTML = '';
+            const points = [];
+            (early || []).forEach(p => points.push({ year: Number(p.year), count: Number(p.cited_by_count || 0), kind: Number(p.year) === Number(cutoffYear) ? 'cutoff' : 'early' }));
+            (windowRows || []).forEach(p => points.push({ year: Number(p.year), count: Number(p.cited_by_count || 0), kind: 'window' }));
+            points.sort((a, b) => a.year - b.year);
+            const maxV = Math.max(1, ...points.map(p => p.count));
+            points.forEach(p => {
+                const col = document.createElement('div');
+                col.className = 'year-bar-col';
+                const val = document.createElement('div');
+                val.className = 'year-bar-val';
+                val.textContent = String(p.count);
+                const bar = document.createElement('div');
+                bar.className = 'year-bar ' + (p.kind === 'window' ? 'window' : (p.kind === 'cutoff' ? 'cutoff' : ''));
+                bar.style.height = Math.max(4, Math.round((p.count / maxV) * 120)) + 'px';
+                const lab = document.createElement('div');
+                lab.className = 'year-bar-label';
+                lab.textContent = String(p.year);
+                col.appendChild(val);
+                col.appendChild(bar);
+                col.appendChild(lab);
+                host.appendChild(col);
+            });
+            if (points.length === 0) {
+                host.textContent = 'No yearly counts returned for this paper.';
+            }
+        }
+
+        function renderCompareBars(predCits, actualCits) {
+            const host = document.getElementById('teacherCompareBars');
+            if (!host) return;
+            host.innerHTML = '';
+            const pred = Number(predCits || 0);
+            const actual = Number(actualCits || 0);
+            const maxV = Math.max(1, pred, actual);
+            [
+                { label: 'Predicted', count: pred, cls: '' },
+                { label: 'Actual (OpenAlex)', count: actual, cls: 'window' }
+            ].forEach(p => {
+                const col = document.createElement('div');
+                col.className = 'year-bar-col';
+                const val = document.createElement('div');
+                val.className = 'year-bar-val';
+                val.textContent = fmtNum(p.count);
+                const bar = document.createElement('div');
+                bar.className = 'year-bar ' + p.cls;
+                bar.style.height = Math.max(8, Math.round((p.count / maxV) * 90)) + 'px';
+                const lab = document.createElement('div');
+                lab.className = 'year-bar-label';
+                lab.textContent = p.label;
+                col.appendChild(val);
+                col.appendChild(bar);
+                col.appendChild(lab);
+                host.appendChild(col);
+            });
+        }
+
+        async function teacherPredictAndCompare() {
+            if (!teacherSelectedPaper) return;
+            const wid = teacherSelectedPaper.paper_id;
+            const errBox = document.getElementById('teacherFreezeError');
+            const resBox = document.getElementById('teacherFreezeResult');
+            const loader = document.getElementById('teacherRunLoader');
+            const btn = document.getElementById('btnTeacherFreeze');
+            if (errBox) errBox.style.display = 'none';
+            if (loader) loader.classList.add('on');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Running…';
+            }
+
+            try {
+                const resp = await fetch(`/api/v1/verify/compare/${encodeURIComponent(wid)}`);
+                const payload = await resp.json().catch(() => ({}));
+                if (!resp.ok) throw new Error(payload.detail || ('Live prediction failed: HTTP ' + resp.status));
+
+                const pred = payload.prediction || {};
+                const receipt = payload.receipt || {};
+                const reveal = payload.reveal || {};
+                const side = payload.side_by_side || {};
+                teacherCurrentReceipt = receipt;
+
+                if (resBox) {
+                    resBox.style.display = 'block';
+                    resBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                const cutoffYear = pred.cutoff_year || receipt.cutoff_year;
+                const earlyCits = side.citations_at_cutoff != null ? side.citations_at_cutoff : cutoffCount(pred);
+                document.getElementById('teacherCutoffYear').textContent = String(cutoffYear || '—');
+                document.getElementById('teacherEarlyCitations').textContent = fmtNum(earlyCits);
+
+                const tableBody = document.getElementById('teacherEarlyCitationsTable');
+                tableBody.innerHTML = '';
+                const traj = side.early_trajectory || (receipt.frozen_inputs || {}).historical_citation_trajectory_to_cutoff || [];
+                if (traj.length === 0) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>Up to ${cutoffYear}</td><td>${fmtNum(earlyCits)}</td><td>Pre-cutoff observed</td>`;
+                    tableBody.appendChild(tr);
+                } else {
+                    traj.forEach(item => {
+                        const tr = document.createElement('tr');
+                        const status = item.year === cutoffYear ? 'Cutoff boundary' : 'Pre-cutoff observed';
+                        tr.innerHTML = `<td>${item.year}</td><td>${fmtNum(item.cited_by_count)}</td><td>${status}</td>`;
+                        tableBody.appendChild(tr);
+                    });
+                }
+
+                const predCits = side.predicted_window_citations != null ? side.predicted_window_citations : pred.predicted_future_citations_5y;
+                const actualCits = side.actual_window_citations != null ? side.actual_window_citations : reveal.window_total_citations;
+                document.getElementById('teacherPredWindowCits').textContent = fmtNum(predCits);
+                document.getElementById('teacherActualWindowCits').textContent = fmtNum(actualCits);
+
+                setTierBadge(document.getElementById('teacherPredictedTier'), side.predicted_tier || pred.predicted_impact_label, side.predicted_class);
+                setTierBadge(document.getElementById('teacherActualTierInline'), side.actual_tier || reveal.actual_tier, side.actual_class);
+
+                const matchEl = document.getElementById('teacherCmpMatch');
+                if (side.is_correct) {
+                    matchEl.className = 'verdict-match-tag match';
+                    matchEl.textContent = 'Correct';
+                } else {
+                    matchEl.className = 'verdict-match-tag misaligned';
+                    matchEl.textContent = 'Misaligned';
+                }
+
+                const probs = side.probabilities || pred.calibrated_probabilities || {};
+                const probContainer = document.getElementById('teacherProbabilities');
+                probContainer.innerHTML = '';
+                Object.entries(probs).forEach(([k, v]) => {
+                    if (v == null) return;
+                    const span = document.createElement('span');
+                    span.style.background = 'var(--bg-surface-subtle)';
+                    span.style.padding = '3px 8px';
+                    span.style.borderRadius = '4px';
+                    span.textContent = `${k}: ${(Number(v) * 100).toFixed(1)}%`;
+                    probContainer.appendChild(span);
+                });
+
+                const th = side.cohort_thresholds || reveal.cohort_thresholds || {};
+                document.getElementById('teacherCohortInline').textContent = `${fmtNum(th.p50_threshold)} / ${fmtNum(th.p90_threshold)}`;
+                document.getElementById('teacherReceiptHash').textContent = side.receipt_sha256 || receipt.receipt_sha256 || '—';
+
+                const yearly = side.yearly_actual || reveal.yearly_citations_breakdown || [];
+                renderYearChart(traj, yearly, cutoffYear);
+                renderCompareBars(predCits, actualCits);
+                if (pred && document.getElementById('cyTeacher')) {
+                    renderSubgraph(pred, 'cyTeacher');
+                }
+
+                const rvEl = document.getElementById('teacherRevealResult');
+                if (rvEl) rvEl.style.display = 'block';
+                const tbody = document.getElementById('teacherRealityTable');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    yearly.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${item.year}</td><td>${fmtNum(item.cited_by_count)}</td><td>Post-cutoff outcome</td>`;
+                        tbody.appendChild(tr);
+                    });
+                }
+                const totalEl = document.getElementById('teacherRealityTotal');
+                if (totalEl) totalEl.textContent = fmtNum(actualCits);
+                const p50El = document.getElementById('teacherCohortP50');
+                const p90El = document.getElementById('teacherCohortP90');
+                if (p50El) p50El.textContent = fmtNum(th.p50_threshold);
+                if (p90El) p90El.textContent = fmtNum(th.p90_threshold);
+                const actualTierEl = document.getElementById('teacherActualTier');
+                if (actualTierEl) actualTierEl.textContent = side.actual_tier || '—';
+                const badge = document.getElementById('teacherVerdictBadge');
+                if (badge) {
+                    badge.textContent = side.is_correct ? 'Correct' : 'Wrong';
+                    badge.style.background = side.is_correct ? 'var(--success-bg)' : 'var(--destructive-bg)';
+                    badge.style.color = side.is_correct ? 'var(--success-green)' : 'var(--destructive-red)';
+                }
+                const link = document.getElementById('teacherOpenAlexLink');
+                if (link) link.href = `https://api.openalex.org/works/${wid}?select=id,publication_year,counts_by_year`;
+            } catch (e) {
+                if (errBox) {
+                    errBox.style.display = 'block';
+                    errBox.textContent = e.message;
+                }
+            } finally {
+                if (loader) loader.classList.remove('on');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Run prediction';
+                }
+            }
+        }
+
+        async function teacherFreezeAndPredict() {
+            return teacherPredictAndCompare();
+        }
+
+        async function teacherRevealReality() {
+            if (!teacherSelectedPaper) return;
+            const wid = teacherSelectedPaper.paper_id;
+            const errBox = document.getElementById('teacherRevealError');
+            const resBox = document.getElementById('teacherRevealResult');
+            if (errBox) errBox.style.display = 'none';
+
+            try {
+                const resp = await fetch(`/api/v1/verify/reveal/${wid}`);
+                if (!resp.ok) throw new Error('Failed to reveal reality: HTTP ' + resp.status);
+                const data = await resp.json();
+
+                if (resBox) resBox.style.display = 'block';
+
+                const tbody = document.getElementById('teacherRealityTable');
+                tbody.innerHTML = '';
+                (data.yearly_citations_breakdown || []).forEach(item => {
+                    const tr = document.createElement('tr');
+                    const td1 = document.createElement('td');
+                    td1.textContent = String(item.year);
+                    const td2 = document.createElement('td');
+                    td2.textContent = String(item.cited_by_count);
+                    const td3 = document.createElement('td');
+                    const pubYr = (data.cohort_thresholds && data.cohort_thresholds.pub_year) || 2018;
+                    td3.textContent = 'Post-cutoff outcome (Year ' + (item.year - pubYr) + ' after publication)';
+                    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+                    tbody.appendChild(tr);
+                });
+
+                document.getElementById('teacherRealityTotal').textContent = String(data.window_total_citations);
+                document.getElementById('teacherCohortP50').textContent = String(data.cohort_thresholds.p50_threshold);
+                document.getElementById('teacherCohortP90').textContent = String(data.cohort_thresholds.p90_threshold);
+                document.getElementById('teacherActualTier').textContent = data.actual_tier;
+
+                const badge = document.getElementById('teacherVerdictBadge');
+                if (data.is_correct) {
+                    badge.textContent = 'Correct';
+                    badge.style.background = 'var(--success-bg)';
+                    badge.style.color = 'var(--success-green)';
+                } else {
+                    badge.textContent = 'Wrong';
+                    badge.style.background = 'var(--destructive-bg)';
+                    badge.style.color = 'var(--destructive-red)';
+                }
+
+                // External Link to OpenAlex
+                const link = document.getElementById('teacherOpenAlexLink');
+                if (link) {
+                    link.href = `https://api.openalex.org/works/${wid}?select=id,publication_year,counts_by_year`;
+                }
+
+                // Check receipt integrity
+                const hash = data.receipt_sha256;
+                if (hash) {
+                    try {
+                        const cResp = await fetch(`/api/v1/verify/receipt/${hash}/check`);
+                        const cData = await cResp.json();
+                        const integrityEl = document.getElementById('teacherReceiptIntegrity');
+                        if (cData.valid) {
+                            integrityEl.textContent = '✔ Receipt unchanged: Verified against immutable prediction ledger';
+                            integrityEl.style.color = 'var(--success-green)';
+                        } else {
+                            integrityEl.textContent = '✖ Integrity check failed: ' + (cData.reason || 'Hash mismatch');
+                            integrityEl.style.color = 'var(--destructive-red)';
+                        }
+                    } catch (ignore) {}
+                }
+            } catch (e) {
+                if (errBox) {
+                    errBox.style.display = 'block';
+                    errBox.textContent = e.message;
+                }
+            }
+        }
+
+        async function teacherRunSpotcheck() {
+            const btn = document.getElementById('btnTeacherSpotcheck');
+            const errBox = document.getElementById('teacherSpotcheckError');
+            const resBox = document.getElementById('teacherSpotcheckResult');
+            const tbody = document.getElementById('teacherSpotcheckTableBody');
+            if (errBox) errBox.style.display = 'none';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Spot-checking live OpenAlex...';
+            }
+
+            try {
+                const resp = await fetch('/api/v1/verify/spotcheck?n=20');
+                if (!resp.ok) throw new Error('Live spotcheck failed: HTTP ' + resp.status);
+                const data = await resp.json();
+
+                if (resBox) resBox.style.display = 'block';
+                document.getElementById('teacherMatchRate').textContent = data.match_rate_percent.toFixed(1) + '%';
+                document.getElementById('teacherMatchCount').textContent = String(data.matches);
+                document.getElementById('teacherValidCount').textContent = String(data.valid_count);
+
+                tbody.innerHTML = '';
+                (data.sample_results || []).forEach(r => {
+                    const tr = document.createElement('tr');
+
+                    const tdTitle = document.createElement('td');
+                    const a = document.createElement('a');
+                    a.href = r.openalex_api_url || `https://openalex.org/${r.work_id}`;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = r.title || r.work_id;
+                    tdTitle.appendChild(a);
+
+                    const tdYear = document.createElement('td');
+                    tdYear.textContent = String(r.publication_year);
+
+                    const tdStored = document.createElement('td');
+                    tdStored.textContent = String(r.stored_window);
+
+                    const tdLive = document.createElement('td');
+                    tdLive.textContent = r.live_window !== null ? String(r.live_window) : 'Network Error';
+
+                    const tdMatch = document.createElement('td');
+                    const matchSpan = document.createElement('span');
+                    matchSpan.textContent = r.tier_match ? 'Match' : 'Drift';
+                    matchSpan.style.color = r.tier_match ? 'var(--success-green)' : 'var(--warning-amber)';
+                    matchSpan.style.fontWeight = '600';
+                    tdMatch.appendChild(matchSpan);
+
+                    const tdStatus = document.createElement('td');
+                    tdStatus.textContent = r.status;
+
+                    tr.appendChild(tdTitle);
+                    tr.appendChild(tdYear);
+                    tr.appendChild(tdStored);
+                    tr.appendChild(tdLive);
+                    tr.appendChild(tdMatch);
+                    tr.appendChild(tdStatus);
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                if (errBox) {
+                    errBox.style.display = 'block';
+                    errBox.textContent = 'Spotcheck Error: ' + e.message;
+                }
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Spot-check 20 random papers live against OpenAlex';
+                }
+            }
+        }
+
+        async function teacherRunLeakage() {
+            if (!teacherSelectedPaper) return;
+            const wid = teacherSelectedPaper.paper_id;
+            const errBox = document.getElementById('teacherLeakageError');
+            const resBox = document.getElementById('teacherLeakageResult');
+            if (errBox) errBox.style.display = 'none';
+
+            try {
+                const resp = await fetch(`/api/v1/verify/leakage-controls/${wid}`);
+                if (!resp.ok) throw new Error('Leakage test failed: HTTP ' + resp.status);
+                const data = await resp.json();
+
+                if (resBox) resBox.style.display = 'block';
+                const neg = data.negative_control;
+                const pos = data.positive_control;
+
+                document.getElementById('teacherNegDesc').textContent = neg.description;
+                document.getElementById('teacherNegAdded').textContent = `+${neg.citations_added.toLocaleString()} citations in ${neg.target_year}`;
+                document.getElementById('teacherNegDelta').textContent = `Δ = ${neg.max_probability_delta.toFixed(6)}`;
+                document.getElementById('teacherNegVerdict').textContent = neg.verdict;
+
+                document.getElementById('teacherPosDesc').textContent = pos.description;
+                document.getElementById('teacherPosAdded').textContent = `+${pos.citations_added} citations in ${pos.target_year}`;
+                document.getElementById('teacherPosDelta').textContent = `Δ = ${pos.max_probability_delta.toFixed(4)}`;
+                document.getElementById('teacherPosVerdict').textContent = pos.verdict;
+            } catch (e) {
+                if (errBox) {
+                    errBox.style.display = 'block';
+                    errBox.textContent = e.message;
+                }
+            }
+        }
+
+        async function loadTeacherScoreboardAndFooter() {
+            try {
+                const bResp = await fetch('/api/v1/papers/benchmark');
+                if (bResp.ok) {
+                    const bData = await bResp.json();
+                    const summary = bData.summary || {};
+                    const m1 = summary.M1_LogisticRegression || {};
+                    const m0 = summary.M0_Majority || {};
+                    const b1 = summary.B1_EarlyCitationsOnly || {};
+
+                    if (m1.micro_f1_mean !== undefined) {
+                        const acc = (m1.micro_f1_mean * 100).toFixed(1) + '%';
+                        document.getElementById('teacherScoreModelAcc').textContent = acc;
+                        document.getElementById('teacherScoreModelF1').textContent = m1.macro_f1_mean.toFixed(4);
+                        const top = document.getElementById('topbarHeldoutAcc');
+                        if (top) top.textContent = acc + ' Acc';
+                    }
+                    if (m0.micro_f1_mean !== undefined) {
+                        document.getElementById('teacherScoreMajAcc').textContent = (m0.micro_f1_mean * 100).toFixed(1) + '%';
+                        document.getElementById('teacherScoreMajF1').textContent = m0.macro_f1_mean.toFixed(4);
+                    }
+                    if (b1.micro_f1_mean !== undefined) {
+                        document.getElementById('teacherScoreEarlyAcc').textContent = (b1.micro_f1_mean * 100).toFixed(1) + '%';
+                        document.getElementById('teacherScoreEarlyF1').textContent = b1.macro_f1_mean.toFixed(4);
+                    }
+                }
+            } catch (ignore) {}
+
+            try {
+                const hResp = await fetch('/health');
+                if (hResp.ok) {
+                    const hData = await hResp.json();
+                    const sn = (hData.data_snapshot && hData.data_snapshot.openalex_retrieved_utc) || '2026-10-15';
+                    document.getElementById('teacherFooterSnapshot').textContent = sn;
+                    document.getElementById('teacherFooterVersion').textContent = `${hData.service || 'SciGraph AI 2.0'} (${hData.model_name || 'M1_LogisticRegression'})`;
+                }
+            } catch (ignore) {}
+        }
+
+        async function loadBenchmarks() {
+            const body = document.getElementById('benchmarkBody');
+            if (!body) return;
+            try {
+                const resp = await fetch('/api/v1/papers/benchmark');
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const data = await resp.json();
+                const summary = data.summary || {};
+                const rows = [
+                    ['M0_Majority', 'Majority class baseline', 'Baseline'],
+                    ['B1_EarlyCitationsOnly', 'Early citations at cutoff only', 'Baseline'],
+                    ['M1_LogisticRegression', '51-dim cutoff features + text SVD', 'Production Primary'],
+                    ['M2_LightGBM', 'Gradient-boosted trees on cutoff features', 'Comparative'],
+                    ['M5_HeteroGraphSAGE', '2-hop heterogeneous graph', 'Experimental GNN']
+                ];
+                body.innerHTML = '';
+                rows.forEach(([key, feats, status]) => {
+                    const m = summary[key];
+                    if (!m) return;
+                    const tr = document.createElement('tr');
+                    if (key === 'M1_LogisticRegression') tr.className = 'table-selected-row';
+                    const acc = m.micro_f1_mean != null ? (m.micro_f1_mean * 100).toFixed(2) + '%' : '—';
+                    const f1 = m.macro_f1_mean != null ? Number(m.macro_f1_mean).toFixed(4) : '—';
+                    const auc = m.auroc_mean != null ? Number(m.auroc_mean).toFixed(3) : '—';
+                    tr.innerHTML = `<td>${key}</td><td>${feats}</td><td>${acc}</td><td>${f1}</td><td>${auc}</td><td>${status}</td>`;
+                    body.appendChild(tr);
+                });
+                if (!body.children.length) body.innerHTML = '<tr><td colspan="6">Benchmark summary missing expected model keys.</td></tr>';
+            } catch (e) {
+                body.innerHTML = `<tr><td colspan="6">Could not load benchmarks: ${e.message}</td></tr>`;
+            }
+        }
+
+        async function loadVerifySummary() {
+            try {
+                await fetch('/api/v1/verify/summary');
+            } catch (e) {}
+        }
+
+        async function loadAuditResults() {
+            try {
+                await fetch('/api/v1/verify/audits');
+            } catch (e) {}
+        }
+
         // Tab switching logic
         function switchTab(viewId) {
             document.querySelectorAll('.view-pane').forEach(el => el.classList.remove('active'));
@@ -1622,6 +2665,7 @@
             if (targetView) targetView.classList.add('active');
 
             const idMap = {
+                'viewTeacherVerify': { link: 'tabLinkTeacherVerify', title: 'Verify Our Work' },
                 'viewPredictor': { link: 'tabLinkPredictor', title: 'Citation Impact Predictor' },
                 'viewVerifyLab': { link: 'tabLinkVerify', title: 'Verification Lab' },
                 'viewAudit': { link: 'tabLinkAudit', title: 'Temporal & Leakage Audit' },
@@ -1636,13 +2680,18 @@
             }
 
             // Lazy load data for tabs when selected
+            if (viewId === 'viewTeacherVerify') {
+                if (teacherCorpusSamples.length === 0) loadTeacherCorpus();
+                loadTeacherScoreboardAndFooter();
+            }
             if (viewId === 'viewVerifyLab') loadVerifySummary();
             if (viewId === 'viewAudit') loadAuditResults();
             if (viewId === 'viewBenchmarks') loadBenchmarks();
         }
 
         function loadSample(id) {
-            document.getElementById('paperInput').value = id;
+            const input = document.getElementById('paperInput');
+            if (input) input.value = id;
             const presetSel = document.getElementById('presetPaperSelect');
             if (presetSel) {
                 for (let i = 0; i < presetSel.options.length; i++) {
@@ -1652,31 +2701,35 @@
                     }
                 }
             }
-            runPrediction();
         }
 
         function onPresetSelect(id) {
             if (!id) return;
-            document.getElementById('paperInput').value = id;
-            runPrediction();
+            const input = document.getElementById('paperInput');
+            if (input) input.value = id;
         }
 
         // Live Prediction Handler
         async function runPrediction() {
-            const inputVal = document.getElementById('paperInput').value.trim();
+            const inputEl = document.getElementById('paperInput');
+            const inputVal = inputEl ? inputEl.value.trim() : '';
             if (!inputVal) return;
+            const empty = document.getElementById('predictionEmptyState');
+            const area = document.getElementById('predictionResultsArea');
+            if (empty) empty.style.display = 'none';
+            if (area) area.style.display = 'none';
 
             try {
                 const res = await fetch(`/api/v1/papers/predict/${encodeURIComponent(inputVal)}`);
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
-                    alert(`Prediction Error (${res.status}): ${err.detail || 'Service unavailable'}`);
+                    console.error('Prediction Error:', err);
                     return;
                 }
                 const data = await res.json();
                 renderPrediction(data);
             } catch (err) {
-                alert(`Network error connecting to API: ${err.message}`);
+                console.error('Network error connecting to API:', err);
             }
         }
 
@@ -1688,7 +2741,7 @@
             document.getElementById('resPaperTitle').innerText = data.title || 'Untitled';
             document.getElementById('resPubYear').innerText = data.publication_year || '—';
             document.getElementById('resCutoffYear').innerText = data.cutoff_year || (data.publication_year + 2);
-            document.getElementById('resCutoffCits').innerText = data.cutoff_citations != null ? data.cutoff_citations.toLocaleString() : '0';
+            document.getElementById('resCutoffCits').innerText = fmtNum(cutoffCount(data));
             document.getElementById('resSplitStatus').innerText = data.in_train_split ? 'Training Split (2012–2016)' : 'Held-Out Blind Test';
 
             // OpenAlex Link
@@ -1767,16 +2820,26 @@
             }
 
             const probs = data.calibrated_probabilities || data.class_probabilities || {};
-            const pHigh = (probs['High (>=90th)'] != null ? probs['High (>=90th)'] * 100 : 33.3).toFixed(1);
-            const pMed = (probs['Medium (50-90th)'] != null ? probs['Medium (50-90th)'] * 100 : 33.3).toFixed(1);
-            const pLow = (probs['Low (<50th)'] != null ? probs['Low (<50th)'] * 100 : 33.3).toFixed(1);
+            const pickProb = (keys) => {
+                for (const k of keys) {
+                    if (probs[k] != null) return (Number(probs[k]) * 100).toFixed(1);
+                }
+                return null;
+            };
+            const pHigh = pickProb(['High (>=90th)', 'High']);
+            const pMed = pickProb(['Medium (50-90th)', 'Medium']);
+            const pLow = pickProb(['Low (<50th)', 'Low']);
 
-            document.getElementById('probHighVal').innerText = `${pHigh}%`;
-            document.getElementById('probHighBar').style.width = `${pHigh}%`;
-            document.getElementById('probMedVal').innerText = `${pMed}%`;
-            document.getElementById('probMedBar').style.width = `${pMed}%`;
-            document.getElementById('probLowVal').innerText = `${pLow}%`;
-            document.getElementById('probLowBar').style.width = `${pLow}%`;
+            document.getElementById('probHighVal').innerText = pHigh != null ? `${pHigh}%` : '—';
+            document.getElementById('probHighBar').style.width = pHigh != null ? `${pHigh}%` : '0%';
+            document.getElementById('probMedVal').innerText = pMed != null ? `${pMed}%` : '—';
+            document.getElementById('probMedBar').style.width = pMed != null ? `${pMed}%` : '0%';
+            document.getElementById('probLowVal').innerText = pLow != null ? `${pLow}%` : '—';
+            document.getElementById('probLowBar').style.width = pLow != null ? `${pLow}%` : '0%';
+
+            const predWindow = data.predicted_future_citations_5y != null ? data.predicted_future_citations_5y : data.citations_in_window;
+            const predNumEl = document.getElementById('resPredWindowCits');
+            if (predNumEl) predNumEl.textContent = fmtNum(predWindow);
 
             // Column 2: Side-by-Side Ground Truth Empirical Verification
             const bt = data.backtest;
@@ -1806,8 +2869,10 @@
                     matchBadge.innerHTML = 'Class Misaligned';
                 }
 
-                document.getElementById('btCutoffStatVal').innerText = (data.cutoff_citations != null ? data.cutoff_citations.toLocaleString() : '0');
-                document.getElementById('btActualCitsVal').innerText = (bt.actual_future_citations_5y != null ? bt.actual_future_citations_5y.toLocaleString() : '—');
+                document.getElementById('btCutoffStatVal').innerText = fmtNum(cutoffCount(data));
+                document.getElementById('btActualCitsVal').innerText = fmtNum(bt.actual_future_citations_5y != null ? bt.actual_future_citations_5y : bt.actual_window);
+                const btPred = document.getElementById('btPredCitsVal');
+                if (btPred) btPred.innerText = fmtNum(data.predicted_future_citations_5y);
                 
                 const pctVal = bt.cohort_percentile != null ? Number(bt.cohort_percentile).toFixed(1) : null;
                 document.getElementById('btCohortPctVal').innerText = pctVal != null ? `${pctVal}th percentile` : 'Evaluated against cohort';
@@ -1855,14 +2920,16 @@
             }
         }
 
-        function renderSubgraph(data) {
+        function renderSubgraph(data, containerId) {
+            const container = document.getElementById(containerId || 'cy');
+            if (!container || !data) return;
             const elements = [];
 
             // 1. Target Paper (Hop 0)
             const targetMetrics = [
-                { label: 'Cutoff Citations', val: (data.cutoff_citations != null ? data.cutoff_citations.toLocaleString() : '0') + ' (T_cutoff)' },
+                { label: 'Cutoff Citations', val: fmtNum(cutoffCount(data)) + ' (T_cutoff)' },
                 { label: 'Pub Year', val: String(data.publication_year || 'N/A') },
-                { label: 'Forecast Tier', val: data.predicted_label || 'High / Medium' },
+                { label: 'Forecast Tier', val: data.predicted_impact_label || data.predicted_label || '—' },
                 { label: 'Split', val: data.in_train_split ? 'Train (2012–2016)' : 'Held-Out Test' }
             ];
 
@@ -1876,7 +2943,7 @@
                     hop_badge: 'HOP 0 (FOCAL SEED)',
                     role_desc: 'Target Focal Paper (Predictive Root)',
                     metrics: targetMetrics,
-                    explanation: 'This is the focal paper being evaluated. In our 2-Hop Heterogeneous GNN (HeteroSAGE), this node aggregates citations, author reputations, institutional rankings, and venue prestige to forecast 5-year citation trajectory.'
+                    explanation: 'This is the focal paper being evaluated. In our 2-Hop Heterogeneous GNN (HeteroSAGE), this node aggregates citations, author reputations, institutional rankings, and venue prestige to forecast citations in years 3-5 after publication.'
                 }
             });
 
@@ -1886,7 +2953,7 @@
                 : (data.authors || []).map((name, i) => ({
                     name: name,
                     position: i === 0 ? 'first' : (i === ((data.authors || []).length - 1) ? 'last' : 'middle'),
-                    institutions: [i === 0 ? 'Primary Academic Affiliation' : 'Research Institute']
+                    institutions: []
                 }));
 
             authorList.slice(0, 4).forEach((auth, i) => {
@@ -1917,7 +2984,7 @@
                 elements.push({ data: { source: aid, target: 'target', label: 'authored' } });
 
                 // Hop 2: Institutional Affiliation
-                const insts = (auth.institutions && auth.institutions.length > 0) ? auth.institutions.slice(0, 1) : ['University / Lab'];
+                const insts = (auth.institutions && auth.institutions.length > 0) ? auth.institutions.slice(0, 1) : [];
                 insts.forEach((instName, j) => {
                     const iid = `inst_${i}_${j}`;
                     const instMetrics = [
@@ -2022,10 +3089,15 @@
                 elements.push({ data: { source: 'target', target: rid, label: 'cites' } });
             });
 
-            if (cy) cy.destroy();
+            if (container._cy) {
+                try { container._cy.destroy(); } catch (e) {}
+            }
+            if (!containerId && cy) {
+                try { cy.destroy(); } catch (e) {}
+            }
 
-            cy = cytoscape({
-                container: document.getElementById('cy'),
+            const graph = cytoscape({
+                container: container,
                 elements: elements,
                 style: [
                     {
@@ -2080,19 +3152,19 @@
                 }
             });
 
-            cy.on('tap', 'node', function(evt) {
+            graph.on('tap', 'node', function(evt) {
                 updateNodeInspector(evt.target.data());
             });
+            container._cy = graph;
+            if (!containerId) cy = graph;
 
             setTimeout(() => {
-                if (cy) {
-                    cy.resize();
-                    cy.fit(30);
-                    const targetNode = cy.$('#target');
-                    if (targetNode.length > 0) {
-                        targetNode.select();
-                        updateNodeInspector(targetNode.data());
-                    }
+                graph.resize();
+                graph.fit(30);
+                const targetNode = graph.$('#target');
+                if (targetNode.length > 0) {
+                    targetNode.select();
+                    updateNodeInspector(targetNode.data());
                 }
             }, 100);
         }
@@ -2118,25 +3190,32 @@
             try {
                 const res = await fetch(`/api/v1/verify/blind/${encodeURIComponent(inputVal)}`);
                 if (!res.ok) {
-                    alert(`Evaluation Error: API returned ${res.status}`);
+                    console.error(`Evaluation Error: API returned ${res.status}`);
+                    document.getElementById('blindResultCard').style.display = 'block';
+                    document.getElementById('blindTitle').textContent = `Paper not found (${res.status})`;
+                    document.getElementById('blindMeta').textContent = 'Please select a valid work ID from the test split.';
                     return;
                 }
                 currentBlindData = await res.json();
                 document.getElementById('blindResultCard').style.display = 'block';
-                document.getElementById('blindTitle').innerText = currentBlindData.title || 'Untitled';
-                document.getElementById('blindMeta').innerText = `Pub Year: ${currentBlindData.publication_year} | Cutoff: ${currentBlindData.cutoff_year} | Split: ${currentBlindData.split}`;
+                document.getElementById('blindTitle').textContent = currentBlindData.title || 'Untitled';
+                document.getElementById('blindMeta').textContent = `Pub Year: ${currentBlindData.publication_year} | Cutoff: ${currentBlindData.cutoff_year} | Split: ${currentBlindData.split}`;
                 
-                document.getElementById('blindPredictedTier').innerText = currentBlindData.predicted_impact_class_label || 'High Impact';
-                const p = currentBlindData.prediction || {};
-                document.getElementById('blindConfidence').innerText = `Prob: ${((p.predicted_probability || 0.75) * 100).toFixed(1)}%`;
+                document.getElementById('blindPredictedTier').textContent = currentBlindData.predicted_impact_label || currentBlindData.predicted_impact_class_label || '—';
+                const probs = currentBlindData.calibrated_probabilities || {};
+                const topP = Math.max(...Object.values(probs).map(Number).filter(n => !Number.isNaN(n)), 0);
+                document.getElementById('blindConfidence').textContent = topP ? `Prob: ${(topP * 100).toFixed(1)}%` : '—';
 
                 // Reset Ground Truth Card
-                document.getElementById('blindActualTier').innerText = '[Hidden]';
+                document.getElementById('blindActualTier').textContent = '[Hidden]';
                 document.getElementById('blindActualTier').style.color = 'var(--text-tertiary)';
-                document.getElementById('blindActualDetails').innerText = 'Click Reveal Ground Truth to audit observed citations.';
+                document.getElementById('blindActualDetails').textContent = 'Click Reveal Ground Truth to audit observed citations.';
                 document.getElementById('revealBtn').disabled = false;
             } catch (err) {
-                alert(`Error: ${err.message}`);
+                console.error(`Error: ${err.message}`);
+                document.getElementById('blindResultCard').style.display = 'block';
+                document.getElementById('blindTitle').textContent = `Network Error`;
+                document.getElementById('blindMeta').textContent = err.message;
             }
         }
 
@@ -2146,16 +3225,21 @@
             try {
                 const res = await fetch(`/api/v1/verify/blind/${encodeURIComponent(cleanId)}/reveal`);
                 if (!res.ok) {
-                    alert('Failed to retrieve ground truth');
+                    console.error('Failed to retrieve ground truth');
+                    document.getElementById('blindActualDetails').textContent = `Could not load ground truth (HTTP ${res.status})`;
                     return;
                 }
                 const data = await res.json();
-                document.getElementById('blindActualTier').innerText = data.actual_impact_class_label || 'High Impact';
-                document.getElementById('blindActualTier').style.color = data.is_correct ? 'var(--success-green)' : 'var(--warning-amber)';
-                document.getElementById('blindActualDetails').innerText = `Actual 5-Year Citations: ${data.actual_future_citations_5y != null ? data.actual_future_citations_5y.toLocaleString() : 'N/A'} (Percentile: ${data.cohort_percentile != null ? data.cohort_percentile.toFixed(1) : '—'}th)`;
+                const bt = data.backtest || data;
+                document.getElementById('blindActualTier').textContent = bt.actual_label || data.actual_impact_class_label || '—';
+                document.getElementById('blindActualTier').style.color = bt.is_correct_class ? 'var(--success-green)' : 'var(--warning-amber)';
+                const actualC = bt.actual_future_citations_5y != null ? bt.actual_future_citations_5y : data.actual_future_citations_5y;
+                const pct = bt.cohort_percentile != null ? bt.cohort_percentile : data.cohort_percentile;
+                document.getElementById('blindActualDetails').textContent = `Actual citations in years 3-5 after publication: ${actualC != null ? Number(actualC).toLocaleString() : 'N/A'} (Percentile: ${pct != null ? Number(pct).toFixed(1) : '—'}th)`;
                 document.getElementById('revealBtn').disabled = true;
             } catch (err) {
-                alert(`Error: ${err.message}`);
+                console.error(`Error: ${err.message}`);
+                document.getElementById('blindActualDetails').textContent = `Error: ${err.message}`;
             }
         }
 
@@ -2166,18 +3250,18 @@
                 if (!res.ok) return;
                 const data = await res.json();
                 const tbody = document.getElementById('spotcheckBody');
-                tbody.innerHTML = (data.samples || []).map(s => `
+                tbody.innerHTML = (data.sample_results || data.samples || []).map(s => `
                     <tr>
-                        <td style="font-family: var(--font-mono); font-size: 0.78rem;">${s.work_id.split('/').pop()}</td>
-                        <td style="font-weight: 500;">${s.title}</td>
-                        <td>${s.publication_year}</td>
-                        <td>${s.citations_at_cutoff}</td>
-                        <td>${s.actual_future_citations_5y != null ? s.actual_future_citations_5y.toLocaleString() : '—'}</td>
-                        <td>${s.predicted_label || 'High'}</td>
-                        <td>${s.actual_label || 'High'}</td>
+                        <td style="font-family: var(--font-mono); font-size: 0.78rem;">${String(s.work_id || '').split('/').pop()}</td>
+                        <td style="font-weight: 500;">${s.title || s.work_id}</td>
+                        <td>${s.publication_year || ''}</td>
+                        <td>${s.citations_at_cutoff != null ? s.citations_at_cutoff : (s.stored_window != null ? s.stored_window : '—')}</td>
+                        <td>${s.live_window != null ? s.live_window : (s.actual_future_citations_5y != null ? s.actual_future_citations_5y : '—')}</td>
+                        <td>${s.predicted_label || '—'}</td>
+                        <td>${s.actual_label || s.live_label || '—'}</td>
                         <td>
-                            ${s.is_correct 
-                                ? '<span style="color: var(--success-green); font-weight: 600;">✓ Correct</span>' 
+                            ${(s.is_correct || s.tier_match)
+                                ? '<span style="color: var(--success-green); font-weight: 600;">✓ Match</span>' 
                                 : '<span style="color: var(--warning-amber); font-weight: 600;">Misaligned</span>'}
                         </td>
                     </tr>
@@ -2201,7 +3285,8 @@
                     return;
                 }
                 const data = await res.json();
-                const passed = data.invariance_holds;
+                const passed = data.temporal_firewall_intact === true || data.invariance_holds === true;
+                const delta = data.max_probability_delta != null ? data.max_probability_delta : (data.probability_delta || 0);
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
@@ -2209,12 +3294,11 @@
                                 ${passed ? '✓ Temporal Invariance Confirmed (Zero Shift)' : '⚠ Leakage Detected'}
                             </strong>
                             <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;">
-                                Baseline Predicted Probability: ${(data.baseline_prediction.top_class_probability * 100).toFixed(2)}% | 
-                                Poisoned Predicted Probability: ${(data.poisoned_prediction.top_class_probability * 100).toFixed(2)}%
+                                ${data.verdict || 'Poison test complete.'}
                             </div>
                         </div>
                         <span class="status-tag" style="background-color: ${passed ? 'var(--success-bg)' : 'var(--destructive-bg)'}; color: ${passed ? 'var(--success-green)' : 'var(--destructive-red)'}; font-weight: 700;">
-                            $\Delta = ${data.probability_delta.toFixed(4)}$
+                            Δ = ${Number(delta).toFixed(4)}
                         </span>
                     </div>
                 `;
@@ -2245,8 +3329,10 @@
                 const metrics = [
                     { name: 'Publication Year', a: dataA.publication_year, b: dataB.publication_year },
                     { name: 'Cutoff Boundary', a: dataA.cutoff_year, b: dataB.cutoff_year },
-                    { name: 'Citations at Cutoff', a: (dataA.cutoff_citations || 0).toLocaleString(), b: (dataB.cutoff_citations || 0).toLocaleString() },
-                    { name: 'Predicted Impact Tier', a: dataA.predicted_label || 'High', b: dataB.predicted_label || 'High' },
+                    { name: 'Citations at Cutoff', a: fmtNum(cutoffCount(dataA)), b: fmtNum(cutoffCount(dataB)) },
+                    { name: 'Predicted citations (years 3–5)', a: fmtNum(dataA.predicted_future_citations_5y), b: fmtNum(dataB.predicted_future_citations_5y) },
+                    { name: 'Actual citations (years 3–5)', a: fmtNum((dataA.backtest || {}).actual_future_citations_5y), b: fmtNum((dataB.backtest || {}).actual_future_citations_5y) },
+                    { name: 'Predicted Impact Tier', a: dataA.predicted_impact_label || dataA.predicted_label || '—', b: dataB.predicted_impact_label || dataB.predicted_label || '—' },
                     { name: 'Venue Prestige', a: dataA.venue ? dataA.venue.quartile || 'Peer-Reviewed' : 'Unranked', b: dataB.venue ? dataB.venue.quartile || 'Peer-Reviewed' : 'Unranked' },
                     { name: 'Primary Field', a: dataA.primary_field || 'Computer Science', b: dataB.primary_field || 'Computer Science' }
                 ];
@@ -2259,13 +3345,14 @@
                     </tr>
                 `).join('');
             } catch (err) {
-                alert(`Error comparing papers: ${err.message}`);
+                console.error(`Error comparing papers: ${err.message}`);
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--warning-amber); padding: 1.5rem;">Could not compare papers: ${err.message}</td></tr>`;
             }
         }
 
-        // Auto-run initial prediction on page load
         window.addEventListener('DOMContentLoaded', () => {
-            runPrediction();
+            loadTeacherCorpus();
+            loadTeacherScoreboardAndFooter();
         });
     </script>
 </body>

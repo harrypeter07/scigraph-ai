@@ -81,7 +81,10 @@ class ScientometricAccessService:
     ) -> AccessEconomicsResult:
         oa = open_access_obj or {}
         is_oa = bool(oa.get("is_oa", False))
+        allowed_oa = {"gold", "green", "hybrid", "bronze", "closed", "diamond"}
         oa_status = (oa.get("oa_status") or "closed").lower()
+        if oa_status not in allowed_oa:
+            oa_status = "closed" if not is_oa else "green"
         oa_url = oa.get("oa_url")
 
         # Extract authentic APC if available

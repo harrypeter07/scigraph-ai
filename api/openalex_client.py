@@ -274,13 +274,17 @@ class OpenAlexClient:
         clean_id = self.clean_identifier(identifier)
         cache_key = f"work_{clean_id}"
 
-        # Check pre-ingested local corpus first (authoritative parquet tables)
         local_work = self._lookup_local_corpus(clean_id)
-        if local_work:
+        if local_work and local_work.get("counts_by_year"):
             return local_work
 
         cached = self._read_cache(cache_key)
-        if cached:
+        if cached and cached.get("counts_by_year"):
+            if local_work:
+                local_work["counts_by_year"] = cached["counts_by_year"]
+                if not local_work.get("authorships") and cached.get("authorships"):
+                    local_work["authorships"] = cached["authorships"]
+                return local_work
             return cached
 
         url = f"{self.base_url}/works/{clean_id}"
@@ -290,9 +294,13 @@ class OpenAlexClient:
                 response = await client.get(url, headers=self.headers)
             except (httpx.ConnectError, httpx.TimeoutException) as exc:
                 logger.error(f"OpenAlex connection error fetching {clean_id}: {exc}")
+                if local_work:
+                    return local_work
                 raise OpenAlexUpstreamError(f"Failed to connect to OpenAlex: {exc}")
 
         if response.status_code == 404:
+            if local_work:
+                return local_work
             raise OpenAlexNotFoundError(f"Work '{clean_id}' was not found in OpenAlex.")
         elif response.status_code == 429:
             raise OpenAlexRateLimitError("OpenAlex upstream rate limit reached (HTTP 429).")
@@ -303,6 +311,14 @@ class OpenAlexClient:
 
         data = response.json()
         self._write_cache(cache_key, data)
+        if local_work:
+            if data.get("counts_by_year"):
+                local_work["counts_by_year"] = data["counts_by_year"]
+            if data.get("authorships") and not local_work.get("authorships"):
+                local_work["authorships"] = data["authorships"]
+            if data.get("cited_by_count") is not None:
+                local_work["cited_by_count"] = data["cited_by_count"]
+            return local_work
         return data
 
     async def search_works(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:

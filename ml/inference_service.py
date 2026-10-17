@@ -96,8 +96,11 @@ class ModelInferenceService:
                 gnn.eval()
                 self.model = gnn
                 logger.info("Successfully loaded AuthenticHeteroSAGE checkpoint.")
+        except ImportError:
+            logger.info("Lightweight serve mode: PyTorch is not installed; serving calibrated M1 logistic regression only.")
+            self.model = None
         except Exception as exc:
-            logger.info(f"HeteroSAGE not loaded (running lightweight served mode): {exc}")
+            logger.info("Optional HeteroSAGE checkpoint skipped: %s", exc)
             self.model = None
 
         # 2. Load Model Card

@@ -15,12 +15,17 @@ from pathlib import Path
 # Suppress PyTorch internal JIT deprecation warnings emitted by torch_geometric
 warnings.filterwarnings("ignore", category=FutureWarning, message=".*torch.jit.script.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch.jit")
+try:
+    from sklearn.exceptions import InconsistentVersionWarning
+    warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
+except Exception:
+    pass
 
 import hashlib
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 
 from api.config import settings
 from ml.inference_service import inference_service
@@ -128,6 +133,17 @@ def get_numbers_registry():
     """Returns the unified quantitative numbers registry from docs/NUMBERS.json."""
     from scripts.make_numbers import collect_numbers
     return collect_numbers()
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'
+        '<rect width="32" height="32" rx="6" fill="#246B50"/>'
+        '<text x="16" y="22" text-anchor="middle" fill="#fff" font-size="16" font-family="Arial">S</text>'
+        "</svg>"
+    )
+    return Response(content=svg, media_type="image/svg+xml")
 
 
 @app.get("/health")

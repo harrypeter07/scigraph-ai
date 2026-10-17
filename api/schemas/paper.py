@@ -86,6 +86,7 @@ class BacktestComparison(BaseModel):
     absolute_error_log_citations: Optional[float] = None
     warning: Optional[str] = None
     threshold_provenance: Optional[Dict[str, Any]] = None
+    cohort_percentile: Optional[float] = None
     provenance: str = "openalex | model | computed"
     class_provenance: Optional[str] = None
 

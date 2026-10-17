@@ -484,6 +484,211 @@
         .outcome-badge.medium { background-color: var(--accent-blue-subtle); color: var(--accent-blue); border: 1px solid rgba(29, 78, 216, 0.25); }
         .outcome-badge.low { background-color: var(--bg-surface-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
 
+        /* Preset Evaluation Selector Toolbar */
+        .preset-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.85rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .preset-select-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .preset-dropdown {
+            flex: 1;
+            padding: 0.45rem 0.65rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: var(--font-body);
+            background-color: #FFFFFF;
+            color: var(--text-ink);
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .preset-dropdown:focus {
+            border-color: var(--accent-forest);
+            box-shadow: 0 0 0 2px var(--accent-forest-subtle);
+        }
+
+        .tier-quick-buttons {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .tier-btn {
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 0.35rem 0.65rem;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.12s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .tier-btn.high {
+            background-color: var(--success-bg);
+            color: var(--success-green);
+            border-color: rgba(21, 128, 61, 0.25);
+        }
+        .tier-btn.high:hover {
+            background-color: rgba(21, 128, 61, 0.18);
+        }
+
+        .tier-btn.medium {
+            background-color: var(--accent-blue-subtle);
+            color: var(--accent-blue);
+            border-color: rgba(29, 78, 216, 0.25);
+        }
+        .tier-btn.medium:hover {
+            background-color: rgba(29, 78, 216, 0.18);
+        }
+
+        .tier-btn.low {
+            background-color: #F1F3F2;
+            color: var(--text-ink);
+            border-color: var(--border-subtle);
+        }
+        .tier-btn.low:hover {
+            background-color: #E5E7EB;
+        }
+
+        /* Dual Comparison Hero: Prediction vs Observed Ground Truth */
+        .dual-eval-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        @media (max-width: 900px) {
+            .dual-eval-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .eval-panel {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .eval-panel.forecast-side {
+            border-left: 3px solid var(--accent-forest);
+        }
+
+        .eval-panel.truth-side {
+            border-left: 3px solid var(--accent-blue);
+            background-color: #FAFAF8;
+        }
+
+        .eval-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .eval-badge-label {
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .eval-badge-label.forecast { color: var(--accent-forest); }
+        .eval-badge-label.truth { color: var(--accent-blue); }
+
+        .provenance-pill {
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            background-color: var(--bg-surface-subtle);
+            padding: 0.15rem 0.45rem;
+            border-radius: 3px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .verdict-match-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 0.25rem 0.55rem;
+            border-radius: 4px;
+            margin-top: 0.4rem;
+        }
+        .verdict-match-tag.match {
+            background-color: var(--success-bg);
+            color: var(--success-green);
+            border: 1px solid rgba(21, 128, 61, 0.3);
+        }
+        .verdict-match-tag.misaligned {
+            background-color: #FEF3C7;
+            color: #92400E;
+            border: 1px solid rgba(146, 64, 14, 0.3);
+        }
+
+        .truth-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 0.85rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .truth-stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            margin-bottom: 0.15rem;
+        }
+
+        .truth-stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-ink);
+        }
+
+        .truth-stat-value.highlight {
+            color: var(--accent-forest);
+        }
+
+        /* Scientometrics & Economics Inset Panel */
+        .scientometrics-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.85rem;
+            background-color: #FAFAF8;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 0.9rem 1.15rem;
+            margin-top: 1rem;
+        }
+
         /* Probabilities and multi-task grid */
         .prob-bar-container {
             margin-top: 1rem;
@@ -829,67 +1034,155 @@
                     </p>
                 </div>
 
-                <!-- Input Workspace Panel -->
+                <!-- Input Workspace Panel with Impact Tier Preset Dropdown -->
                 <div class="editorial-panel">
                     <label for="paperInput" style="font-size: 0.84rem; font-weight: 600; color: var(--text-ink); margin-bottom: 0.4rem; display: block;">
                         Paper Identifier (OpenAlex Work ID, DOI, or Canonical Title)
                     </label>
                     <div class="search-bar-wrap">
-                        <input type="text" id="paperInput" class="search-input" placeholder="e.g. W2752782242, 10.1109/cvpr.2018.00745, or Attention Is All You Need" value="W2752782242">
+                        <input type="text" id="paperInput" class="search-input" placeholder="e.g. W2752782242, 10.1109/cvpr.2018.00745, or Squeeze-and-Excitation Networks" value="W2752782242">
                         <button class="btn-primary" onclick="runPrediction()">Generate Forecast</button>
                     </div>
 
-                    <div class="quick-samples">
-                        <span>Verified Held-Out Test Papers (2018–2020):</span>
-                        <span class="sample-pill" onclick="loadSample('W2752782242')">Squeeze-and-Excitation (W2752782242)</span>
-                        <span class="sample-pill" onclick="loadSample('W2194775991')">AlexNet (W2194775991)</span>
-                        <span class="sample-pill" onclick="loadSample('W2147415463')">ResNet (W2147415463)</span>
+                    <div class="preset-toolbar">
+                        <div class="preset-select-wrap">
+                            <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap;">Preset Held-Out Evaluation Cases:</span>
+                            <select id="presetPaperSelect" class="preset-dropdown" onchange="onPresetSelect(this.value)">
+                                <option value="W2752782242" selected>🟢 High Impact (≥90th) — W2752782242: Squeeze-and-Excitation Networks (CVPR 2018)</option>
+                                <option value="W2603777577">🔵 Medium Impact (50–90th) — W2603777577: Arbitrary Style Transfer (AdaIN) (ICCV)</option>
+                                <option value="W2580662672">⚪ Low Impact (&lt;50th) — W2580662672: Gate-Variants of GRU Neural Networks</option>
+                                <option value="W2619383789">🔵 Medium Impact (Survey) — W2619383789: Multimodal Machine Learning (TPAMI)</option>
+                                <option value="W1991691398">⚪ Low Impact (Historical Re-issue) — W1991691398: Psychology of Human-Computer Interaction</option>
+                            </select>
+                        </div>
+                        <div class="tier-quick-buttons">
+                            <button type="button" class="tier-btn high" onclick="loadSample('W2752782242')">🟢 Test High (≥90th)</button>
+                            <button type="button" class="tier-btn medium" onclick="loadSample('W2603777577')">🔵 Test Medium (50–90th)</button>
+                            <button type="button" class="tier-btn low" onclick="loadSample('W2580662672')">⚪ Test Low (&lt;50th)</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Live Results Container (Dynamically Populated) -->
                 <div id="predictionResultsArea" style="display: none;">
                     
-                    <!-- Paper Lead Card & Forecast Verdict -->
-                    <div class="editorial-panel result-hero">
-                        <div>
-                            <div class="metadata-tags-row">
-                                <span class="meta-tag">Pub Year: <strong id="resPubYear">2018</strong></span>
-                                <span class="meta-tag">Cutoff Boundary: <strong id="resCutoffYear">2020</strong></span>
-                                <span class="meta-tag">Citations at $T_{\text{cutoff}}$: <strong id="resCutoffCits">84</strong></span>
-                                <span class="meta-tag">Split: <strong id="resSplitStatus">Held-Out Blind Test</strong></span>
+                    <!-- Paper Lead Card -->
+                    <div class="editorial-panel" style="margin-bottom: 1.25rem;">
+                        <div class="metadata-tags-row">
+                            <span class="meta-tag">Pub Year: <strong id="resPubYear">2018</strong></span>
+                            <span class="meta-tag">Cutoff Boundary: <strong id="resCutoffYear">2020</strong> ($T_{\text{cutoff}}$)</span>
+                            <span class="meta-tag">Cutoff Citations: <strong id="resCutoffCits">3,107</strong></span>
+                            <span class="meta-tag">Split: <strong id="resSplitStatus">Held-Out Blind Test</strong></span>
+                            <span class="meta-tag"><a id="resOpenAlexLink" href="https://openalex.org/W2752782242" target="_blank" style="color: var(--accent-forest); text-decoration: none; font-weight: 600;">OpenAlex Verified Record ↗</a></span>
+                        </div>
+                        <h2 class="paper-title-lead" id="resPaperTitle">Squeeze-and-Excitation Networks</h2>
+                        <div class="paper-authors-line" id="resAuthorsLine">Jie Hu, Li Shen, Gang Sun</div>
+                        <div style="font-size: 0.82rem; color: var(--text-secondary);" id="resVenueLine">
+                            Published in <strong>IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</strong> (CORE A*)
+                        </div>
+
+                        <!-- Scientometrics & Access Economics Strip (Clean without zero placeholders) -->
+                        <div class="scientometrics-bar" id="scientometricsBar">
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Publication Venue Prestige</div>
+                                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-ink);" id="econVenuePrestige">CORE A* / SCImago Q1</div>
                             </div>
-                            <h2 class="paper-title-lead" id="resPaperTitle">Squeeze-and-Excitation Networks</h2>
-                            <div class="paper-authors-line" id="resAuthorsLine">Jie Hu, Li Shen, Gang Sun</div>
-                            <div style="font-size: 0.82rem; color: var(--text-secondary);" id="resVenueLine">
-                                Published in <strong>IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</strong> (CORE A*)
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Publishing Access Model</div>
+                                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-ink);" id="econModelVal">Traditional Subscription</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Author Processing Charge (APC)</div>
+                                <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-ink);" id="econApcVal">Subscription Access (No author APC required)</div>
+                            </div>
+                            <div id="econAdvCol" style="display: none;">
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Empirical OA Advantage</div>
+                                <div style="font-size: 0.88rem; font-weight: 700; color: var(--accent-forest);" id="econAdvVal">+23.6% crude / +10.8% adj.</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">CD Disruption Index</div>
+                                <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-ink);" id="econDisruptionVal">-0.039 (Consolidating milestone)</div>
                             </div>
                         </div>
 
-                        <div class="outcome-card">
-                            <div>
-                                <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-mono); color: var(--text-secondary);">Predicted 5-Year Impact Tier</div>
-                                <div class="outcome-badge high" id="resImpactBadge">High Impact (≥90th)</div>
+                        <!-- SIDE-BY-SIDE DUAL EVALUATION CARD: BLIND PREDICTION vs OBSERVED GROUND TRUTH -->
+                        <div class="dual-eval-grid">
+                            <!-- Column 1: Blind Model Forecast -->
+                            <div class="eval-panel forecast-side">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label forecast">Model Forecast ($T_{\text{cutoff}}$ Blind Inference)</span>
+                                        <span class="provenance-pill">M1_LogisticRegression + GNN</span>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.2rem;">Predicted 5-Year Impact Tier</div>
+                                    <div class="outcome-badge" id="resImpactBadge">High Impact (≥90th)</div>
+                                </div>
+
+                                <div class="prob-bar-container">
+                                    <div class="prob-bar-row">
+                                        <span>High Tier (≥90th Percentile)</span>
+                                        <strong id="probHighVal">96.2%</strong>
+                                    </div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probHighBar" style="width: 96.2%; background-color: var(--accent-forest);"></div></div>
+
+                                    <div class="prob-bar-row">
+                                        <span>Medium Tier (50–90th Percentile)</span>
+                                        <strong id="probMedVal">3.5%</strong>
+                                    </div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probMedBar" style="width: 3.5%; background-color: var(--accent-blue);"></div></div>
+
+                                    <div class="prob-bar-row">
+                                        <span>Low Tier (&lt;50th Percentile)</span>
+                                        <strong id="probLowVal">0.3%</strong>
+                                    </div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probLowBar" style="width: 0.3%; background-color: var(--text-tertiary);"></div></div>
+                                </div>
+
+                                <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.35;">
+                                    Inference strictly isolated to citation graph & metadata as of $T_{\text{cutoff}} = \text{pub\_year} + 2$. Zero future data leakage.
+                                </div>
                             </div>
 
-                            <div class="prob-bar-container">
-                                <div class="prob-bar-row">
-                                    <span>High (≥90th)</span>
-                                    <strong id="probHighVal">76.4%</strong>
+                            <!-- Column 2: Ground-Truth Empirical Verification -->
+                            <div class="eval-panel truth-side" id="sideBySideTruthPanel">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label truth">Observed Ground Truth (Held-Out)</span>
+                                        <span class="provenance-pill" id="btProvenanceTag">OpenAlex Corpus (works.parquet)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                                        <div>
+                                            <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.2rem;">Actual Historical Impact Tier</div>
+                                            <div class="outcome-badge" id="btActualBadge" style="margin-top: 0;">High Impact (≥90th)</div>
+                                        </div>
+                                        <div id="btMatchBadge" class="verdict-match-tag match">
+                                            ✓ Prediction Verified Correct
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="prob-bar-bg"><div class="prob-bar-fill" id="probHighBar" style="width: 76.4%;"></div></div>
 
-                                <div class="prob-bar-row">
-                                    <span>Medium (50–90th)</span>
-                                    <strong id="probMedVal">18.2%</strong>
+                                <div class="truth-stat-grid">
+                                    <div>
+                                        <div class="truth-stat-label">Citations at Cutoff ($T_{\text{cutoff}}$)</div>
+                                        <div class="truth-stat-value" id="btCutoffStatVal">3,107</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Observed Citations in 5Y Window</div>
+                                        <div class="truth-stat-value highlight" id="btActualCitsVal">11,633</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Field Cohort Percentile</div>
+                                        <div class="truth-stat-value" id="btCohortPctVal">99.8th percentile</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Observation Horizon</div>
+                                        <div class="truth-stat-value" id="btWindowRangeVal">Pub+3 to Pub+5 (Closed)</div>
+                                    </div>
                                 </div>
-                                <div class="prob-bar-bg"><div class="prob-bar-fill" id="probMedBar" style="width: 18.2%; background-color: var(--accent-blue);"></div></div>
 
-                                <div class="prob-bar-row">
-                                    <span>Low (&lt;50th)</span>
-                                    <strong id="probLowVal">5.4%</strong>
+                                <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.35;">
+                                    Empirically verified against actual held-out citation counts across 5-year post-publication observation window.
                                 </div>
-                                <div class="prob-bar-bg"><div class="prob-bar-fill" id="probLowBar" style="width: 5.4%; background-color: var(--text-tertiary);"></div></div>
                             </div>
                         </div>
                     </div>
@@ -934,27 +1227,6 @@
                             <div class="gnn-explainer-banner">
                                 <strong style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--accent-forest); display: block; margin-bottom: 2px;">Scientometric Significance</strong>
                                 <span id="inspDetail">Click any node in the 2-hop graph to inspect its numerical features and relational contribution.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ground Truth Backtest Audit (If Evaluation Window Closed) -->
-                    <div id="backtestAuditCard" class="editorial-panel inset" style="display: none;">
-                        <h3 class="section-title">Held-Out Historical Backtest Evaluation</h3>
-                        <p class="section-desc">Comparing the predicted tier against actual citations accumulated over the 5-year observation window.</p>
-                        
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.75rem;">
-                            <div>
-                                <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase;">Actual Window Citations</div>
-                                <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-ink);" id="btActualCits">—</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase;">Empirical Cohort Percentile</div>
-                                <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-ink);" id="btCohortPct">—</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase;">Prediction Accuracy</div>
-                                <div style="font-size: 1.15rem; font-weight: 700;" id="btVerdict">—</div>
                             </div>
                         </div>
                     </div>
@@ -1371,6 +1643,21 @@
 
         function loadSample(id) {
             document.getElementById('paperInput').value = id;
+            const presetSel = document.getElementById('presetPaperSelect');
+            if (presetSel) {
+                for (let i = 0; i < presetSel.options.length; i++) {
+                    if (presetSel.options[i].value === id) {
+                        presetSel.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+            runPrediction();
+        }
+
+        function onPresetSelect(id) {
+            if (!id) return;
+            document.getElementById('paperInput').value = id;
             runPrediction();
         }
 
@@ -1397,24 +1684,74 @@
             document.getElementById('predictionEmptyState').style.display = 'none';
             document.getElementById('predictionResultsArea').style.display = 'block';
 
-            // Populate Metadata
+            // Populate Lead Metadata
             document.getElementById('resPaperTitle').innerText = data.title || 'Untitled';
             document.getElementById('resPubYear').innerText = data.publication_year || '—';
             document.getElementById('resCutoffYear').innerText = data.cutoff_year || (data.publication_year + 2);
             document.getElementById('resCutoffCits').innerText = data.cutoff_citations != null ? data.cutoff_citations.toLocaleString() : '0';
-            document.getElementById('resSplitStatus').innerText = data.in_train_split ? 'Training Split (2012–2016)' : 'Held-Out Test Split';
+            document.getElementById('resSplitStatus').innerText = data.in_train_split ? 'Training Split (2012–2016)' : 'Held-Out Blind Test';
+
+            // OpenAlex Link
+            const cleanId = (data.paper_id || '').split('/').pop();
+            const linkEl = document.getElementById('resOpenAlexLink');
+            if (linkEl && cleanId) {
+                linkEl.href = `https://openalex.org/${cleanId}`;
+                linkEl.innerText = `OpenAlex Verified Record (${cleanId}) ↗`;
+            }
 
             // Authors Line
             const authorsList = data.authors && data.authors.length > 0 ? data.authors.join(', ') : 'Authors cataloged in OpenAlex';
             document.getElementById('resAuthorsLine').innerText = authorsList;
 
-            // Venue Line
+            // Venue Line & Prestige
+            let venueText = 'Peer-Reviewed Literature';
+            let venuePrestige = 'Standard Peer-Reviewed';
             if (data.venue && data.venue.venue_name) {
                 const quartile = data.venue.quartile || data.venue.core_rank || 'Peer-Reviewed';
-                document.getElementById('resVenueLine').innerHTML = `Published in <strong>${data.venue.venue_name}</strong> (${quartile})`;
+                venueText = `Published in <strong>${data.venue.venue_name}</strong> (${quartile})`;
+                venuePrestige = `${data.venue.venue_name.slice(0, 36)} (${quartile})`;
+            }
+            document.getElementById('resVenueLine').innerHTML = venueText;
+            document.getElementById('econVenuePrestige').innerText = venuePrestige;
+
+            // Scientometrics & Access Economics Strip (Clean without zero placeholders)
+            const econ = data.access_economics || {};
+            if (econ.is_oa) {
+                document.getElementById('econModelVal').innerHTML = `<span style="color: var(--success-green); font-weight: 700;">Open Access (${(econ.oa_status || 'OA').toUpperCase()})</span>`;
+                if (econ.apc_paid_usd != null && econ.apc_paid_usd > 0) {
+                    document.getElementById('econApcVal').innerText = `$${Math.round(econ.apc_paid_usd).toLocaleString()} USD (Author Paid)`;
+                } else if (econ.apc_list_usd != null && econ.apc_list_usd > 0) {
+                    document.getElementById('econApcVal').innerText = `$${Math.round(econ.apc_list_usd).toLocaleString()} USD (List Price)`;
+                } else {
+                    document.getElementById('econApcVal').innerText = `Institutional / Diamond OA (No APC required)`;
+                }
+
+                // Show OA Advantage ONLY if paper is Open Access and advantage is positive
+                const advPct = econ.empirical_cohort_oa_advantage_pct;
+                if (advPct != null && advPct > 0) {
+                    document.getElementById('econAdvCol').style.display = 'block';
+                    document.getElementById('econAdvVal').innerText = `+${advPct.toFixed(1)}% citation volume`;
+                } else {
+                    document.getElementById('econAdvCol').style.display = 'none';
+                }
+            } else {
+                document.getElementById('econModelVal').innerHTML = `<span style="color: var(--text-ink); font-weight: 600;">Traditional Subscription (Paywalled)</span>`;
+                document.getElementById('econApcVal').innerText = `Subscription Access (No author APC required)`;
+                // Suppress OA advantage row completely for closed subscription papers
+                document.getElementById('econAdvCol').style.display = 'none';
             }
 
-            // Impact Badge
+            // CD Disruption Index
+            const lineage = data.lineage || {};
+            if (lineage.cd_disruption_index != null) {
+                const cd = Number(lineage.cd_disruption_index);
+                const cdDesc = cd < -0.01 ? 'Consolidating milestone' : (cd > 0.01 ? 'Disruptive innovation' : 'Neutral lineage');
+                document.getElementById('econDisruptionVal').innerText = `${cd.toFixed(3)} (${cdDesc})`;
+            } else {
+                document.getElementById('econDisruptionVal').innerText = `Cataloged Lineage`;
+            }
+
+            // Column 1: Model Prediction & Calibrated Probabilities
             const badgeEl = document.getElementById('resImpactBadge');
             const predCls = data.predicted_impact_class;
             badgeEl.className = 'outcome-badge';
@@ -1429,8 +1766,7 @@
                 badgeEl.innerText = 'Low Impact (<50th)';
             }
 
-            // Probabilities
-            const probs = data.class_probabilities || {};
+            const probs = data.calibrated_probabilities || data.class_probabilities || {};
             const pHigh = (probs['High (>=90th)'] != null ? probs['High (>=90th)'] * 100 : 33.3).toFixed(1);
             const pMed = (probs['Medium (50-90th)'] != null ? probs['Medium (50-90th)'] * 100 : 33.3).toFixed(1);
             const pLow = (probs['Low (<50th)'] != null ? probs['Low (<50th)'] * 100 : 33.3).toFixed(1);
@@ -1442,22 +1778,46 @@
             document.getElementById('probLowVal').innerText = `${pLow}%`;
             document.getElementById('probLowBar').style.width = `${pLow}%`;
 
-            // Backtest Ground Truth Card
+            // Column 2: Side-by-Side Ground Truth Empirical Verification
             const bt = data.backtest;
-            const btCard = document.getElementById('backtestAuditCard');
+            const truthPanel = document.getElementById('sideBySideTruthPanel');
             if (bt && bt.has_ground_truth) {
-                btCard.style.display = 'block';
-                document.getElementById('btActualCits').innerText = bt.actual_future_citations_5y != null ? bt.actual_future_citations_5y.toLocaleString() : '—';
-                document.getElementById('btCohortPct').innerText = bt.cohort_percentile != null ? `${bt.cohort_percentile.toFixed(1)}th percentile` : '—';
-                
-                const vEl = document.getElementById('btVerdict');
-                if (bt.is_correct_class) {
-                    vEl.innerHTML = '<span style="color: var(--success-green); font-weight: 700;">✓ Correct Class Match</span>';
+                truthPanel.style.display = 'flex';
+                const actualCls = bt.actual_impact_class;
+                const actualBadge = document.getElementById('btActualBadge');
+                actualBadge.className = 'outcome-badge';
+                if (actualCls === 2) {
+                    actualBadge.classList.add('high');
+                    actualBadge.innerText = 'High Impact (≥90th)';
+                } else if (actualCls === 1) {
+                    actualBadge.classList.add('medium');
+                    actualBadge.innerText = 'Medium Impact (50–90th)';
                 } else {
-                    vEl.innerHTML = '<span style="color: var(--warning-amber); font-weight: 700;">Class Misaligned</span>';
+                    actualBadge.classList.add('low');
+                    actualBadge.innerText = 'Low Impact (<50th)';
                 }
+
+                const matchBadge = document.getElementById('btMatchBadge');
+                if (bt.is_correct_class) {
+                    matchBadge.className = 'verdict-match-tag match';
+                    matchBadge.innerHTML = '✓ Prediction Verified Correct';
+                } else {
+                    matchBadge.className = 'verdict-match-tag misaligned';
+                    matchBadge.innerHTML = 'Class Misaligned';
+                }
+
+                document.getElementById('btCutoffStatVal').innerText = (data.cutoff_citations != null ? data.cutoff_citations.toLocaleString() : '0');
+                document.getElementById('btActualCitsVal').innerText = (bt.actual_future_citations_5y != null ? bt.actual_future_citations_5y.toLocaleString() : '—');
+                
+                const pctVal = bt.cohort_percentile != null ? Number(bt.cohort_percentile).toFixed(1) : null;
+                document.getElementById('btCohortPctVal').innerText = pctVal != null ? `${pctVal}th percentile` : 'Evaluated against cohort';
+                
+                const startY = data.publication_year + 3;
+                const endY = data.publication_year + 5;
+                document.getElementById('btWindowRangeVal').innerText = `${startY}–${endY} (5Y Closed)`;
+                document.getElementById('btProvenanceTag').innerText = bt.provenance || 'OpenAlex (works.parquet)';
             } else {
-                btCard.style.display = 'none';
+                truthPanel.style.display = 'none';
             }
 
             // Render Subgraph

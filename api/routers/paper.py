@@ -115,7 +115,7 @@ def get_benchmark_report():
 
 
 @router.get("/corpus-sample")
-def get_corpus_sample(limit: int = Query(15, ge=1, le=50)):
+def get_corpus_sample(limit: int = Query(30, ge=1, le=100), randomize: bool = Query(False)):
     """Return diverse sample papers from local 16,500 works dataset for demonstration."""
     if inference_service.df_works is None or inference_service.df_works.empty:
         raise HTTPException(status_code=503, detail="Corpus data is not loaded.")
@@ -123,7 +123,10 @@ def get_corpus_sample(limit: int = Query(15, ge=1, le=50)):
     df = inference_service.df_works
     # Restrict demo samples strictly to held-out test split (2018-2020) — never training data
     df_test = df[df["publication_year"] >= 2018]
-    sample = df_test.sample(n=min(limit, len(df_test)), random_state=42)
+    if randomize:
+        sample = df_test.sample(n=min(limit, len(df_test)))
+    else:
+        sample = df_test.sample(n=min(limit, len(df_test)), random_state=42)
     items = []
     for _, row in sample.iterrows():
         items.append({

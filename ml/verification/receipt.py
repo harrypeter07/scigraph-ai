@@ -245,13 +245,24 @@ def build_reveal(work_id: str, receipt: Optional[Dict[str, Any]] = None) -> Dict
             actual_label = "High (>=90th)"
         provenance = "estimated using cohort thresholds from 2012-2017"
 
-    # Year-by-year counts for the 3-year window
+    # Year-by-year counts for the 3-year window (years pub+3..pub+5)
     window_years_breakdown = []
-    if inference_service.df_counts is not None:
-        c_matches = inference_service.df_counts[inference_service.df_counts["work_id"] == clean_id]
-        by_yr = {int(r["year"]): int(r["cited_by_count"]) for _, r in c_matches.iterrows()}
-        for yr in range(window_start, window_end + 1):
-            window_years_breakdown.append({"year": yr, "cited_by_count": by_yr.get(yr, 0)})
+    by_yr = {}
+    counts_path = settings.DATA_DIR / "counts_by_year.parquet"
+    if counts_path.exists():
+        try:
+            wids = [clean_id, f"https://openalex.org/{clean_id}"]
+            df_c = pd.read_parquet(counts_path, columns=["year", "cited_by_count"], filters=[("work_id", "in", wids)])
+            if not df_c.empty:
+                by_yr = dict(zip(df_c["year"].astype(int), df_c["cited_by_count"].astype(int)))
+        except Exception:
+            pass
+    for yr in range(window_start, window_end + 1):
+        window_years_breakdown.append({"year": yr, "cited_by_count": by_yr.get(yr, 0)})
+
+    sum_breakdown = sum(item["cited_by_count"] for item in window_years_breakdown)
+    if sum_breakdown > 0 or not actual_window:
+        actual_window = sum_breakdown
 
     threshold_info = inference_service.get_cohort_threshold(
         receipt["frozen_inputs"]["primary_field"], pub_year

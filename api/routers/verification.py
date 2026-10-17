@@ -222,8 +222,10 @@ def download_heldout_csv():
 
 @router.get("/spotcheck")
 async def spotcheck_live_openalex(n: int = Query(20, ge=1, le=50)):
-    """Picks n random heldout test papers and queries api.openalex.org LIVE to verify ground truth."""
-    from scripts.verify_sample import fetch_openalex_live, load_cohort_threshold
+    """Picks n random heldout test papers and queries api.openalex.org LIVE in parallel to verify ground truth."""
+    import asyncio
+    import httpx
+    from scripts.verify_sample import load_cohort_threshold
 
     test_path = settings.DATA_DIR / "processed" / "test.parquet"
     if not test_path.exists():
@@ -232,19 +234,33 @@ async def spotcheck_live_openalex(n: int = Query(20, ge=1, le=50)):
     df_test = pd.read_parquet(test_path)
     sample = df_test.sample(n=min(n, len(df_test)), random_state=random.randint(1, 10000))
 
+    headers = {"User-Agent": f"SciGraphVerification/2.0 (mailto:{settings.OPENALEX_POLITE_EMAIL})"}
+
+    async def fetch_paper_live(client: httpx.AsyncClient, wid: str):
+        url = f"https://api.openalex.org/works/{wid}?select=id,title,publication_year,primary_topic,counts_by_year,cited_by_count&mailto={settings.OPENALEX_POLITE_EMAIL}"
+        try:
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 200:
+                return resp.json()
+        except Exception:
+            pass
+        return None
+
+    wids = [str(r["work_id"]).split("/")[-1] for _, r in sample.iterrows()]
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        tasks = [fetch_paper_live(client, wid) for wid in wids]
+        live_data_list = await asyncio.gather(*tasks)
+
     results = []
     matches = 0
     valid_count = 0
 
-    for _, row in sample.iterrows():
-        wid = str(row["work_id"]).split("/")[-1]
+    for (_, row), wid, live_data in zip(sample.iterrows(), wids, live_data_list):
         stored_pub_year = int(row["publication_year"])
         stored_field = row.get("primary_field_name", "Computer Science")
         stored_window = int(row.get("future_citations_5y", 0))
         stored_class = int(row.get("impact_class", 0))
 
-        # Query live
-        live_data = fetch_openalex_live(wid)
         if not live_data:
             results.append({
                 "work_id": wid,
@@ -254,6 +270,9 @@ async def spotcheck_live_openalex(n: int = Query(20, ge=1, le=50)):
                 "live_window": None,
                 "stored_class": stored_class,
                 "live_class": None,
+                "live_label": None,
+                "tier_match": False,
+                "openalex_api_url": f"https://api.openalex.org/works/{wid}?select=id,publication_year,counts_by_year",
                 "status": "API_TIMEOUT_OR_NETWORK_ERROR"
             })
             continue

@@ -102,19 +102,14 @@ class OpenAlexClient:
                 return None
             return val
 
-        if not hasattr(self, "_corpus_works_map"):
-            try:
-                df = pd.read_parquet(works_path)
-                self._corpus_works_map = {}
-                for _, r in df.iterrows():
-                    wid = str(r["work_id"]).split("/")[-1]
-                    self._corpus_works_map[wid] = r.to_dict()
-            except Exception as e:
-                logger.warning(f"Failed to index corpus works for openalex_client: {e}")
-                self._corpus_works_map = {}
-
-        row = self._corpus_works_map.get(clean_id)
-        if not row:
+        wids = [clean_id, full_uri]
+        try:
+            df = pd.read_parquet(works_path, filters=[("work_id", "in", wids)])
+            if df.empty:
+                return None
+            row = df.iloc[0].to_dict()
+        except Exception as e:
+            logger.warning(f"Error reading local works parquet: {e}")
             return None
 
         py_raw = _clean(row.get("publication_year"))
@@ -134,8 +129,6 @@ class OpenAlexClient:
         n_auth = max(1, int(n_auth_raw)) if n_auth_raw is not None else 1
         refs_raw = _clean(row.get("referenced_works_count"))
         refs_count = int(refs_raw) if refs_raw is not None else 0
-        cits_cut_raw = _clean(row.get("citations_at_cutoff"))
-        cits_cut = int(cits_cut_raw) if cits_cut_raw is not None else 0
         fut_raw = _clean(row.get("future_citations_5y"))
         fut_cits = int(fut_raw) if fut_raw is not None else 0
 
@@ -173,101 +166,84 @@ class OpenAlexClient:
         }
 
         # 1. Real Authorships from authorships.parquet + authors.parquet + institutions.parquet
-        if not hasattr(self, "_corpus_authors_map"):
-            authorships_path = settings.DATA_DIR / "authorships.parquet"
-            authors_path = settings.DATA_DIR / "authors.parquet"
-            inst_path = settings.DATA_DIR / "institutions.parquet"
-            self._corpus_authors_map = {}
-            if authorships_path.exists() and authors_path.exists():
-                try:
-                    df_a = pd.read_parquet(authors_path)
-                    a_name_map = dict(zip(df_a["author_id"].astype(str), df_a["display_name"].astype(str)))
-                    for aid, name in list(a_name_map.items()):
-                        a_name_map[aid.split("/")[-1]] = name
+        authorships_path = settings.DATA_DIR / "authorships.parquet"
+        authors_path = settings.DATA_DIR / "authors.parquet"
+        inst_path = settings.DATA_DIR / "institutions.parquet"
+        if authorships_path.exists():
+            try:
+                df_auths = pd.read_parquet(authorships_path, filters=[("work_id", "in", wids)])
+                if not df_auths.empty:
+                    aids = [str(a) for a in df_auths["author_id"].dropna().unique()]
+                    author_name_map = {}
+                    if aids and authors_path.exists():
+                        search_aids = aids + [f"https://openalex.org/{a.split('/')[-1]}" for a in aids]
+                        df_a = pd.read_parquet(authors_path, columns=["author_id", "display_name"], filters=[("author_id", "in", search_aids)])
+                        for _, ar in df_a.iterrows():
+                            aid_str = str(ar["author_id"])
+                            author_name_map[aid_str] = ar["display_name"]
+                            author_name_map[aid_str.split("/")[-1]] = ar["display_name"]
 
                     inst_name_map = {}
-                    if inst_path.exists():
-                        df_i = pd.read_parquet(inst_path)
-                        inst_name_map = dict(zip(df_i["institution_id"].astype(str), df_i["display_name"].astype(str)))
-                        for iid, iname in list(inst_name_map.items()):
-                            inst_name_map[iid.split("/")[-1]] = iname
+                    if "institution_id" in df_auths.columns:
+                        iids = [str(i) for i in df_auths["institution_id"].dropna().unique()]
+                        if iids and inst_path.exists():
+                            search_iids = iids + [f"https://openalex.org/{i.split('/')[-1]}" for i in iids]
+                            df_i = pd.read_parquet(inst_path, columns=["institution_id", "display_name"], filters=[("institution_id", "in", search_iids)])
+                            for _, ir in df_i.iterrows():
+                                iid_str = str(ir["institution_id"])
+                                inst_name_map[iid_str] = ir["display_name"]
+                                inst_name_map[iid_str.split("/")[-1]] = ir["display_name"]
 
-                    df_auths = pd.read_parquet(authorships_path)
-                    has_inst = "institution_id" in df_auths.columns
-                    for wid, aid, pos, iid in zip(
-                        df_auths["work_id"].values,
-                        df_auths["author_id"].values,
-                        df_auths["author_position"].values,
-                        df_auths["institution_id"].values if has_inst else [None] * len(df_auths)
-                    ):
-                        w_clean = str(wid).split("/")[-1]
-                        a_clean = str(aid).split("/")[-1] if aid else None
-                        dname = a_name_map.get(str(aid)) or a_name_map.get(a_clean) or "Unknown Author"
-
+                    auth_list = []
+                    for _, r in df_auths.iterrows():
+                        aid = str(r.get("author_id") or "")
+                        a_clean = aid.split("/")[-1] if aid else None
+                        dname = author_name_map.get(aid) or author_name_map.get(a_clean) or "Unknown Author"
+                        pos = str(r.get("author_position") or "middle")
                         inst_list = []
+                        iid = r.get("institution_id")
                         if pd.notnull(iid):
                             iid_str = str(iid)
                             iname = inst_name_map.get(iid_str) or inst_name_map.get(iid_str.split("/")[-1])
                             if iname:
                                 inst_list.append({"id": iid_str, "display_name": iname})
-
-                        if w_clean not in self._corpus_authors_map:
-                            self._corpus_authors_map[w_clean] = []
-                        self._corpus_authors_map[w_clean].append({
-                            "author": {"display_name": dname, "id": str(aid) if aid else None},
-                            "author_position": str(pos) if pos else "middle",
+                        auth_list.append({
+                            "author": {"display_name": dname, "id": aid if aid else None},
+                            "author_position": pos,
                             "institutions": inst_list
                         })
-                    logger.info(f"Indexed {len(self._corpus_authors_map):,} works with genuine author and institution names.")
-                except Exception as e:
-                    logger.warning(f"Failed to load corpus authorships: {e}")
-                    self._corpus_authors_map = {}
-
-        if clean_id in self._corpus_authors_map:
-            raw_work["authorships"] = self._corpus_authors_map[clean_id]
+                    raw_work["authorships"] = auth_list
+            except Exception as e:
+                logger.warning(f"Failed to load authorships for {clean_id}: {e}")
 
         # 2. Real Referenced Works from citation_edges.parquet
-        if not hasattr(self, "_corpus_refs_map"):
-            edges_path = settings.DATA_DIR / "citation_edges.parquet"
-            self._corpus_refs_map = {}
-            if edges_path.exists():
-                try:
-                    df_edges = pd.read_parquet(edges_path)
-                    for citing, cited in zip(df_edges["citing_work_id"].values, df_edges["referenced_work_id"].values):
-                        citing_c = str(citing).split("/")[-1]
-                        if citing_c not in self._corpus_refs_map:
-                            self._corpus_refs_map[citing_c] = []
-                        self._corpus_refs_map[citing_c].append(str(cited))
-                    logger.info(f"Indexed {len(self._corpus_refs_map):,} works with genuine referenced works.")
-                except Exception as e:
-                    logger.warning(f"Failed to load corpus citation edges: {e}")
-                    self._corpus_refs_map = {}
+        edges_path = settings.DATA_DIR / "citation_edges.parquet"
+        if edges_path.exists():
+            try:
+                df_edges = pd.read_parquet(edges_path, columns=["referenced_work_id"], filters=[("citing_work_id", "in", wids)])
+                if not df_edges.empty:
+                    refs = [str(cited) for cited in df_edges["referenced_work_id"].dropna().unique()]
+                    raw_work["referenced_works"] = refs
+                    raw_work["referenced_works_count"] = max(refs_count, len(refs))
+            except Exception as e:
+                logger.warning(f"Failed to query citation edges for {clean_id}: {e}")
 
-        if clean_id in self._corpus_refs_map:
-            raw_work["referenced_works"] = self._corpus_refs_map[clean_id]
-            raw_work["referenced_works_count"] = max(refs_count, len(raw_work["referenced_works"]))
-
-        # 3. Yearly Citation Counts
+        # 3. Yearly Citation Counts from counts_by_year.parquet
         counts_path = settings.DATA_DIR / "counts_by_year.parquet"
         if counts_path.exists():
-            if not hasattr(self, "_corpus_counts_map"):
-                try:
-                    df_c = pd.read_parquet(counts_path)
-                    counts_dict = {}
+            try:
+                df_c = pd.read_parquet(counts_path, columns=["year", "cited_by_count"], filters=[("work_id", "in", wids)])
+                if not df_c.empty:
+                    c_list = []
                     for _, r in df_c.iterrows():
-                        wid = str(r["work_id"]).split("/")[-1]
-                        if wid not in counts_dict:
-                            counts_dict[wid] = []
-                        counts_dict[wid].append({
+                        c_list.append({
                             "year": int(r["year"]),
                             "cited_by_count": int(r["cited_by_count"])
                         })
-                    self._corpus_counts_map = counts_dict
-                except Exception as e:
-                    logger.warning(f"Failed to map corpus counts: {e}")
-                    self._corpus_counts_map = {}
-            if clean_id in self._corpus_counts_map:
-                raw_work["counts_by_year"] = self._corpus_counts_map[clean_id]
+                    raw_work["counts_by_year"] = c_list
+            except Exception as e:
+                logger.warning(f"Failed to query counts by year for {clean_id}: {e}")
+
         return raw_work
 
     def clean_identifier(self, identifier: str) -> str:

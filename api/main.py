@@ -133,8 +133,8 @@ def get_numbers_registry():
 @app.get("/health")
 def health_check():
     """Service health and model availability status."""
-    is_ready = inference_service.model is not None
     primary_ready = getattr(inference_service, "primary_model", None) is not None
+    is_ready = primary_ready or (inference_service.model is not None)
     works_count = len(inference_service.df_works) if inference_service.df_works is not None else 0
 
     manifest_path = Path(__file__).resolve().parent.parent / "data" / "MANIFEST.sha256"
@@ -143,10 +143,11 @@ def health_check():
         manifest_sha = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
 
     return {
-        "status": "healthy" if (is_ready and primary_ready) else "degraded",
+        "status": "healthy" if primary_ready else "degraded",
         "service": "SciGraph AI 2.0",
-        "model_loaded": is_ready,
+        "model_loaded": primary_ready,
         "primary_model_loaded": primary_ready,
+        "gnn_model_loaded": inference_service.model is not None,
         "model_name": "M1_LogisticRegression",
         "corpus_works_indexed": works_count,
         "polite_pool": settings.OPENALEX_POLITE_EMAIL,

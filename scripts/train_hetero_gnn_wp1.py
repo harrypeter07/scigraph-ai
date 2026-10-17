@@ -18,7 +18,7 @@ def main():
     graph = build_heterogeneous_graph()
     paper_dim = graph["paper"].x.shape[1]
     print(f"Paper node feature dimension: {paper_dim}")
-    assert paper_dim == 47, f"Expected 47 features, got {paper_dim}"
+    assert paper_dim == 51, f"Expected 51 features, got {paper_dim}"
 
     node_in_channels = {
         "paper": paper_dim,

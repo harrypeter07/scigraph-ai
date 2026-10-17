@@ -19,6 +19,10 @@ data/interim/*
 !data/interim/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+data/dense/*
+data/cache/*
+*.npy
+reports/full_codebase_bundle.txt
 
 # Model checkpoints & artifacts
 ml/gnn/checkpoints/*

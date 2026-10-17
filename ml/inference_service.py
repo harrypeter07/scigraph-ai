@@ -81,8 +81,10 @@ class ModelInferenceService:
         # 0. Load Primary Served Model: M1_LogisticRegression (Best empirical performer)
         primary_ckpt = settings.CHECKPOINTS_DIR / "primary_model.joblib"
         if not primary_ckpt.exists():
-            from ml.evaluation.fit_primary_model import fit_and_save_primary_model
-            fit_and_save_primary_model()
+            raise RuntimeError(
+                f"CRITICAL: Primary model checkpoint missing at '{primary_ckpt}'. "
+                "Run 'python ml/evaluation/fit_primary_model.py' to fit and calibrate it."
+            )
         import joblib
         self.primary_payload = joblib.load(primary_ckpt)
         self.primary_model = self.primary_payload["model"]
@@ -123,25 +125,27 @@ class ModelInferenceService:
         works_path = settings.DATA_DIR / "works.parquet"
         counts_path = settings.DATA_DIR / "counts_by_year.parquet"
 
-        if works_path.exists():
-            self.df_works = pd.read_parquet(works_path)
-            logger.info(f"Loaded {len(self.df_works):,} reference works for corpus lookups.")
+        if not works_path.exists():
+            raise RuntimeError(f"CRITICAL: Reference dataset missing at '{works_path}'.")
+        self.df_works = pd.read_parquet(works_path)
+        logger.info(f"Loaded {len(self.df_works):,} reference works for corpus lookups.")
 
-            # Compute empirical cohort percentiles (50th, 90th) by pub_year for backtesting
-            for year, group in self.df_works.groupby("publication_year"):
-                fut_cits = group["future_citations_5y"].dropna().values
-                if len(fut_cits) > 0:
-                    self.cohort_thresholds[int(year)] = {
-                        "p50": float(np.percentile(fut_cits, 50)),
-                        "p90": float(np.percentile(fut_cits, 90)),
-                    }
+        # Compute empirical cohort percentiles (50th, 90th) by pub_year for backtesting
+        for year, group in self.df_works.groupby("publication_year"):
+            fut_cits = group["future_citations_5y"].dropna().values
+            if len(fut_cits) > 0:
+                self.cohort_thresholds[int(year)] = {
+                    "p50": float(np.percentile(fut_cits, 50)),
+                    "p90": float(np.percentile(fut_cits, 90)),
+                }
 
-        if counts_path.exists():
-            self.df_counts = pd.read_parquet(counts_path)
-            logger.info(f"Loaded {len(self.df_counts):,} citation yearly count records.")
+        if not counts_path.exists():
+            raise RuntimeError(f"CRITICAL: Reference yearly citation records missing at '{counts_path}'.")
+        self.df_counts = pd.read_parquet(counts_path)
+        logger.info(f"Loaded {len(self.df_counts):,} citation yearly count records.")
 
-        # 5. Load empirical cohort thresholds reference
-        cohort_ref_path = settings.DATA_DIR / "reference" / "cohort_thresholds.json"
+        # 5. Load empirical cohort thresholds reference (single source of truth: label_thresholds.json)
+        cohort_ref_path = settings.DATA_DIR / "reference" / "label_thresholds.json"
         if cohort_ref_path.exists():
             with open(cohort_ref_path, "r", encoding="utf-8") as f:
                 self.cohort_reference = json.load(f)
@@ -331,15 +335,26 @@ class ModelInferenceService:
             err_abs = float(abs(pred_future_cits - actual_window))
             err_log = float(abs(pred_log - actual_log))
 
-            if actual_window < p50:
-                actual_cls = 0
-                actual_lbl = "Low (<50th)"
-            elif actual_window < p90:
-                actual_cls = 1
-                actual_lbl = "Medium (50-90th)"
+            clean_wid = str(work_id).split("/")[-1]
+            stored_rows = self.df_works[self.df_works["work_id"] == clean_wid] if self.df_works is not None else None
+            if stored_rows is not None and len(stored_rows) > 0 and "impact_class" in stored_rows.columns and pd.notnull(stored_rows.iloc[0]["impact_class"]):
+                actual_cls = int(stored_rows.iloc[0]["impact_class"])
+                actual_lbl = label_map[actual_cls]
+                provenance_str = "ground truth from corpus (works.parquet)"
+                if "future_citations_5y" in stored_rows.columns and pd.notnull(stored_rows.iloc[0]["future_citations_5y"]):
+                    actual_window = int(stored_rows.iloc[0]["future_citations_5y"])
+                    actual_log = float(np.log1p(actual_window))
             else:
-                actual_cls = 2
-                actual_lbl = "High (>=90th)"
+                if actual_window < p50:
+                    actual_cls = 0
+                    actual_lbl = "Low (<50th)"
+                elif actual_window < p90:
+                    actual_cls = 1
+                    actual_lbl = "Medium (50-90th)"
+                else:
+                    actual_cls = 2
+                    actual_lbl = "High (>=90th)"
+                provenance_str = "estimated using cohort thresholds from 2012-2017"
 
             is_correct = bool(pred_cls == actual_cls)
 
@@ -376,7 +391,8 @@ class ModelInferenceService:
                 "warning": None,
                 "threshold_provenance": threshold_info,
                 "cohort_percentile": round(pct, 1),
-                "provenance": "openalex | model | computed",
+                "provenance": provenance_str,
+                "class_provenance": provenance_str,
             }
         else:
             backtest = {

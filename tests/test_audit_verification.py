@@ -32,8 +32,10 @@ def test_served_model_not_constant(client):
     assert test_parquet.exists(), "data/processed/test.parquet missing"
     df_test = pd.read_parquet(test_parquet)
 
-    # Sample 30 test papers for fast, thorough verification
-    sample = df_test.sample(n=min(30, len(df_test)), random_state=42)
+    # Sample 15 test papers per class (45 total) for balanced, non-degenerate verification
+    sample = df_test.groupby("impact_class", group_keys=False).apply(
+        lambda g: g.sample(min(15, len(g)), random_state=42)
+    )
     preds = []
     actuals = []
 
@@ -135,3 +137,60 @@ def test_verification_poison_endpoint(client):
     data = res.json()
     assert data["temporal_firewall_intact"] is True
     assert data["max_probability_delta"] < 1e-4
+
+
+def test_verification_receipt_and_reveal_flow(client):
+    """Test cryptographic receipt generation, ledger persistence, and reveal flow."""
+    sample_res = client.get("/api/v1/papers/corpus-sample?limit=1")
+    sample_id = sample_res.json()["sample"][0]["paper_id"]
+
+    # 1. Generate receipt
+    rec_res = client.post(f"/api/v1/verify/receipt/{sample_id}")
+    assert rec_res.status_code == 200
+    receipt = rec_res.json()
+    assert "receipt_sha256" in receipt
+    assert receipt["work_id"] == sample_id
+    receipt_hash = receipt["receipt_sha256"]
+
+    # 2. Check receipt against ledger
+    check_res = client.get(f"/api/v1/verify/receipt/{receipt_hash}/check")
+    assert check_res.status_code == 200
+    check_data = check_res.json()
+    assert check_data["valid"] is True
+    assert check_data["work_id"] == sample_id
+
+    # 3. Reveal ground truth
+    reveal_res = client.get(f"/api/v1/verify/reveal/{sample_id}")
+    assert reveal_res.status_code == 200
+    reveal = reveal_res.json()
+    assert reveal["receipt_unchanged"] is True
+    assert "window_total_citations" in reveal
+    assert "actual_tier" in reveal
+    assert "is_correct" in reveal
+
+
+def test_leakage_controls_endpoint(client):
+    """Test /api/v1/verify/leakage-controls dual controls (negative poison + positive sensitivity)."""
+    sample_res = client.get("/api/v1/papers/corpus-sample?limit=1")
+    sample_id = sample_res.json()["sample"][0]["paper_id"]
+
+    res = client.get(f"/api/v1/verify/leakage-controls/{sample_id}")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["negative_control"]["passed"] is True
+    assert data["positive_control"]["passed"] is True
+    assert data["firewall_integrity"] is True
+
+
+def test_heldout_csv_endpoint(client):
+    """Test /api/v1/verify/heldout.csv downloads test split evaluation predictions."""
+    res = client.get("/api/v1/verify/heldout.csv")
+    assert res.status_code == 200
+    assert "text/csv" in res.headers["content-type"]
+    text = res.text
+    lines = text.strip().split("\n")
+    assert len(lines) >= 100
+    header = lines[0].split(",")
+    assert "work_id" in header
+    assert "actual_class" in header
+    assert "pred_class" in header

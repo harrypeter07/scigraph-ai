@@ -28,17 +28,17 @@ from ml.features.builder import (
 
 
 def test_feature_groups_structure():
-    """Assert exactly 14 feature groups covering exactly 47 dimensions without gaps."""
+    """Assert exactly 14 feature groups covering exactly 51 dimensions without gaps."""
     assert len(FEATURE_GROUPS) == 14, f"Expected exactly 14 feature groups, got {len(FEATURE_GROUPS)}"
-    assert TOTAL_FEATURE_DIM == 47, f"Expected 47 dimensions, got {TOTAL_FEATURE_DIM}"
-    assert len(FEATURE_NAMES) == 47, f"Expected 47 feature names, got {len(FEATURE_NAMES)}"
+    assert TOTAL_FEATURE_DIM == 51, f"Expected 51 dimensions, got {TOTAL_FEATURE_DIM}"
+    assert len(FEATURE_NAMES) == 51, f"Expected 51 feature names, got {len(FEATURE_NAMES)}"
 
     # Check contiguous slices without overlap
     current_idx = 0
     for name, sl in FEATURE_GROUPS.items():
         assert sl.start == current_idx, f"Group {name} slice start {sl.start} != {current_idx}"
         current_idx = sl.stop
-    assert current_idx == 47, f"Total slice coverage {current_idx} != 47"
+    assert current_idx == 51, f"Total slice coverage {current_idx} != 51"
 
 
 def test_text_encoder_persistence():
@@ -109,6 +109,7 @@ def test_200_works_parity_parquet_vs_raw_openalex():
         raw_dict = {
             "id": row["work_id"],
             "title": row["title"],
+            "primary_field_name": row["primary_field_name"] if "primary_field_name" in row and pd.notnull(row["primary_field_name"]) else None,
             "publication_year": pub_year,
             "counts_by_year": [
                 {"year": cutoff_year - 1, "cited_by_count": int(row["citations_at_cutoff"]) // 2},

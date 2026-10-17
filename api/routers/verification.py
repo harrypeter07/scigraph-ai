@@ -10,14 +10,16 @@ Provides transparent endpoints to verify:
 
 import json
 import logging
+import random
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 
 from api.config import settings
 from api.openalex_client import openalex_client, OpenAlexNotFoundError, OpenAlexValidationError
 from ml.inference_service import inference_service
+from ml.verification.receipt import build_receipt, build_reveal, check_receipt
 
 logger = logging.getLogger("scigraph.api.verify")
 
@@ -164,9 +166,157 @@ async def reveal_blind_forecast(work_id: str):
     return inference_service.predict(raw_work)
 
 
-@router.get("/poison/{work_id}")
-async def test_poison_invariance(work_id: str):
-    """Verify temporal leakage immunity: inject fake future citations and assert zero prediction delta."""
+@router.post("/receipt/{work_id}")
+async def create_verification_receipt(work_id: str):
+    """Generate a tamper-evident prediction receipt frozen strictly as-of cutoff."""
+    clean_id = openalex_client.clean_identifier(work_id)
+    try:
+        receipt = build_receipt(clean_id)
+        return receipt
+    except Exception as exc:
+        logger.error(f"Failed to build receipt for {clean_id}: {exc}")
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/reveal/{work_id}")
+async def reveal_ground_truth(work_id: str):
+    """Reveal post-cutoff ground truth citations (years pub+3..pub+5) and compare against receipt."""
+    clean_id = openalex_client.clean_identifier(work_id)
+    try:
+        reveal_data = build_reveal(clean_id)
+        return reveal_data
+    except Exception as exc:
+        logger.error(f"Failed to reveal ground truth for {clean_id}: {exc}")
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/receipt/{receipt_hash}/check")
+def verify_receipt_hash_endpoint(receipt_hash: str):
+    """Verify cryptographic receipt against the immutable prediction ledger."""
+    res = check_receipt(receipt_hash)
+    if not res.get("valid"):
+        raise HTTPException(status_code=404, detail=res.get("reason", "Invalid receipt hash."))
+    return res
+
+
+@router.get("/heldout.csv")
+def download_heldout_csv():
+    """Download held-out test split evaluation predictions as a CSV."""
+    parquet_path = REPORTS_DIR / "heldout_predictions.parquet"
+    if not parquet_path.exists():
+        from ml.evaluation.export_heldout import export_heldout_predictions
+        export_heldout_predictions()
+
+    try:
+        df = pd.read_parquet(parquet_path)
+        df_test = df[df["split"] == "test"]
+        csv_str = df_test.to_csv(index=False)
+        return Response(
+            content=csv_str,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=heldout_test_predictions.csv"}
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to generate heldout CSV: {exc}")
+
+
+@router.get("/spotcheck")
+async def spotcheck_live_openalex(n: int = Query(20, ge=1, le=50)):
+    """Picks n random heldout test papers and queries api.openalex.org LIVE to verify ground truth."""
+    from scripts.verify_sample import fetch_openalex_live, load_cohort_threshold
+
+    test_path = settings.DATA_DIR / "processed" / "test.parquet"
+    if not test_path.exists():
+        raise HTTPException(status_code=500, detail="data/processed/test.parquet missing")
+
+    df_test = pd.read_parquet(test_path)
+    sample = df_test.sample(n=min(n, len(df_test)), random_state=random.randint(1, 10000))
+
+    results = []
+    matches = 0
+    valid_count = 0
+
+    for _, row in sample.iterrows():
+        wid = str(row["work_id"]).split("/")[-1]
+        stored_pub_year = int(row["publication_year"])
+        stored_field = row.get("primary_field_name", "Computer Science")
+        stored_window = int(row.get("future_citations_5y", 0))
+        stored_class = int(row.get("impact_class", 0))
+
+        # Query live
+        live_data = fetch_openalex_live(wid)
+        if not live_data:
+            results.append({
+                "work_id": wid,
+                "title": str(row.get("title", "Untitled"))[:40],
+                "publication_year": stored_pub_year,
+                "stored_window": stored_window,
+                "live_window": None,
+                "stored_class": stored_class,
+                "live_class": None,
+                "status": "API_TIMEOUT_OR_NETWORK_ERROR"
+            })
+            continue
+
+        counts_by_year = live_data.get("counts_by_year", [])
+        by_year_dict = {
+            int(c.get("year", 0)): int(c.get("cited_by_count", 0))
+            for c in counts_by_year
+            if isinstance(c, dict)
+        }
+
+        cutoff_year = stored_pub_year + 2
+        window_counts = [by_year_dict.get(yr, 0) for yr in range(cutoff_year + 1, stored_pub_year + 6)]
+        live_window = sum(window_counts)
+
+        thresholds = load_cohort_threshold(stored_field, stored_pub_year)
+        p50 = thresholds["p50"]
+        p90 = thresholds["p90"]
+
+        if live_window < p50:
+            live_class = 0
+            live_label = "Low (<50th)"
+        elif live_window < p90:
+            live_class = 1
+            live_label = "Medium (50-90th)"
+        else:
+            live_class = 2
+            live_label = "High (>=90th)"
+
+        tier_match = (stored_class == live_class)
+        valid_count += 1
+        if tier_match:
+            matches += 1
+
+        results.append({
+            "work_id": wid,
+            "title": str(row.get("title", "Untitled"))[:40],
+            "publication_year": stored_pub_year,
+            "stored_window": stored_window,
+            "live_window": live_window,
+            "stored_class": stored_class,
+            "live_class": live_class,
+            "live_label": live_label,
+            "tier_match": tier_match,
+            "openalex_api_url": f"https://api.openalex.org/works/{wid}?select=id,publication_year,counts_by_year",
+            "status": "VERIFIED_MATCH" if tier_match else "CITATION_DRIFT"
+        })
+
+    match_rate = (matches / valid_count * 100.0) if valid_count > 0 else 0.0
+    return {
+        "n_requested": n,
+        "n_audited": len(results),
+        "valid_count": valid_count,
+        "matches": matches,
+        "match_rate_percent": round(match_rate, 2),
+        "provenance": "Live external query to api.openalex.org",
+        "sample_results": results
+    }
+
+
+@router.get("/leakage-controls/{work_id}")
+async def run_leakage_controls(work_id: str):
+    """Run dual leakage controls (negative future-poison + positive pre-cutoff sensitivity)."""
     clean_id = openalex_client.clean_identifier(work_id)
     try:
         raw_work = await openalex_client.get_work(clean_id)
@@ -175,38 +325,100 @@ async def test_poison_invariance(work_id: str):
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
-    # 1. Clean prediction
-    clean_pred = inference_service.predict(raw_work)
-
-    # 2. Poisoned work: inject massive citation spike 10 years in the future
     import copy
-    poisoned_work = copy.deepcopy(raw_work)
-    fut_yr = clean_pred["publication_year"] + 10
-    counts = poisoned_work.get("counts_by_year", [])
-    counts.append({"year": fut_yr, "cited_by_count": 100000})
-    poisoned_work["counts_by_year"] = counts
-    poisoned_work["cited_by_count"] = int(poisoned_work.get("cited_by_count", 0)) + 100000
 
-    poisoned_pred = inference_service.predict(poisoned_work)
-
-    # Compare probabilities and class
+    # 1. Baseline prediction (clean)
+    clean_pred = inference_service.predict(raw_work)
     clean_probs = clean_pred["calibrated_probabilities"]
-    poison_probs = poisoned_pred["calibrated_probabilities"]
-    max_prob_diff = max(abs(clean_probs[k] - poison_probs[k]) for k in clean_probs)
+    clean_cits_cutoff = clean_pred["citations_at_cutoff"]
+    pub_year = clean_pred["publication_year"]
+    cutoff_year = clean_pred["cutoff_year"]
 
-    is_invariant = (max_prob_diff < 1e-5) and (clean_pred["predicted_impact_class"] == poisoned_pred["predicted_impact_class"])
+    # 2. Negative Control: Inject +100,000 citations 10 years in future
+    neg_work = copy.deepcopy(raw_work)
+    fut_yr = pub_year + 10
+    counts_neg = list(neg_work.get("counts_by_year", []))
+    counts_neg.append({"year": fut_yr, "cited_by_count": 100000})
+    neg_work["counts_by_year"] = counts_neg
+    neg_work["cited_by_count"] = int(neg_work.get("cited_by_count", 0)) + 100000
+
+    neg_pred = inference_service.predict(neg_work)
+    neg_probs = neg_pred["calibrated_probabilities"]
+    neg_prob_delta = max(abs(clean_probs[k] - neg_probs[k]) for k in clean_probs)
+    neg_cits_delta = abs(neg_pred["citations_at_cutoff"] - clean_cits_cutoff)
+    negative_passed = bool(neg_prob_delta < 1e-5 and neg_cits_delta == 0)
+
+    # 3. Positive Control: Inject +50 citations in cutoff_year (valid historical year)
+    pos_work = copy.deepcopy(raw_work)
+    counts_pos = list(pos_work.get("counts_by_year", []))
+    found_yr = False
+    for c in counts_pos:
+        if c.get("year") == cutoff_year:
+            c["cited_by_count"] = int(c.get("cited_by_count", 0)) + 50
+            found_yr = True
+            break
+    if not found_yr:
+        counts_pos.append({"year": cutoff_year, "cited_by_count": 50})
+    pos_work["counts_by_year"] = counts_pos
+    pos_work["cited_by_count"] = int(pos_work.get("cited_by_count", 0)) + 50
+
+    pos_pred = inference_service.predict(pos_work)
+    pos_probs = pos_pred["calibrated_probabilities"]
+    pos_prob_delta = max(abs(clean_probs[k] - pos_probs[k]) for k in clean_probs)
+    pos_cits_delta = abs(pos_pred["citations_at_cutoff"] - clean_cits_cutoff)
+    positive_passed = bool(pos_cits_delta > 0 and pos_prob_delta > 1e-4)
 
     return {
         "work_id": clean_id,
         "title": clean_pred["title"],
-        "cutoff_year": clean_pred["cutoff_year"],
-        "poison_injected_year": fut_yr,
-        "poison_citations_added": 100000,
-        "clean_probabilities": clean_probs,
-        "poisoned_probabilities": poison_probs,
-        "max_probability_delta": float(max_prob_diff),
-        "temporal_firewall_intact": is_invariant,
-        "verdict": "PASSED: Zero Temporal Leakage (Strict Cutoff Firewall Verified)" if is_invariant else "FAILED: Leakage Detected"
+        "publication_year": pub_year,
+        "cutoff_year": cutoff_year,
+        "baseline": {
+            "citations_at_cutoff": clean_cits_cutoff,
+            "probabilities": clean_probs,
+            "predicted_class": clean_pred["predicted_impact_class"],
+            "predicted_label": clean_pred["predicted_impact_label"],
+        },
+        "negative_control": {
+            "description": "Injected +100,000 citations to year pub+10 (post-cutoff future). Features and probabilities must be identical.",
+            "citations_added": 100000,
+            "target_year": fut_yr,
+            "result_citations_at_cutoff": neg_pred["citations_at_cutoff"],
+            "max_probability_delta": float(neg_prob_delta),
+            "citations_at_cutoff_delta": float(neg_cits_delta),
+            "passed": negative_passed,
+            "verdict": "PASSED: Zero Temporal Leakage (Strict Cutoff Firewall Verified)" if negative_passed else "FAILED: Leakage Detected"
+        },
+        "positive_control": {
+            "description": "Injected +50 citations to cutoff year (pre-cutoff historical). Features and probabilities must change.",
+            "citations_added": 50,
+            "target_year": cutoff_year,
+            "result_citations_at_cutoff": pos_pred["citations_at_cutoff"],
+            "max_probability_delta": float(pos_prob_delta),
+            "citations_at_cutoff_delta": float(pos_cits_delta),
+            "passed": positive_passed,
+            "verdict": "PASSED: Sensitive to Pre-Cutoff Signal (Model Actually Uses Real Features)" if positive_passed else "FAILED: Invariant to Historical Signal"
+        },
+        "firewall_integrity": bool(negative_passed and positive_passed)
+    }
+
+
+@router.get("/poison/{work_id}")
+async def test_poison_invariance(work_id: str):
+    """Backward-compatible endpoint: calls run_leakage_controls."""
+    res = await run_leakage_controls(work_id)
+    neg = res["negative_control"]
+    return {
+        "work_id": res["work_id"],
+        "title": res["title"],
+        "cutoff_year": res["cutoff_year"],
+        "poison_injected_year": neg["target_year"],
+        "poison_citations_added": neg["citations_added"],
+        "clean_probabilities": res["baseline"]["probabilities"],
+        "poisoned_probabilities": neg["result_citations_at_cutoff"],
+        "max_probability_delta": neg["max_probability_delta"],
+        "temporal_firewall_intact": neg["passed"],
+        "verdict": neg["verdict"]
     }
 
 

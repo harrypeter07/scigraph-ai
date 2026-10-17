@@ -1,0 +1,28 @@
+{
+  "timestamp_utc": "2026-10-17T01:05:37Z",
+  "selection_bias": {
+    "detected": true,
+    "target_citations_p50": 381.0,
+    "target_citations_mean": 626.7061818181818,
+    "explanation": "Ingested corpus represents prominent papers with abstracts (median 381 citations in window)."
+  },
+  "completeness": {
+    "total_papers_2012_2020": 13500,
+    "cutoff_coverage": 1.0,
+    "full_window_coverage": 0.9997777777777778,
+    "pub_year_coverage": 0.9239259259259259
+  },
+  "split_hygiene": {
+    "train_papers_2012_2016": 7500,
+    "val_papers_2017": 1500,
+    "test_papers_2018_2020": 4500,
+    "zero_2010_2011_in_train": true
+  },
+  "old_served_model_baseline": {
+    "accuracy": 0.4893,
+    "macro_f1": 0.4673,
+    "auroc": 0.7129,
+    "within_one_tier_accuracy": 0.9491,
+    "precision_at_top10_high": 0.4089
+  }
+}

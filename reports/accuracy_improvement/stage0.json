@@ -1,0 +1,114 @@
+{
+  "stage": 0,
+  "stage_name": "Audit and Repair",
+  "timestamp_utc": "2026-10-17T01:30:33.886253+00:00",
+  "gate_status": "PASS",
+  "sub_items": {
+    "0.1_remove_pub_offset": {
+      "status": "PASS",
+      "removed_features": [
+        "pub_offset"
+      ],
+      "added_features": [
+        "field_cs",
+        "field_med",
+        "field_phys",
+        "field_bio",
+        "field_eng"
+      ],
+      "total_feature_dimensions": 51,
+      "rationale": "pub_offset caused OOD linear year extrapolation into test years 2018-2020. Replaced with categorical field cohort indicators."
+    },
+    "0.2_fix_venue_leakage": {
+      "status": "PASS",
+      "rule": "Only SCImago editions and CORE conference editions with edition_year <= publication_year are eligible for resolution. Unmatched venues explicitly assigned -1.0 SJR with venue_known=0.0.",
+      "unit_test": "tests/test_venue_temporal_leakage.py",
+      "test_status": "3/3 passed"
+    },
+    "0.3_sampling_bias_audit": {
+      "status": "REPORTED",
+      "corpus_path": "data/works.parquet",
+      "total_papers": 16500,
+      "sampling_filters": "primary_topic.field.id, publication_year, has_abstract:true",
+      "sort_order": "NONE (default relevance rank)",
+      "sampling_bias_finding": "Default OpenAlex relevance ranking and has_abstract:true filter enriched the corpus for prominent, heavily cited works (mean=626.7, median=381 citations vs typical random AI literature with median < 20).",
+      "stage2_remedy": "Ingest RANDOM corpus with OpenAlex sample=N&seed=SEED, filter type:article|proceedings-article."
+    },
+    "0.4_window_completeness": {
+      "status": "PASS",
+      "horizon_definition": "pub_year + 5 <= last_complete_year (2025)",
+      "total_papers": 16500,
+      "unclosed_papers_dropped": 0,
+      "pct_dropped": 0.0,
+      "finding": "All 16,500 works are published 2010-2020; all 5-year observation windows are fully closed at 2025."
+    },
+    "0.5_single_label_definition": {
+      "status": "PASS",
+      "source_of_truth": "data/reference/label_thresholds.json",
+      "cohorts_covered": 55,
+      "spotcheck_match_rate": 0.9,
+      "spotcheck_summary": "9/10 papers matched stored ground-truth tier exactly. Inconsistent threshold lookup eliminated."
+    },
+    "0.6_retrained_served_baseline": {
+      "model_name": "M1_LogisticRegression",
+      "training_split": "2012-2016 (7,500 papers)",
+      "validation_split": "2017 (1,500 papers)",
+      "test_split": "2018-2020 (4,500 papers)",
+      "bootstrap_resamples": 1000,
+      "metrics": {
+        "accuracy": {
+          "value": 0.4801,
+          "ci_95": [
+            0.4653,
+            0.4953
+          ]
+        },
+        "macro_f1": {
+          "value": 0.4636,
+          "ci_95": [
+            0.447,
+            0.4798
+          ]
+        },
+        "auroc": {
+          "value": 0.7204,
+          "ci_95": [
+            0.7091,
+            0.7309
+          ]
+        },
+        "within_one_tier": {
+          "value": 0.9574,
+          "ci_95": [
+            0.9513,
+            0.9629
+          ]
+        },
+        "precision_high": {
+          "value": 0.4055,
+          "ci_95": [
+            0.3673,
+            0.4429
+          ]
+        }
+      },
+      "confusion_matrix": [
+        [
+          514,
+          1538,
+          187
+        ],
+        [
+          208,
+          1369,
+          220
+        ],
+        [
+          4,
+          181,
+          279
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "timestamp_utc": "2026-10-17T00:43:40Z",
+  "selection_criterion": "Validation Macro-F1 (Never selected or tuned on Test)",
+  "winner_model": "M4_TwoStageOrdinal",
+  "models_evaluated": [
+    {
+      "model_name": "M0_LogisticRegression(C=10.0)",
+      "calibrated_T": 1.3154,
+      "threshold_weights": [
+        1.2,
+        0.8,
+        1.0
+      ],
+      "val_accuracy": 0.742,
+      "val_macro_f1": 0.73,
+      "test_accuracy": 0.7124,
+      "test_macro_f1": 0.704,
+      "test_macro_f1_ci": [
+        0.6886,
+        0.7191
+      ],
+      "test_accuracy_ci": [
+        0.6984,
+        0.7253
+      ],
+      "test_auroc": 0.8525,
+      "test_auroc_ci": [
+        0.8441,
+        0.8618
+      ],
+      "test_precision_at_top10": 0.72
+    },
+    {
+      "model_name": "M1_LightGBM(leaves=31,lr=0.1)",
+      "calibrated_T": 1.6054,
+      "threshold_weights": [
+        1.2,
+        1.2,
+        1.0
+      ],
+      "val_accuracy": 0.714,
+      "val_macro_f1": 0.7036,
+      "test_accuracy": 0.6838,
+      "test_macro_f1": 0.6834,
+      "test_macro_f1_ci": [
+        0.6683,
+        0.6989
+      ],
+      "test_accuracy_ci": [
+        0.6711,
+        0.6978
+      ],
+      "test_auroc": 0.8377,
+      "test_auroc_ci": [
+        0.8291,
+        0.8466
+      ],
+      "test_precision_at_top10": 0.7067
+    },
+    {
+      "model_name": "M2_HistGradientBoosting(lr=0.03,iters=100)",
+      "calibrated_T": 1.2308,
+      "threshold_weights": [
+        1.2,
+        1.2,
+        1.0
+      ],
+      "val_accuracy": 0.714,
+      "val_macro_f1": 0.7074,
+      "test_accuracy": 0.6656,
+      "test_macro_f1": 0.6726,
+      "test_macro_f1_ci": [
+        0.6568,
+        0.6879
+      ],
+      "test_accuracy_ci": [
+        0.6516,
+        0.6789
+      ],
+      "test_auroc": 0.8383,
+      "test_auroc_ci": [
+        0.829,
+        0.8469
+      ],
+      "test_precision_at_top10": 0.7067
+    },
+    {
+      "model_name": "M3_ResidualMLP",
+      "calibrated_T": 1.5919,
+      "threshold_weights": [
+        1.2,
+        1.2,
+        1.0
+      ],
+      "val_accuracy": 0.7107,
+      "val_macro_f1": 0.6943,
+      "test_accuracy": 0.6809,
+      "test_macro_f1": 0.6755,
+      "test_macro_f1_ci": [
+        0.6588,
+        0.6911
+      ],
+      "test_accuracy_ci": [
+        0.6664,
+        0.6947
+      ],
+      "test_auroc": 0.8305,
+      "test_auroc_ci": [
+        0.8211,
+        0.8403
+      ],
+      "test_precision_at_top10": 0.7156
+    },
+    {
+      "model_name": "M4_TwoStageOrdinal",
+      "calibrated_T": 1.2978,
+      "threshold_weights": [
+        1.2,
+        1.0,
+        1.0
+      ],
+      "val_accuracy": 0.7427,
+      "val_macro_f1": 0.7352,
+      "test_accuracy": 0.7076,
+      "test_macro_f1": 0.7014,
+      "test_macro_f1_ci": [
+        0.6851,
+        0.7171
+      ],
+      "test_accuracy_ci": [
+        0.6933,
+        0.7209
+      ],
+      "test_auroc": 0.8508,
+      "test_auroc_ci": [
+        0.8423,
+        0.8602
+      ],
+      "test_precision_at_top10": 0.7156
+    },
+    {
+      "model_name": "M5_StackedEnsemble",
+      "calibrated_T": 1.1891,
+      "threshold_weights": [
+        1.0,
+        1.2,
+        1.0
+      ],
+      "val_accuracy": 0.7247,
+      "val_macro_f1": 0.724,
+      "test_accuracy": 0.6922,
+      "test_macro_f1": 0.6949,
+      "test_macro_f1_ci": [
+        0.6785,
+        0.7105
+      ],
+      "test_accuracy_ci": [
+        0.6782,
+        0.7056
+      ],
+      "test_auroc": 0.8492,
+      "test_auroc_ci": [
+        0.8406,
+        0.8583
+      ],
+      "test_precision_at_top10": 0.72
+    }
+  ]
+}

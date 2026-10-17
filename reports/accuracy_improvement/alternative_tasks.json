@@ -1,0 +1,38 @@
+{
+  "timestamp_utc": "2026-10-17T00:47:40Z",
+  "task_2a_binary_median_split": {
+    "definition": "cits >= 50th percentile (Low vs Med+High)",
+    "test_accuracy": 0.7576,
+    "test_macro_f1": 0.7619,
+    "test_auroc": 0.8415,
+    "test_precision": 0.7519,
+    "test_recall": 0.7722,
+    "confusion_matrix": [
+      [
+        1663,
+        576
+      ],
+      [
+        515,
+        1746
+      ]
+    ]
+  },
+  "task_2b_binary_elite_split": {
+    "definition": "cits >= 90th percentile (Top 10% Elite vs Rest)",
+    "test_auroc": 0.952,
+    "test_pr_auc": 0.7492,
+    "test_precision_at_top10": 0.7178,
+    "test_recall_at_top10": 0.6961,
+    "baseline_prevalence": 0.1031,
+    "lift_over_random": 6.96
+  },
+  "task_3_extended_3y_observation": {
+    "definition": "Cutoff extended from pub_year + 2 to pub_year + 3",
+    "test_accuracy": 0.7758,
+    "test_macro_f1": 0.7721,
+    "test_auroc": 0.8993,
+    "accuracy_lift_vs_2y": 0.0716,
+    "f1_lift_vs_2y": 0.07
+  }
+}

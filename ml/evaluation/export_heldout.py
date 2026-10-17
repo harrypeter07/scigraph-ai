@@ -106,10 +106,11 @@ def export_heldout_predictions() -> dict:
 
     # 2. Load data
     print("\n[2/5] Loading parquet splits ...")
-    df_train = pd.read_parquet(DATA_DIR / "train.parquet")
+    df_train_raw = pd.read_parquet(DATA_DIR / "train.parquet")
+    df_train = df_train_raw[(df_train_raw["publication_year"] >= 2012) & (df_train_raw["publication_year"] <= 2016)].reset_index(drop=True)
     df_val = pd.read_parquet(DATA_DIR / "val.parquet")
     df_test = pd.read_parquet(DATA_DIR / "test.parquet")
-    print(f"  train={len(df_train):,}  val={len(df_val):,}  test={len(df_test):,}")
+    print(f"  train={len(df_train):,} (clean 2012-2016)  val={len(df_val):,}  test={len(df_test):,}")
 
     # Reference corpus for empirical percentile (train+val)
     df_reference = pd.concat([df_train, df_val], ignore_index=True)

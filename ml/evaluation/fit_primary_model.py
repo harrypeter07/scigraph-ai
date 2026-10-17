@@ -90,10 +90,15 @@ def fit_and_save_primary_model() -> dict:
 
     # 1. Load data splits
     print("\n[1/6] Loading parquet splits ...")
-    df_train = pd.read_parquet(DATA_DIR / "train.parquet")
+    df_train_raw = pd.read_parquet(DATA_DIR / "train.parquet")
+    # Strict temporal filter: train only on 2012-2016 (7,500 papers)
+    df_train = df_train_raw[(df_train_raw["publication_year"] >= 2012) & (df_train_raw["publication_year"] <= 2016)].reset_index(drop=True)
+    assert len(df_train) == 7500, f"Expected 7,500 train papers (2012-2016), got {len(df_train)}"
+    assert int(df_train["publication_year"].min()) >= 2012 and int(df_train["publication_year"].max()) <= 2016, "Train years outside 2012-2016"
+
     df_val = pd.read_parquet(DATA_DIR / "val.parquet")
     df_test = pd.read_parquet(DATA_DIR / "test.parquet")
-    print(f"  train={len(df_train):,}  val={len(df_val):,}  test={len(df_test):,}")
+    print(f"  train={len(df_train):,} (clean 2012-2016)  val={len(df_val):,}  test={len(df_test):,}")
 
     # 2. Build features
     print("\n[2/6] Building 47-dimensional features (batch mode) ...")
@@ -114,34 +119,35 @@ def fit_and_save_primary_model() -> dict:
     X_val = scaler.transform(X_val_raw)
     X_test = scaler.transform(X_test_raw)
 
-    # 4. Fit LogisticRegression (C tuned on VAL)
-    print("\n[4/6] Fitting LogisticRegression (C tuned on val) ...")
+    # 4. Fit LogisticRegression (C and class_weight tuned on VAL)
+    print("\n[4/6] Fitting LogisticRegression (C and class_weight tuned on val) ...")
     best_c = 1.0
+    best_cw = None
     best_val_f1 = -1.0
-    for c_cand in [0.01, 0.1, 1.0, 10.0]:
-        clf_probe = LogisticRegression(
-            C=c_cand,
-            class_weight="balanced",
-            max_iter=1000,
-            random_state=42,
-            solver="lbfgs",
-            multi_class="auto",
-        )
-        clf_probe.fit(X_train, y_train)
-        vf1 = f1_score(y_val, clf_probe.predict(X_val), average="macro")
-        print(f"  C={c_cand:6.3f} -> val_macro_f1={vf1:.4f}")
-        if vf1 > best_val_f1:
-            best_val_f1 = vf1
-            best_c = c_cand
+    for cw in [None, "balanced"]:
+        for c_cand in [0.01, 0.1, 1.0, 10.0]:
+            clf_probe = LogisticRegression(
+                C=c_cand,
+                class_weight=cw,
+                max_iter=1000,
+                random_state=42,
+                solver="lbfgs",
+            )
+            clf_probe.fit(X_train, y_train)
+            vf1 = f1_score(y_val, clf_probe.predict(X_val), average="macro")
+            print(f"  C={c_cand:6.3f}, class_weight={cw!s:8s} -> val_macro_f1={vf1:.4f}")
+            if vf1 > best_val_f1:
+                best_val_f1 = vf1
+                best_c = c_cand
+                best_cw = cw
 
-    print(f"  Best C={best_c}  val_macro_f1={best_val_f1:.4f}")
+    print(f"  Best C={best_c}, class_weight={best_cw}  val_macro_f1={best_val_f1:.4f}")
     lr = LogisticRegression(
         C=best_c,
-        class_weight="balanced",
+        class_weight=best_cw,
         max_iter=1000,
         random_state=42,
         solver="lbfgs",
-        multi_class="auto",
     )
     lr.fit(X_train, y_train)
 
@@ -189,6 +195,7 @@ def fit_and_save_primary_model() -> dict:
         "feature_names": feat_names,
         "feature_dims": feature_dim,
         "best_c": best_c,
+        "best_class_weight": best_cw,
         "fitted_at": timestamp,
         "val_macro_f1": round(val_macro_f1, 4),
         "val_auroc": round(val_auroc, 4),
@@ -212,16 +219,17 @@ def fit_and_save_primary_model() -> dict:
         "test_ece": round(test_ece, 4),
         "temperature": round(T, 4),
         "best_c": best_c,
+        "best_class_weight": best_cw,
         "fitted_at": timestamp,
         "feature_dims": feature_dim,
         "feature_names": feat_names,
         "description": (
             "Logistic regression with temperature-calibrated probabilities. "
-            "Best validation Macro-F1 across M0-M5 benchmark. "
-            "The GNN (M5_HeteroGraphSAGE) is available as experimental but "
+            "Best validation Macro-F1 across benchmark. "
+            "The GNN is available as experimental but "
             "does not outperform logistic regression on the test set."
         ),
-        "training_split": "train (pub_year <= 2016, 10,500 papers)",
+        "training_split": "train (pub_year 2012-2016, 7,500 papers)",
         "val_split": "val (pub_year = 2017, 1,500 papers)",
         "test_split": "test (pub_year 2018-2020, 4,500 papers)",
         "cutoff_offset": "T_cutoff = pub_year + 2",

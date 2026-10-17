@@ -21,6 +21,7 @@ import os
 import sys
 import json
 import time
+import hashlib
 import argparse
 from pathlib import Path
 from datetime import datetime, timezone
@@ -226,6 +227,9 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
     X_val = scaler.transform(X_all[val_mask])
     X_test = scaler.transform(X_all[test_mask])
 
+    # Bug fix 4a: scale paper node features for homogeneous and heterogeneous GNNs
+    graph["paper"].x = torch.from_numpy(scaler.transform(X_all)).float()
+
     y_train_cls, y_val_cls, y_test_cls = y_cls[train_mask], y_cls[val_mask], y_cls[test_mask]
     y_train_reg, y_val_reg, y_test_reg = y_reg[train_mask], y_reg[val_mask], y_reg[test_mask]
 
@@ -237,10 +241,12 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
     print("\n--- Evaluating M0: Majority Class ---")
     maj_class = int(np.bincount(y_train_cls).argmax())
     m0_preds = np.full(len(y_test_cls), maj_class, dtype=int)
-    # empirical training class proportions
     m0_probs_1work = np.bincount(y_train_cls, minlength=3) / len(y_train_cls)
     m0_probs = np.tile(m0_probs_1work, (len(y_test_cls), 1))
     m0_reg_pred = np.full(len(y_test_reg), float(np.mean(y_train_reg)))
+
+    val_probs_m0 = np.tile(m0_probs_1work, (len(y_val_cls), 1))
+    val_preds_m0 = np.full(len(y_val_cls), maj_class, dtype=int)
 
     results["M0_Majority"] = {
         "macro_f1": round(float(f1_score(y_test_cls, m0_preds, average="macro")), 4),
@@ -249,6 +255,11 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         "auroc": 0.5000,
         "mae": round(float(mean_absolute_error(y_test_reg, m0_reg_pred)), 4),
         "ece": round(compute_ece(m0_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, val_preds_m0, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, val_preds_m0, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, val_preds_m0)), 4),
+        "val_auroc": 0.5000,
+        "val_ece": round(compute_ece(val_probs_m0, y_val_cls), 4),
         "temperature": 1.0,
         "_preds": m0_preds,
         "_probs": m0_probs,
@@ -256,24 +267,101 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
     }
 
     # -------------------------------------------------------------
-    # M1: Regularized Logistic Regression (C tuned on VAL)
+    # B1: Early Citations Only Baseline (log_cits_cutoff)
+    # -------------------------------------------------------------
+    print("\n--- Evaluating B1: Early Citations Only ---")
+    clf_b1 = LogisticRegression(C=1.0, max_iter=500, random_state=seed, solver="lbfgs")
+    clf_b1.fit(X_train[:, 0:1], y_train_cls)
+    val_logits_b1 = clf_b1.decision_function(X_val[:, 0:1])
+    test_logits_b1 = clf_b1.decision_function(X_test[:, 0:1])
+    t_star_b1 = fit_temperature(val_logits_b1, y_val_cls)
+    b1_val_probs = apply_temperature_scaling(val_logits_b1, t_star_b1)
+    b1_val_preds = np.argmax(b1_val_probs, axis=1)
+    b1_probs = apply_temperature_scaling(test_logits_b1, t_star_b1)
+    b1_preds = np.argmax(b1_probs, axis=1)
+
+    reg_b1 = Ridge(alpha=1.0, random_state=seed)
+    reg_b1.fit(X_train[:, 0:1], y_train_reg)
+    b1_reg_pred = reg_b1.predict(X_test[:, 0:1])
+
+    results["B1_EarlyCitationsOnly"] = {
+        "macro_f1": round(float(f1_score(y_test_cls, b1_preds, average="macro")), 4),
+        "weighted_f1": round(float(f1_score(y_test_cls, b1_preds, average="weighted")), 4),
+        "micro_f1": round(float(accuracy_score(y_test_cls, b1_preds)), 4),
+        "auroc": round(float(roc_auc_score(y_test_cls, b1_probs, multi_class="ovr")), 4),
+        "mae": round(float(mean_absolute_error(y_test_reg, b1_reg_pred)), 4),
+        "ece": round(compute_ece(b1_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, b1_val_preds, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, b1_val_preds, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, b1_val_preds)), 4),
+        "val_auroc": round(float(roc_auc_score(y_val_cls, b1_val_probs, multi_class="ovr")), 4),
+        "val_ece": round(compute_ece(b1_val_probs, y_val_cls), 4),
+        "temperature": round(t_star_b1, 4),
+        "_preds": b1_preds,
+        "_probs": b1_probs,
+        "_reg_pred": b1_reg_pred,
+    }
+
+    # -------------------------------------------------------------
+    # B2: Venue Tier Only Baseline (sjr, venue_known, tier_top)
+    # -------------------------------------------------------------
+    print("\n--- Evaluating B2: Venue Tier Only ---")
+    clf_b2 = LogisticRegression(C=1.0, max_iter=500, random_state=seed, solver="lbfgs")
+    clf_b2.fit(X_train[:, 12:15], y_train_cls)
+    val_logits_b2 = clf_b2.decision_function(X_val[:, 12:15])
+    test_logits_b2 = clf_b2.decision_function(X_test[:, 12:15])
+    t_star_b2 = fit_temperature(val_logits_b2, y_val_cls)
+    b2_val_probs = apply_temperature_scaling(val_logits_b2, t_star_b2)
+    b2_val_preds = np.argmax(b2_val_probs, axis=1)
+    b2_probs = apply_temperature_scaling(test_logits_b2, t_star_b2)
+    b2_preds = np.argmax(b2_probs, axis=1)
+
+    reg_b2 = Ridge(alpha=1.0, random_state=seed)
+    reg_b2.fit(X_train[:, 12:15], y_train_reg)
+    b2_reg_pred = reg_b2.predict(X_test[:, 12:15])
+
+    results["B2_VenueTierOnly"] = {
+        "macro_f1": round(float(f1_score(y_test_cls, b2_preds, average="macro")), 4),
+        "weighted_f1": round(float(f1_score(y_test_cls, b2_preds, average="weighted")), 4),
+        "micro_f1": round(float(accuracy_score(y_test_cls, b2_preds)), 4),
+        "auroc": round(float(roc_auc_score(y_test_cls, b2_probs, multi_class="ovr")), 4),
+        "mae": round(float(mean_absolute_error(y_test_reg, b2_reg_pred)), 4),
+        "ece": round(compute_ece(b2_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, b2_val_preds, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, b2_val_preds, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, b2_val_preds)), 4),
+        "val_auroc": round(float(roc_auc_score(y_val_cls, b2_val_probs, multi_class="ovr")), 4),
+        "val_ece": round(compute_ece(b2_val_probs, y_val_cls), 4),
+        "temperature": round(t_star_b2, 4),
+        "_preds": b2_preds,
+        "_probs": b2_probs,
+        "_reg_pred": b2_reg_pred,
+    }
+
+    # -------------------------------------------------------------
+    # M1: Regularized Logistic Regression (C and class_weight tuned on VAL)
     # -------------------------------------------------------------
     print("\n--- Evaluating M1: Regularized Logistic Regression ---")
     best_c = 1.0
+    best_cw = None
     best_val_f1 = -1.0
-    for c_cand in [0.01, 0.1, 1.0, 10.0]:
-        clf = LogisticRegression(C=c_cand, max_iter=500, random_state=seed)
-        clf.fit(X_train, y_train_cls)
-        val_f1 = f1_score(y_val_cls, clf.predict(X_val), average="macro")
-        if val_f1 > best_val_f1:
-            best_val_f1 = val_f1
-            best_c = c_cand
+    for cw in [None, "balanced"]:
+        for c_cand in [0.01, 0.1, 1.0, 10.0]:
+            clf = LogisticRegression(C=c_cand, class_weight=cw, max_iter=1000, random_state=seed, solver="lbfgs")
+            clf.fit(X_train, y_train_cls)
+            val_f1 = f1_score(y_val_cls, clf.predict(X_val), average="macro")
+            if val_f1 > best_val_f1:
+                best_val_f1 = val_f1
+                best_c = c_cand
+                best_cw = cw
 
-    clf_m1 = LogisticRegression(C=best_c, max_iter=500, random_state=seed)
+    clf_m1 = LogisticRegression(C=best_c, class_weight=best_cw, max_iter=1000, random_state=seed, solver="lbfgs")
     clf_m1.fit(X_train, y_train_cls)
     val_logits_m1 = clf_m1.decision_function(X_val)
     test_logits_m1 = clf_m1.decision_function(X_test)
     t_star_m1 = fit_temperature(val_logits_m1, y_val_cls)
+    m1_val_probs = apply_temperature_scaling(val_logits_m1, t_star_m1)
+    m1_val_preds = np.argmax(m1_val_probs, axis=1)
     m1_probs = apply_temperature_scaling(test_logits_m1, t_star_m1)
     m1_preds = np.argmax(m1_probs, axis=1)
 
@@ -288,8 +376,13 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         "auroc": round(float(roc_auc_score(y_test_cls, m1_probs, multi_class="ovr")), 4),
         "mae": round(float(mean_absolute_error(y_test_reg, m1_reg_pred)), 4),
         "ece": round(compute_ece(m1_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, m1_val_preds, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, m1_val_preds, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, m1_val_preds)), 4),
+        "val_auroc": round(float(roc_auc_score(y_val_cls, m1_val_probs, multi_class="ovr")), 4),
+        "val_ece": round(compute_ece(m1_val_probs, y_val_cls), 4),
         "temperature": round(t_star_m1, 4),
-        "tuned_hyperparameters": {"C": best_c},
+        "tuned_hyperparameters": {"C": best_c, "class_weight": best_cw},
         "_preds": m1_preds,
         "_probs": m1_probs,
         "_reg_pred": m1_reg_pred,
@@ -338,6 +431,9 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
     reg_m2.fit(X_train, y_train_reg)
     m2_reg_pred = reg_m2.predict(X_test)
 
+    val_probs_cal_m2 = apply_temperature_scaling(val_logits_m2, t_star_m2)
+    val_preds_m2 = np.argmax(val_probs_cal_m2, axis=1)
+
     results["M2_LightGBM"] = {
         "macro_f1": round(float(f1_score(y_test_cls, m2_preds, average="macro")), 4),
         "weighted_f1": round(float(f1_score(y_test_cls, m2_preds, average="weighted")), 4),
@@ -345,6 +441,11 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         "auroc": round(float(roc_auc_score(y_test_cls, m2_probs, multi_class="ovr")), 4),
         "mae": round(float(mean_absolute_error(y_test_reg, m2_reg_pred)), 4),
         "ece": round(compute_ece(m2_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, val_preds_m2, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, val_preds_m2, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, val_preds_m2)), 4),
+        "val_auroc": round(float(roc_auc_score(y_val_cls, val_probs_cal_m2, multi_class="ovr")), 4),
+        "val_ece": round(compute_ece(val_probs_cal_m2, y_val_cls), 4),
         "temperature": round(t_star_m2, 4),
         "tuned_hyperparameters": best_params,
         "_preds": m2_preds,
@@ -398,6 +499,8 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         m3_reg_pred = test_reg_m3.numpy()
 
     t_star_m3 = fit_temperature(val_logits_m3, y_val_cls)
+    m3_val_probs = apply_temperature_scaling(val_logits_m3, t_star_m3)
+    m3_val_preds = np.argmax(m3_val_probs, axis=1)
     m3_probs = apply_temperature_scaling(test_logits_m3, t_star_m3)
     m3_preds = np.argmax(m3_probs, axis=1)
 
@@ -408,6 +511,11 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         "auroc": round(float(roc_auc_score(y_test_cls, m3_probs, multi_class="ovr")), 4),
         "mae": round(float(mean_absolute_error(y_test_reg, m3_reg_pred)), 4),
         "ece": round(compute_ece(m3_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, m3_val_preds, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, m3_val_preds, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, m3_val_preds)), 4),
+        "val_auroc": round(float(roc_auc_score(y_val_cls, m3_val_probs, multi_class="ovr")), 4),
+        "val_ece": round(compute_ece(m3_val_probs, y_val_cls), 4),
         "temperature": round(t_star_m3, 4),
         "_preds": m3_preds,
         "_probs": m3_probs,
@@ -460,6 +568,8 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         m4_reg_pred = t_r[test_mask_t].numpy()
 
     t_star_m4 = fit_temperature(val_logits_m4, y_val_cls)
+    m4_val_probs = apply_temperature_scaling(val_logits_m4, t_star_m4)
+    m4_val_preds = np.argmax(m4_val_probs, axis=1)
     m4_probs = apply_temperature_scaling(test_logits_m4, t_star_m4)
     m4_preds = np.argmax(m4_probs, axis=1)
 
@@ -470,6 +580,11 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         "auroc": round(float(roc_auc_score(y_test_cls, m4_probs, multi_class="ovr")), 4),
         "mae": round(float(mean_absolute_error(y_test_reg, m4_reg_pred)), 4),
         "ece": round(compute_ece(m4_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, m4_val_preds, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, m4_val_preds, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, m4_val_preds)), 4),
+        "val_auroc": round(float(roc_auc_score(y_val_cls, m4_val_probs, multi_class="ovr")), 4),
+        "val_ece": round(compute_ece(m4_val_probs, y_val_cls), 4),
         "temperature": round(t_star_m4, 4),
         "_preds": m4_preds,
         "_probs": m4_probs,
@@ -529,6 +644,8 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         m5_reg_pred = t_out["predicted_log_citations"][test_mask_t].numpy()
 
     t_star_m5 = fit_temperature(val_logits_m5, y_val_cls)
+    m5_val_probs = apply_temperature_scaling(val_logits_m5, t_star_m5)
+    m5_val_preds = np.argmax(m5_val_probs, axis=1)
     m5_probs = apply_temperature_scaling(test_logits_m5, t_star_m5)
     m5_preds = np.argmax(m5_probs, axis=1)
 
@@ -544,6 +661,11 @@ def run_benchmark_for_seed(seed: int, graph, df_works: pd.DataFrame) -> Dict[str
         "auroc": round(float(roc_auc_score(y_test_cls, m5_probs, multi_class="ovr")), 4),
         "mae": round(float(mean_absolute_error(y_test_reg, m5_reg_pred)), 4),
         "ece": round(compute_ece(m5_probs, y_test_cls), 4),
+        "val_macro_f1": round(float(f1_score(y_val_cls, m5_val_preds, average="macro")), 4),
+        "val_weighted_f1": round(float(f1_score(y_val_cls, m5_val_preds, average="weighted")), 4),
+        "val_micro_f1": round(float(accuracy_score(y_val_cls, m5_val_preds)), 4),
+        "val_auroc": round(float(roc_auc_score(y_val_cls, m5_val_probs, multi_class="ovr")), 4),
+        "val_ece": round(compute_ece(m5_val_probs, y_val_cls), 4),
         "temperature": round(t_star_m5, 4),
         "_preds": m5_preds,
         "_probs": m5_probs,
@@ -604,15 +726,19 @@ def run_all_seeds(seeds: List[int] = [0, 1, 2, 3, 4]):
 
     # Compute mean and standard deviation across seeds for each model and metric
     models = list(all_seed_results[seeds[0]].keys())
-    metrics_keys = ["macro_f1", "weighted_f1", "micro_f1", "auroc", "mae", "ece"]
+    metrics_keys = [
+        "macro_f1", "weighted_f1", "micro_f1", "auroc", "mae", "ece",
+        "val_macro_f1", "val_weighted_f1", "val_micro_f1", "val_auroc", "val_ece"
+    ]
 
     summary = {}
     for m in models:
         summary[m] = {}
         for met in metrics_keys:
-            vals = [all_seed_results[s][m][met] for s in seeds]
-            summary[m][f"{met}_mean"] = round(float(np.mean(vals)), 4)
-            summary[m][f"{met}_std"] = round(float(np.std(vals)), 4)
+            vals = [all_seed_results[s][m][met] for s in seeds if met in all_seed_results[s][m]]
+            if vals:
+                summary[m][f"{met}_mean"] = round(float(np.mean(vals)), 4)
+                summary[m][f"{met}_std"] = round(float(np.std(vals)), 4)
         summary[m]["macro_f1_95ci"] = all_seed_results[seeds[0]][m]["macro_f1_ci"]
         summary[m]["paired_p_val_vs_lgbm"] = all_seed_results[seeds[0]][m]["paired_p_val_vs_lgbm"]
         summary[m]["temperature_val_fit"] = all_seed_results[seeds[0]][m]["temperature"]
@@ -628,9 +754,15 @@ def run_all_seeds(seeds: List[int] = [0, 1, 2, 3, 4]):
         ci_str = f"[{stats['macro_f1_95ci'][0]:.4f}, {stats['macro_f1_95ci'][1]:.4f}]"
         print(f"{m:25s} | {f1_str:22s} | {ci_str:18s} | {stats['auroc_mean']:.4f}   | {stats['ece_mean']:.4f}   | {stats['paired_p_val_vs_lgbm']:.4f}")
 
-    # Determine empirical best model
-    best_model = max(summary.keys(), key=lambda k: summary[k]["macro_f1_mean"])
-    print(f"\nEmpirical Leader by Macro-F1: {best_model}")
+    # Determine empirical best model strictly using VAL Macro-F1
+    best_model = max(summary.keys(), key=lambda k: summary[k].get("val_macro_f1_mean", 0.0))
+    print(f"\nEmpirical Leader by Validation Macro-F1: {best_model} (val_macro_f1={summary[best_model].get('val_macro_f1_mean'):.4f})")
+
+    # Read manifest hash if present
+    manifest_path = Path("data/MANIFEST.sha256")
+    manifest_sha = None
+    if manifest_path.exists():
+        manifest_sha = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
 
     # Save reports/benchmark_latest.json
     benchmark_latest = {
@@ -638,9 +770,17 @@ def run_all_seeds(seeds: List[int] = [0, 1, 2, 3, 4]):
             "timestamp_utc": datetime.now(timezone.utc).isoformat(),
             "seeds": seeds,
             "duration_seconds": duration,
+            "train_split_size": int(graph["paper"].train_mask.sum()),
+            "val_split_size": int(graph["paper"].val_mask.sum()),
             "test_split_size": int(graph["paper"].test_mask.sum()),
             "evaluation_protocol": "Equal budget on VAL only, temperature scaling on VAL logits, 95% bootstrap CIs (1,000 resamples), paired tests vs M2_LightGBM",
             "empirical_best_model": best_model,
+            "selected_on": "val",
+            "data_snapshot": {
+                "openalex_retrieved_utc": "2026-10-15T08:08:00Z",
+                "manifest_sha256": manifest_sha,
+                "manifest_path": "data/MANIFEST.sha256"
+            }
         },
         "summary": summary,
         "seed_runs": all_seed_results

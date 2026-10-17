@@ -1,0 +1,99 @@
+{
+  "generated_utc": "2026-10-16T23:32:39Z",
+  "polite_pool": "researcher@scigraph.org",
+  "subfield_counts": [
+    {
+      "subfield_id": "1707",
+      "name": "Computer Vision and Pattern Recognition",
+      "field": "Computer Science",
+      "filter": "primary_topic.subfield.id:1707,type:article|proceedings-article,publication_year:2010-2022,has_abstract:true",
+      "total_works_2010_2022": 294645
+    },
+    {
+      "subfield_id": "1702",
+      "name": "Artificial Intelligence",
+      "field": "Computer Science",
+      "filter": "primary_topic.subfield.id:1702,type:article|proceedings-article,publication_year:2010-2022,has_abstract:true",
+      "total_works_2010_2022": 445842
+    },
+    {
+      "subfield_id": "1703",
+      "name": "Computational Theory and Mathematics",
+      "field": "Computer Science",
+      "filter": "primary_topic.subfield.id:1703,type:article|proceedings-article,publication_year:2010-2022,has_abstract:true",
+      "total_works_2010_2022": 168167
+    },
+    {
+      "subfield_id": "1705",
+      "name": "Computer Networks and Communications",
+      "field": "Computer Science",
+      "filter": "primary_topic.subfield.id:1705,type:article|proceedings-article,publication_year:2010-2022,has_abstract:true",
+      "total_works_2010_2022": 331538
+    },
+    {
+      "subfield_id": "1306",
+      "name": "Biochemistry",
+      "field": "Biochemistry, Genetics and Molecular Biology",
+      "filter": "primary_topic.subfield.id:1306,type:article|proceedings-article,publication_year:2010-2022,has_abstract:true",
+      "total_works_2010_2022": 180508
+    },
+    {
+      "subfield_id": "2730",
+      "name": "Oncology",
+      "field": "Medicine",
+      "filter": "primary_topic.subfield.id:2730,type:article|proceedings-article,publication_year:2010-2022,has_abstract:true",
+      "total_works_2010_2022": 393578
+    }
+  ],
+  "reference_probe": {
+    "subfield_id": "1707",
+    "subfield_name": "Computer Vision and Pattern Recognition",
+    "median_references": 54,
+    "mean_references": 69.0,
+    "median_citations": 1710,
+    "mean_citations": 5284.6,
+    "in_subfield_reference_share": 0.633
+  },
+  "variants_estimate": {
+    "C1_subfield_full": {
+      "name": "C1: subfield_full (Computer Vision & Pattern Recognition)",
+      "subfield_id": "1707",
+      "planned_works": 120000,
+      "estimated_requests": 610,
+      "estimated_runtime_minutes": 1.7,
+      "estimated_runtime_hours": 0.03,
+      "estimated_raw_json_mb": 206.0,
+      "estimated_parquet_mb": 40.1,
+      "estimated_target_median_degree": 34,
+      "budget_guard_pass": true
+    },
+    "C2_snowball": {
+      "name": "C2: snowball (3,000 seeds + 1-hop refs + 50 citers)",
+      "seeds": 3000,
+      "planned_works": 110000,
+      "estimated_requests": 3322,
+      "estimated_runtime_minutes": 9.2,
+      "estimated_runtime_hours": 0.15,
+      "estimated_raw_json_mb": 188.8,
+      "estimated_parquet_mb": 36.7,
+      "estimated_target_median_degree": 60,
+      "budget_guard_pass": true
+    },
+    "C3_multifield_dense": {
+      "name": "C3: multifield_dense (CV + AI + Computational Theory, 40k each)",
+      "subfield_ids": [
+        "1707",
+        "1702",
+        "1703"
+      ],
+      "planned_works": 120000,
+      "estimated_requests": 615,
+      "estimated_runtime_minutes": 1.7,
+      "estimated_runtime_hours": 0.03,
+      "estimated_raw_json_mb": 206.0,
+      "estimated_parquet_mb": 40.1,
+      "estimated_target_median_degree": 29,
+      "budget_guard_pass": true
+    }
+  }
+}

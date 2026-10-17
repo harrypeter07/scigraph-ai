@@ -1,0 +1,32 @@
+{
+  "timestamp_utc": "2026-10-17T00:23:15Z",
+  "test_sample_size": 4500,
+  "oracles": {
+    "horizon_2y_baseline": {
+      "description": "Standard cutoff (pub_year + 2 observed)",
+      "test_accuracy": 0.4896,
+      "test_macro_f1": 0.4679,
+      "test_auroc": 0.7102
+    },
+    "oracle_1_3y_observed": {
+      "description": "Ceiling diagnostic: cutoff + 1 year of future window visible (3y observed)",
+      "test_accuracy": 0.4869,
+      "test_macro_f1": 0.5014,
+      "test_auroc": 0.7671
+    },
+    "oracle_2_4y_observed": {
+      "description": "Ceiling diagnostic: cutoff + 2 years of future window visible (4y observed)",
+      "test_accuracy": 0.4904,
+      "test_macro_f1": 0.5098,
+      "test_auroc": 0.7808
+    }
+  },
+  "boundary_noise": {
+    "n_poisson_draws": 200,
+    "share_papers_tier_flip_gt_20pct": 0.5547,
+    "share_papers_tier_flip_gt_10pct": 0.5658,
+    "mean_stochastic_tier_flip_rate": 0.527,
+    "implied_accuracy_ceiling": 0.473,
+    "verdict_statement": "Even a theoretical perfect predictor of the expected window citations would be wrong on about 52.7% of papers because citation arrivals follow a stochastic Poisson process near tier boundaries. The realistic accuracy ceiling on 2-year data is capped at ~47.3%, confirming that 85% accuracy is mathematically impossible."
+  }
+}

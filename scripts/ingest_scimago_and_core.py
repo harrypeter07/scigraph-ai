@@ -284,14 +284,12 @@ def enrich_venues_and_works(df_scimago: pd.DataFrame, df_core: pd.DataFrame):
         issns = normalize_issn(venue_issn_l)
         for issn in issns:
             if issn in scimago_lookup:
-                year_map = scimago_lookup[issn]
-                # Look for exact publication year first, then nearest available year
-                if pub_year in year_map:
-                    entry = year_map[pub_year]
-                else:
-                    # Closest year
-                    closest_yr = min(year_map.keys(), key=lambda y: abs(y - pub_year))
-                    entry = year_map[closest_yr]
+                # Strictly enforce temporal cutoff: only consider editions with year <= pub_year
+                valid_years = [y for y in year_map.keys() if y <= pub_year]
+                if not valid_years:
+                    continue
+                latest_yr = max(valid_years)
+                entry = year_map[latest_yr]
                 return {
                     "ranking_system": "SCImago",
                     "rank": None,

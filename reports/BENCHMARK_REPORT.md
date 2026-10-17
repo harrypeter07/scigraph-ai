@@ -1,15 +1,15 @@
 # SciGraph AI 2.0: Master Benchmark Evaluation Report
 
-**Date:** 2026-10-16 16:14:15 UTC  
-**Seeds Evaluated:** [0, 1, 2, 3, 4]  
+**Date:** 2026-10-16 23:47:04 UTC  
+**Seeds Evaluated:** [0]  
 **Test Set:** Held-out Temporal Test Split (2018–2020, 4,500 papers)  
-**Evaluation Duration:** 662.38 seconds  
+**Evaluation Duration:** 140.61 seconds  
 
 ---
 
 ## 1. Executive Summary & Empirical Findings
 
-- **Top-Performing Model by Macro-F1:** `M1_LogisticRegression`
+- **Top-Performing Model by Macro-F1:** `M2_LightGBM`
 - **Protocol Adherence:**
   - Zero hyperparameter tuning on test data; all configurations and temperature parameters fit exclusively on Validation (2017, 1,500 papers).
   - 95% Bootstrap Confidence Intervals computed across 1,000 resamples for every reported metric.
@@ -23,11 +23,13 @@
 | Model | Architecture / Protocol | Test Macro-F1 (Mean ± Std) | 95% Bootstrap CI | AUROC (OVR) | MAE (log1p) | Calibrated ECE | p-val vs M2 |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | `M0_Majority` | Majority Class Baseline | **0.2215** ± 0.0000 | [0.2172, 0.2258] | 0.5000 | 0.6633 | 0.0006 | 1.0000 |
+| `B1_EarlyCitationsOnly` | B1_EarlyCitationsOnly | **0.4676** ± 0.0000 | [0.4506, 0.4833] | 0.7097 | 0.4637 | 0.0817 | 1.0000 |
+| `B2_VenueTierOnly` | B2_VenueTierOnly | **0.2968** ± 0.0000 | [0.2864, 0.3078] | 0.5255 | 0.6579 | 0.0177 | 1.0000 |
 | `M1_LogisticRegression` | L2 Regularized LogReg (C tuned) | **0.5244** ± 0.0000 | [0.5062, 0.5421] | 0.7141 | 0.5019 | 0.0318 | 0.0030 |
 | `M2_LightGBM` | Gradient Boosted Trees (Val tuned) | **0.5020** ± 0.0000 | [0.4866, 0.5185] | 0.7182 | 0.4248 | 0.0799 | — (ref) |
-| `M3_GraphlessMLP` | 2-Layer MLP (47 -> 64 -> 32 -> 3) | **0.4111** ± 0.0352 | [0.4010, 0.4349] | 0.6711 | 0.8323 | 0.0712 | 1.0000 |
-| `M4_HomogeneousGraphSAGE` | PyG 2-Hop SAGE on Citation Graph | **0.3138** ± 0.0042 | [0.3061, 0.3257] | 0.5129 | 1.0390 | 0.0917 | 1.0000 |
-| `M5_HeteroGraphSAGE` | PyG 2-Hop HeteroConv (5 edge relations) | **0.3167** ± 0.0164 | [0.3149, 0.3343] | 0.5173 | 1.2462 | 0.0679 | 1.0000 |
+| `M3_GraphlessMLP` | 2-Layer MLP (47 -> 64 -> 32 -> 3) | **0.4175** ± 0.0000 | [0.4010, 0.4349] | 0.6792 | 0.7620 | 0.0754 | 1.0000 |
+| `M4_HomogeneousGraphSAGE` | PyG 2-Hop SAGE on Citation Graph | **0.4186** ± 0.0000 | [0.4024, 0.4363] | 0.6709 | 0.8930 | 0.0824 | 1.0000 |
+| `M5_HeteroGraphSAGE` | PyG 2-Hop HeteroConv (5 edge relations) | **0.3266** ± 0.0000 | [0.3171, 0.3368] | 0.5704 | 0.6082 | 0.0454 | 1.0000 |
 
 ---
 

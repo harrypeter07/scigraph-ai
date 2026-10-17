@@ -30,7 +30,7 @@ def test_heterogeneous_graph_structure():
         assert node_type in graph.node_types, f"Missing node type {node_type}"
 
     assert graph["paper"].x.size(0) == 16500
-    assert graph["paper"].x.size(1) == 47  # 47 features strictly as-of-cutoff (with apc_known & venue_known)
+    assert graph["paper"].x.size(1) == 51  # 51 features strictly as-of-cutoff (with field one-hot indicators)
 
     # Verify bidirectional edges
     assert ("paper", "cites", "paper") in graph.edge_types

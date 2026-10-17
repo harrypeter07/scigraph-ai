@@ -25,7 +25,7 @@ from ml.features.builder import (
 
 FEATURE_DISPLAY_NAMES = {
     "log_cits_cutoff": "Early Citation Acceleration",
-    "pub_offset": "Publication Year Cohort",
+    "field_one_hot": "Disciplinary Field Cohort",
     "log_refs": "Foundational Reference Depth",
     "author_scale": "Author Collaboration Scale",
     "is_oa": "Open Access Dissemination",
@@ -51,8 +51,10 @@ def get_train_feature_means() -> np.ndarray:
 
     cache_path = settings.DATA_DIR / "reference" / "train_feature_means.npy"
     if cache_path.exists():
-        _CACHED_TRAIN_MEANS = np.load(cache_path)
-        return _CACHED_TRAIN_MEANS
+        loaded = np.load(cache_path)
+        if len(loaded) == TOTAL_FEATURE_DIM:
+            _CACHED_TRAIN_MEANS = loaded
+            return _CACHED_TRAIN_MEANS
 
     works_path = settings.DATA_DIR / "works.parquet"
     if not works_path.exists():

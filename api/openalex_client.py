@@ -166,7 +166,6 @@ class OpenAlexClient:
             "referenced_works_count": refs_count,
             "referenced_works": [],
             "counts_by_year": [],
-            "citations_at_cutoff": cits_cut,
             "future_citations_5y": fut_cits
         }
 

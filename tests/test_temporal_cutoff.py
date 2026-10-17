@@ -50,10 +50,22 @@ def test_future_poison_invariance():
 
     poisoned_feats, _ = build_paper_features(poisoned_work, cutoff_offset=2)
 
-    # Must be byte-identical
+    # Negative control: Must be byte-identical
     assert np.array_equal(clean_feats, poisoned_feats), (
         f"Temporal leakage detected! Max difference: {np.max(np.abs(clean_feats - poisoned_feats))}"
     )
+
+    # Positive control: Adding pre-cutoff citations MUST alter features
+    pos_work = copy.deepcopy(clean_work)
+    counts_pos = list(pos_work.get("counts_by_year", []))
+    for c in counts_pos:
+        if c.get("year") == cutoff_year:
+            c["cited_by_count"] = int(c.get("cited_by_count", 0)) + 50
+    pos_work["counts_by_year"] = counts_pos
+    pos_feats, _ = build_paper_features(pos_work, cutoff_offset=2)
+
+    assert not np.array_equal(clean_feats, pos_feats), "Feature pipeline insensitive to pre-cutoff citations (positive control failed)!"
+    assert pos_feats[0] > clean_feats[0], "log_cits_cutoff failed to increase upon adding citations"
 
 
 def test_citation_edges_strictly_as_of_cutoff():

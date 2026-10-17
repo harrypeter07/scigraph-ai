@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-10-16T18:07:33.308676+00:00",
+  "generated_at": "2026-10-17T01:28:54.136160+00:00",
   "model": "M1_LogisticRegression",
   "split_sizes": {
     "val": 1500,
     "test": 4500
   },
   "test_metrics": {
-    "accuracy": 0.5533,
-    "macro_f1": 0.5275,
-    "auroc_ovr": 0.7142,
-    "ece": 0.0524
+    "accuracy": 0.4804,
+    "macro_f1": 0.4641,
+    "auroc_ovr": 0.7207,
+    "ece": 0.0878
   },
   "test_confusion_matrix": {
     "labels": [
@@ -19,67 +19,67 @@
     ],
     "matrix": [
       [
-        1427,
-        598,
-        214
+        514,
+        1538,
+        187
       ],
       [
-        802,
-        784,
-        211
+        208,
+        1369,
+        220
       ],
       [
-        30,
-        155,
+        4,
+        181,
         279
       ]
     ]
   },
   "test_per_class": {
     "Low(<50th)": {
-      "precision": 0.6317,
-      "recall": 0.6373,
-      "f1-score": 0.6345,
+      "precision": 0.708,
+      "recall": 0.2296,
+      "f1-score": 0.3467,
       "support": 2239.0
     },
     "Medium(50-90th)": {
-      "precision": 0.5101,
-      "recall": 0.4363,
-      "f1-score": 0.4703,
+      "precision": 0.4433,
+      "recall": 0.7618,
+      "f1-score": 0.5605,
       "support": 1797.0
     },
     "High(>=90th)": {
-      "precision": 0.3963,
+      "precision": 0.4067,
       "recall": 0.6013,
-      "f1-score": 0.4777,
+      "f1-score": 0.4852,
       "support": 464.0
     }
   },
   "test_macro_avg": {
-    "precision": 0.5127,
-    "recall": 0.5583,
-    "f1-score": 0.5275,
+    "precision": 0.5193,
+    "recall": 0.5309,
+    "f1-score": 0.4641,
     "support": 4500.0
   },
   "test_weighted_avg": {
-    "precision": 0.5589,
-    "recall": 0.5533,
-    "f1-score": 0.5528,
+    "precision": 0.5712,
+    "recall": 0.4804,
+    "f1-score": 0.4464,
     "support": 4500.0
   },
   "lift_analysis": {
-    "n_predicted_high": 704,
+    "n_predicted_high": 686,
     "n_truly_high_of_predicted": 279,
-    "lift_precision_at_predicted_high": 0.3963,
+    "lift_precision_at_predicted_high": 0.4067,
     "true_high_rate_in_test": 0.1031,
-    "lift_ratio": 3.8435,
+    "lift_ratio": 3.9443,
     "baseline_lift": 0.1031,
     "description": "lift_precision_at_predicted_high = precision of High predictions. lift_ratio = lift_precision / true_high_rate. baseline_lift = true_high_rate (random guessing at correct base rate)."
   },
   "spearman_correlation": {
-    "rho": 0.3474,
+    "rho": 0.3167,
     "p_value": 0.0,
     "interpretation": "Spearman r between pred_class (0/1/2) and actual_class (0/1/2)"
   },
-  "temperature": 1.5637
+  "temperature": 1.11
 }

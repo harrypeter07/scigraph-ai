@@ -49,6 +49,8 @@ class ScientometricVenueResolver:
         self.scimago_lookup: Dict[str, Dict[int, Dict[str, Any]]] = {}
         self.core_title_lookup: Dict[str, str] = {}
         self.core_acronym_lookup: Dict[str, str] = {}
+        self.core_title_history: Dict[str, List[Tuple[int, str]]] = {}
+        self.core_acronym_history: Dict[str, List[Tuple[int, str]]] = {}
 
         self._load_datasets()
 
@@ -89,19 +91,36 @@ class ScientometricVenueResolver:
             df_core = pd.read_parquet(self.core_path)
             rank_prio = {"A*": 5, "A": 4, "B": 3, "C": 2, "Australasian": 1, "Unranked": 0}
             df_core["prio"] = df_core["rank"].map(lambda r: rank_prio.get(r, 0))
-            df_core = df_core.sort_values(by=["prio", "edition_year"], ascending=False)
+            df_core = df_core.sort_values(by=["edition_year", "prio"], ascending=[False, False])
 
             for _, row in df_core.iterrows():
                 t = self._clean_str(str(row.get("title", "")))
                 a = self._clean_str(str(row.get("acronym", "")))
                 rk = str(row.get("rank", "Unranked"))
-                if t and t not in self.core_title_lookup:
-                    self.core_title_lookup[t] = rk
-                if a and a not in self.core_acronym_lookup:
-                    self.core_acronym_lookup[a] = rk
-            logger.info(f"VenueResolver: Loaded {len(self.core_title_lookup):,} CORE titles, {len(self.core_acronym_lookup):,} CORE acronyms.")
+                ey = int(row.get("edition_year", 2020))
+                if t:
+                    self.core_title_history.setdefault(t, []).append((ey, rk))
+                    if t not in self.core_title_lookup:
+                        self.core_title_lookup[t] = rk
+                if a:
+                    self.core_acronym_history.setdefault(a, []).append((ey, rk))
+                    if a not in self.core_acronym_lookup:
+                        self.core_acronym_lookup[a] = rk
+            logger.info(f"VenueResolver: Loaded {len(self.core_title_history):,} CORE titles, {len(self.core_acronym_history):,} CORE acronyms with temporal editions.")
         else:
             logger.warning(f"VenueResolver: CORE dataset not found at {self.core_path}")
+
+    def _lookup_core(self, token: str, pub_year: int, is_acronym: bool = True) -> Optional[str]:
+        """Lookup CORE rank using strictly edition_year <= pub_year (latest available edition)."""
+        history = self.core_acronym_history.get(token) if is_acronym else self.core_title_history.get(token)
+        if not history:
+            return None
+        valid_editions = [(yr, rk) for yr, rk in history if yr <= pub_year]
+        if not valid_editions:
+            return None
+        # Sort by year descending to get latest edition <= pub_year
+        valid_editions.sort(key=lambda x: x[0], reverse=True)
+        return valid_editions[0][1]
 
     def resolve(
         self,
@@ -135,29 +154,31 @@ class ScientometricVenueResolver:
         if is_conference:
             # A. Match CVPR proceedings & conferences via CORE acronym/title
             if "computer vision and pattern recognition" in vname.lower():
-                cvpr_rank = self.core_acronym_lookup.get("cvpr", "A*")
-                return VenueRankingResult(
-                    venue_name=vname,
-                    venue_type=venue_type or "conference",
-                    ranking_system="CORE",
-                    quartile=None,
-                    core_rank=cvpr_rank,
-                    sjr=None,
-                    h_index=None,
-                    provenance="core"
-                )
-
-            # B. Check parenthesized acronyms first (e.g. "(CVPR)")
-            paren_matches = re.findall(r"[\(\[\{]([A-Za-z0-9\-]+)[\)\]\}]", vname)
-            for p in paren_matches:
-                p_clean = self._clean_str(p)
-                if p_clean in self.core_acronym_lookup:
+                cvpr_rank = self._lookup_core("cvpr", pub_year, is_acronym=True)
+                if cvpr_rank:
                     return VenueRankingResult(
                         venue_name=vname,
                         venue_type=venue_type or "conference",
                         ranking_system="CORE",
                         quartile=None,
-                        core_rank=self.core_acronym_lookup[p_clean],
+                        core_rank=cvpr_rank,
+                        sjr=None,
+                        h_index=None,
+                        provenance="core"
+                    )
+
+            # B. Check parenthesized acronyms first (e.g. "(CVPR)")
+            paren_matches = re.findall(r"[\(\[\{]([A-Za-z0-9\-]+)[\)\]\}]", vname)
+            for p in paren_matches:
+                p_clean = self._clean_str(p)
+                rk = self._lookup_core(p_clean, pub_year, is_acronym=True)
+                if rk:
+                    return VenueRankingResult(
+                        venue_name=vname,
+                        venue_type=venue_type or "conference",
+                        ranking_system="CORE",
+                        quartile=None,
+                        core_rank=rk,
                         sjr=None,
                         h_index=None,
                         provenance="core"
@@ -166,26 +187,28 @@ class ScientometricVenueResolver:
             # B. Check discrete word tokens in title
             words = [self._clean_str(w) for w in re.split(r"[\s,;:\-\/]+", vname) if len(w) >= 3]
             for w in words:
-                if w in self.core_acronym_lookup:
+                rk = self._lookup_core(w, pub_year, is_acronym=True)
+                if rk:
                     return VenueRankingResult(
                         venue_name=vname,
                         venue_type=venue_type or "conference",
                         ranking_system="CORE",
                         quartile=None,
-                        core_rank=self.core_acronym_lookup[w],
+                        core_rank=rk,
                         sjr=None,
                         h_index=None,
                         provenance="core"
                     )
 
             # C. Check full title match
-            if vname_clean in self.core_title_lookup:
+            rk = self._lookup_core(vname_clean, pub_year, is_acronym=False)
+            if rk:
                 return VenueRankingResult(
                     venue_name=vname,
                     venue_type=venue_type or "conference",
                     ranking_system="CORE",
                     quartile=None,
-                    core_rank=self.core_title_lookup[vname_clean],
+                    core_rank=rk,
                     sjr=None,
                     h_index=None,
                     provenance="core"

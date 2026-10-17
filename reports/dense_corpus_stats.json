@@ -1,0 +1,32 @@
+{
+  "timestamp_utc": "2026-10-17T00:15:57Z",
+  "data_dir": "C:\\Users\\ASUS\\Documents\\SECOND SEMISTER\\INTERNSHIP\\scigraph\\data\\dense",
+  "total_works": 39600,
+  "total_in_corpus_edges": 184771,
+  "target_works_count": 32400,
+  "target_degrees": {
+    "median": 5.0,
+    "mean": 9.24,
+    "p25": 2.0,
+    "p75": 11.0,
+    "p90": 20.0,
+    "median_in_degree": 2.0,
+    "median_out_degree": 2.0
+  },
+  "neighbor_fractions": {
+    "ge_1": 0.907,
+    "ge_3": 0.7167,
+    "ge_5": 0.5601,
+    "ge_10": 0.3093
+  },
+  "reference_coverage": {
+    "median": 0.0571,
+    "mean": 0.0861
+  },
+  "gate_a": {
+    "median_degree_ge_15": false,
+    "fraction_ge_3_ge_70pct": true,
+    "median_ref_cov_ge_30pct": false,
+    "overall_pass": false
+  }
+}

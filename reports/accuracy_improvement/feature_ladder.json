@@ -1,0 +1,280 @@
+{
+  "timestamp_utc": "2026-10-17T00:27:44Z",
+  "evaluation_protocol": "Retrained on Train (2012-2016), tuned C on Val (2017), evaluated once on Test (2018-2020)",
+  "ladder": [
+    {
+      "group": "F0_Baseline",
+      "features_in_group": [
+        "f0_log_cits",
+        "f0_is_oa",
+        "f0_num_authors",
+        "f0_venue_sjr"
+      ],
+      "total_features": 4,
+      "kept": true,
+      "decision": "BASELINE",
+      "tuned_C": 0.01,
+      "val_accuracy": 0.586,
+      "val_macro_f1": 0.5539,
+      "test_accuracy": 0.504,
+      "test_macro_f1": 0.4755,
+      "test_macro_f1_ci": [
+        0.4578,
+        0.492
+      ],
+      "test_accuracy_ci": [
+        0.4889,
+        0.5187
+      ],
+      "test_auroc": 0.7186,
+      "test_auroc_ci": [
+        0.7072,
+        0.73
+      ],
+      "test_precision_at_top10": 0.4111,
+      "paired_bootstrap_p_vs_prev": 1.0
+    },
+    {
+      "group": "+F1_CohortNorm",
+      "features_in_group": [
+        "f1_cohort_percentile",
+        "f1_cohort_zscore",
+        "f1_cohort_size"
+      ],
+      "total_features": 7,
+      "kept": true,
+      "decision": "KEEP (+0.0566)",
+      "tuned_C": 10.0,
+      "val_accuracy": 0.6567,
+      "val_macro_f1": 0.6105,
+      "test_accuracy": 0.5967,
+      "test_macro_f1": 0.5824,
+      "test_macro_f1_ci": [
+        0.5638,
+        0.5987
+      ],
+      "test_accuracy_ci": [
+        0.5827,
+        0.6107
+      ],
+      "test_auroc": 0.7453,
+      "test_auroc_ci": [
+        0.7337,
+        0.7567
+      ],
+      "test_precision_at_top10": 0.6044,
+      "paired_bootstrap_p_vs_prev": 0.0
+    },
+    {
+      "group": "+F2_Trajectory",
+      "features_in_group": [
+        "f2_y0",
+        "f2_y1",
+        "f2_y2",
+        "f2_accel",
+        "f2_growth_ratio",
+        "f2_last_year_share",
+        "f2_positive_growth"
+      ],
+      "total_features": 14,
+      "kept": true,
+      "decision": "KEEP (+0.1105)",
+      "tuned_C": 10.0,
+      "val_accuracy": 0.73,
+      "val_macro_f1": 0.721,
+      "test_accuracy": 0.6907,
+      "test_macro_f1": 0.6923,
+      "test_macro_f1_ci": [
+        0.6774,
+        0.7079
+      ],
+      "test_accuracy_ci": [
+        0.6778,
+        0.7049
+      ],
+      "test_auroc": 0.8482,
+      "test_auroc_ci": [
+        0.8392,
+        0.8574
+      ],
+      "test_precision_at_top10": 0.72,
+      "paired_bootstrap_p_vs_prev": 0.0
+    },
+    {
+      "group": "+F3_CiterVol",
+      "features_in_group": [
+        "f3_in_corpus_citer_count"
+      ],
+      "total_features": 15,
+      "kept": true,
+      "decision": "KEEP (+0.0007)",
+      "tuned_C": 1.0,
+      "val_accuracy": 0.7307,
+      "val_macro_f1": 0.7217,
+      "test_accuracy": 0.6949,
+      "test_macro_f1": 0.6944,
+      "test_macro_f1_ci": [
+        0.6791,
+        0.7096
+      ],
+      "test_accuracy_ci": [
+        0.6813,
+        0.7085
+      ],
+      "test_auroc": 0.8481,
+      "test_auroc_ci": [
+        0.8391,
+        0.8571
+      ],
+      "test_precision_at_top10": 0.7178,
+      "paired_bootstrap_p_vs_prev": 0.215
+    },
+    {
+      "group": "+F4_AuthorHist",
+      "features_in_group": [
+        "f4_author_max_prior_papers",
+        "f4_author_mean_prior_papers",
+        "f4_has_veteran_author"
+      ],
+      "total_features": 18,
+      "kept": true,
+      "decision": "KEEP (+0.0004)",
+      "tuned_C": 1.0,
+      "val_accuracy": 0.7287,
+      "val_macro_f1": 0.7221,
+      "test_accuracy": 0.6958,
+      "test_macro_f1": 0.6964,
+      "test_macro_f1_ci": [
+        0.681,
+        0.7124
+      ],
+      "test_accuracy_ci": [
+        0.6824,
+        0.71
+      ],
+      "test_auroc": 0.8491,
+      "test_auroc_ci": [
+        0.8401,
+        0.8582
+      ],
+      "test_precision_at_top10": 0.7267,
+      "paired_bootstrap_p_vs_prev": 0.242
+    },
+    {
+      "group": "+F5_VenueHist",
+      "features_in_group": [
+        "f5_has_core_rank",
+        "f5_is_q1"
+      ],
+      "total_features": 20,
+      "kept": true,
+      "decision": "KEEP (+0.0020)",
+      "tuned_C": 10.0,
+      "val_accuracy": 0.73,
+      "val_macro_f1": 0.7241,
+      "test_accuracy": 0.6998,
+      "test_macro_f1": 0.6982,
+      "test_macro_f1_ci": [
+        0.6824,
+        0.7134
+      ],
+      "test_accuracy_ci": [
+        0.6864,
+        0.7138
+      ],
+      "test_auroc": 0.8518,
+      "test_auroc_ci": [
+        0.843,
+        0.8611
+      ],
+      "test_precision_at_top10": 0.7222,
+      "paired_bootstrap_p_vs_prev": 0.199
+    },
+    {
+      "group": "+F6_RefQuality",
+      "features_in_group": [
+        "f6_ref_count",
+        "f6_log_ref_count"
+      ],
+      "total_features": 20,
+      "kept": false,
+      "decision": "DROP (-0.0016)",
+      "tuned_C": 10.0,
+      "val_accuracy": 0.7307,
+      "val_macro_f1": 0.7225,
+      "test_accuracy": 0.6991,
+      "test_macro_f1": 0.697,
+      "test_macro_f1_ci": [
+        0.6806,
+        0.7122
+      ],
+      "test_accuracy_ci": [
+        0.686,
+        0.7136
+      ],
+      "test_auroc": 0.8517,
+      "test_auroc_ci": [
+        0.8429,
+        0.8608
+      ],
+      "test_precision_at_top10": 0.7244,
+      "paired_bootstrap_p_vs_prev": 0.736
+    },
+    {
+      "group": "+F7_Intrinsics",
+      "features_in_group": [
+        "f7_title_chars",
+        "f7_title_words",
+        "f7_has_apc"
+      ],
+      "total_features": 23,
+      "kept": true,
+      "decision": "KEEP (+0.0053)",
+      "tuned_C": 10.0,
+      "val_accuracy": 0.7327,
+      "val_macro_f1": 0.7278,
+      "test_accuracy": 0.6989,
+      "test_macro_f1": 0.6972,
+      "test_macro_f1_ci": [
+        0.6812,
+        0.7124
+      ],
+      "test_accuracy_ci": [
+        0.6853,
+        0.7129
+      ],
+      "test_auroc": 0.8523,
+      "test_auroc_ci": [
+        0.8436,
+        0.8616
+      ],
+      "test_precision_at_top10": 0.72,
+      "paired_bootstrap_p_vs_prev": 0.68
+    }
+  ],
+  "final_selected_features": [
+    "f0_log_cits",
+    "f0_is_oa",
+    "f0_num_authors",
+    "f0_venue_sjr",
+    "f1_cohort_percentile",
+    "f1_cohort_zscore",
+    "f1_cohort_size",
+    "f2_y0",
+    "f2_y1",
+    "f2_y2",
+    "f2_accel",
+    "f2_growth_ratio",
+    "f2_last_year_share",
+    "f2_positive_growth",
+    "f3_in_corpus_citer_count",
+    "f4_author_max_prior_papers",
+    "f4_author_mean_prior_papers",
+    "f4_has_veteran_author",
+    "f5_has_core_rank",
+    "f5_is_q1",
+    "f7_title_chars",
+    "f7_title_words",
+    "f7_has_apc"
+  ]
+}

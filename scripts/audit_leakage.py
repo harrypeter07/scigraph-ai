@@ -64,7 +64,7 @@ def run_future_poison_test() -> dict:
     # 3. Build features from poisoned work
     poisoned_feats, _ = build_paper_features(poisoned_work, cutoff_offset=2)
 
-    # 4. Strict assertion: features must be byte-identical
+    # 4. Strict assertion: features must be byte-identical (negative control)
     diff = np.abs(clean_feats - poisoned_feats)
     max_diff = float(np.max(diff))
     is_identical = bool(np.array_equal(clean_feats, poisoned_feats))
@@ -72,17 +72,33 @@ def run_future_poison_test() -> dict:
     print(f"Clean features norm: {np.linalg.norm(clean_feats):.4f}")
     print(f"Poisoned features norm: {np.linalg.norm(poisoned_feats):.4f}")
     print(f"Max absolute diff: {max_diff:.8e}")
-    print(f"Byte-identical: {is_identical}")
+    print(f"Byte-identical (Negative Control): {is_identical}")
 
     assert is_identical, f"Future leakage detected! Poisoned features differ by max {max_diff}"
+
+    # 5. Positive Control: Inject +50 citations in cutoff year (must change features)
+    pos_work = copy.deepcopy(clean_work)
+    counts_pos = list(pos_work.get("counts_by_year", []))
+    for c in counts_pos:
+        if c.get("year") == cutoff_year:
+            c["cited_by_count"] = int(c.get("cited_by_count", 0)) + 50
+    pos_work["counts_by_year"] = counts_pos
+    pos_feats, _ = build_paper_features(pos_work, cutoff_offset=2)
+
+    pos_diff = float(np.abs(pos_feats[0] - clean_feats[0]))
+    is_sensitive = bool(pos_diff > 1e-4)
+    print(f"Pre-cutoff feature sensitivity delta (Positive Control): {pos_diff:.4f}")
+    assert is_sensitive, "Model/Feature pipeline invariant to real pre-cutoff citations (positive control failed)!"
 
     return {
         "status": "PASSED",
         "target_work_id": clean_work.get("id"),
         "pub_year": pub_year,
         "cutoff_year": cutoff_year,
-        "max_diff": max_diff,
-        "byte_identical": is_identical,
+        "max_diff_negative": max_diff,
+        "byte_identical_negative": is_identical,
+        "feature_delta_positive": pos_diff,
+        "positive_control_passed": is_sensitive,
     }
 
 

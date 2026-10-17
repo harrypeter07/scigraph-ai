@@ -17,28 +17,32 @@ from sklearn.decomposition import TruncatedSVD
 # Path to persisted text encoder
 DEFAULT_TEXT_ENCODER_PATH = Path(__file__).resolve().parent.parent / "gnn" / "checkpoints" / "text_encoder.joblib"
 
-# Ordered 14 feature groups covering exactly 47 dimensions:
-# Slices match indices in the 47-dimensional output vector.
+# Ordered 14 feature groups covering exactly 51 dimensions:
+# Slices match indices in the 51-dimensional output vector.
 FEATURE_GROUPS: OrderedDict[str, slice] = OrderedDict([
     ("log_cits_cutoff", slice(0, 1)),      # ln(1 + C_cutoff)
-    ("pub_offset", slice(1, 2)),           # (publication_year - 2010) / 10.0
-    ("log_refs", slice(2, 3)),             # ln(1 + referenced_works_count)
-    ("author_scale", slice(3, 4)),         # min(50, max(1, num_authors)) / 10.0
-    ("is_oa", slice(4, 5)),                # is_open_access (1.0 or 0.0)
-    ("oa_gold", slice(5, 6)),              # oa_status == 'gold'
-    ("oa_green", slice(6, 7)),             # oa_status == 'green'
-    ("oa_hybrid", slice(7, 8)),            # oa_status == 'hybrid'
-    ("oa_bronze", slice(8, 9)),            # oa_status == 'bronze'
-    ("oa_closed", slice(9, 10)),           # oa_status == 'closed'
-    ("log_apc", slice(10, 12)),            # [ln(1 + apc_paid_usd), apc_known]
-    ("sjr", slice(12, 14)),                # [sjr, venue_known]
-    ("tier_top", slice(14, 15)),           # SCImago Q1 or CORE A*/A
-    ("title_svd", slice(15, 47)),          # 32-dim TruncatedSVD from TF-IDF
+    ("field_one_hot", slice(1, 6)),        # 5 binary one-hot indicators for fields (no year extrapolation)
+    ("log_refs", slice(6, 7)),             # ln(1 + referenced_works_count)
+    ("author_scale", slice(7, 8)),         # min(50, max(1, num_authors)) / 10.0
+    ("is_oa", slice(8, 9)),                # is_open_access (1.0 or 0.0)
+    ("oa_gold", slice(9, 10)),             # oa_status == 'gold'
+    ("oa_green", slice(10, 11)),           # oa_status == 'green'
+    ("oa_hybrid", slice(11, 12)),          # oa_status == 'hybrid'
+    ("oa_bronze", slice(12, 13)),          # oa_status == 'bronze'
+    ("oa_closed", slice(13, 14)),          # oa_status == 'closed'
+    ("log_apc", slice(14, 16)),            # [ln(1 + apc_paid_usd), apc_known]
+    ("sjr", slice(16, 18)),                # [sjr, venue_known]
+    ("tier_top", slice(18, 19)),           # SCImago Q1 or CORE A*/A
+    ("title_svd", slice(19, 51)),          # 32-dim TruncatedSVD from TF-IDF
 ])
 
 FEATURE_NAMES: List[str] = [
     "log_cits_cutoff",
-    "pub_offset",
+    "field_cs",
+    "field_med",
+    "field_phys",
+    "field_bio",
+    "field_eng",
     "log_refs",
     "author_scale",
     "is_oa",
@@ -55,7 +59,7 @@ FEATURE_NAMES: List[str] = [
     *[f"title_svd_{i}" for i in range(32)],
 ]
 
-TOTAL_FEATURE_DIM = len(FEATURE_NAMES)  # 47 dimensions
+TOTAL_FEATURE_DIM = len(FEATURE_NAMES)  # 51 dimensions
 
 _CACHED_TEXT_ENCODER: Optional[Dict[str, Any]] = None
 
@@ -116,25 +120,41 @@ def transform_titles(titles: List[str], checkpoint_path: Optional[Path] = None) 
 
 
 def _extract_single_tabular(record: Union[Dict[str, Any], pd.Series], cutoff_offset: int = 2) -> np.ndarray:
-    """Extracts the 15 tabular features from a single dictionary or pandas Series."""
-    # 1. Publication year and cutoff
+    """Extracts the 19 tabular features from a single dictionary or pandas Series."""
+    # 1. Publication year and cutoff (year used only for cutoff date calculation, never as feature)
     pub_year_val = record.get("publication_year")
     if pub_year_val is None or (isinstance(pub_year_val, float) and np.isnan(pub_year_val)):
         pub_year = 2018
     else:
         pub_year = int(pub_year_val)
     cutoff_year = pub_year + cutoff_offset
-    pub_offset = (pub_year - 2010) / 10.0
 
-    # 2. Historical citations at cutoff
-    if "citations_at_cutoff" in record and pd.notnull(record.get("citations_at_cutoff")):
-        cits_at_cutoff = float(record["citations_at_cutoff"])
-    elif "counts_by_year" in record and isinstance(record.get("counts_by_year"), list):
+    # 1b. Disciplinary Field One-Hot (5 indicators: CS, Med, Phys, Bio, Eng) - zero temporal extrapolation
+    field_name = (
+        record.get("primary_field_name")
+        or record.get("field")
+        or (record.get("primary_topic") or {}).get("field", {}).get("display_name")
+        or ""
+    )
+    fn_lower = str(field_name).lower()
+    f_cs = 1.0 if "computer science" in fn_lower else 0.0
+    f_med = 1.0 if "medicine" in fn_lower else 0.0
+    f_phys = 1.0 if "physics" in fn_lower else 0.0
+    f_bio = 1.0 if ("biochemistry" in fn_lower or "biology" in fn_lower) else 0.0
+    f_eng = 1.0 if "engineering" in fn_lower else 0.0
+
+    # 2. Historical citations at cutoff:
+    # Strictly compute from counts_by_year whenever counts_by_year is provided (prevents smuggling).
+    # Only fall back to precomputed column for flat parquet rows where counts_by_year is omitted.
+    counts_by_year = record.get("counts_by_year")
+    if counts_by_year is not None and isinstance(counts_by_year, list) and len(counts_by_year) > 0:
         cits_at_cutoff = float(sum(
             c.get("cited_by_count", 0)
-            for c in record["counts_by_year"]
-            if isinstance(c, dict) and c.get("year", 9999) <= cutoff_year
+            for c in counts_by_year
+            if isinstance(c, dict) and int(c.get("year", 9999)) <= cutoff_year
         ))
+    elif "citations_at_cutoff" in record and pd.notnull(record.get("citations_at_cutoff")):
+        cits_at_cutoff = float(record["citations_at_cutoff"])
     else:
         cits_at_cutoff = 0.0
     log_cits = float(np.log1p(max(0.0, cits_at_cutoff)))
@@ -240,7 +260,11 @@ def _extract_single_tabular(record: Union[Dict[str, Any], pd.Series], cutoff_off
 
     return np.array([
         log_cits,
-        pub_offset,
+        f_cs,
+        f_med,
+        f_phys,
+        f_bio,
+        f_eng,
         log_refs,
         author_scale,
         is_oa,
@@ -286,9 +310,16 @@ def build_paper_features_batch(
     """
     N = len(df)
 
-    # 1. Publication year and cutoff
+    # 1. Publication year and cutoff (not used as feature)
     pub_years = df["publication_year"].fillna(2018).astype(int).values
-    pub_offset = ((pub_years - 2010) / 10.0)[:, None]
+
+    # 1b. Disciplinary Field One-Hot (5 indicators: CS, Med, Phys, Bio, Eng) - zero temporal extrapolation
+    field_col = df["primary_field_name"].fillna("").astype(str) if "primary_field_name" in df.columns else pd.Series([""] * N)
+    f_cs = field_col.str.contains("computer science", case=False).astype(float).values[:, None]
+    f_med = field_col.str.contains("medicine", case=False).astype(float).values[:, None]
+    f_phys = field_col.str.contains("physics", case=False).astype(float).values[:, None]
+    f_bio = (field_col.str.contains("biochemistry", case=False) | field_col.str.contains("biology", case=False)).astype(float).values[:, None]
+    f_eng = field_col.str.contains("engineering", case=False).astype(float).values[:, None]
 
     # 2. Historical citations at cutoff
     cits_cutoff = df["citations_at_cutoff"].fillna(0.0).clip(lower=0).values
@@ -328,7 +359,11 @@ def build_paper_features_batch(
 
     tabular_mat = np.hstack([
         log_cits,
-        pub_offset,
+        f_cs,
+        f_med,
+        f_phys,
+        f_bio,
+        f_eng,
         log_refs,
         author_scale,
         is_oa,

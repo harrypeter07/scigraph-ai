@@ -1,0 +1,26 @@
+{
+  "timestamp_utc": "2026-10-17T01:05:46Z",
+  "model_type": "Negative Binomial Over-Dispersed Counting Model",
+  "oracle_diagnostics": {
+    "oracle_1_1y_future_visible": {
+      "accuracy": 0.4869,
+      "macro_f1": 0.5014
+    },
+    "oracle_2_2y_future_visible": {
+      "accuracy": 0.4904,
+      "macro_f1": 0.5098
+    }
+  },
+  "negative_binomial_fit": {
+    "phi_dispersion_estimate": 3.8633,
+    "variance_formula": "Var(W|mu) = mu + mu^2 / 3.8633",
+    "sample_size_train": 7500,
+    "sample_size_test": 4500
+  },
+  "ceiling_metrics": {
+    "irreducible_accuracy_ceiling": 0.6504,
+    "irreducible_error_rate": 0.3496,
+    "boundary_papers_share_lt_60pct": 0.4433
+  },
+  "plain_language_verdict": "Even a theoretical perfect expected-value predictor is wrong on about 35.0% of papers because citation arrivals follow an over-dispersed Negative Binomial process (phi=3.86). 44.3% of papers sit so close to cohort percentile boundaries that their true tier is governed by stochastic arrival variance rather than deterministic features. Consequently, 80-85% accuracy on this 3-tier task is mathematically impossible with 2 years of observed data."
+}

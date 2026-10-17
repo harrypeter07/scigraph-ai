@@ -16,6 +16,7 @@ from pathlib import Path
 warnings.filterwarnings("ignore", category=FutureWarning, message=".*torch.jit.script.*")
 warnings.filterwarnings("ignore", category=FutureWarning, module="torch.jit")
 
+import hashlib
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -133,14 +134,27 @@ def get_numbers_registry():
 def health_check():
     """Service health and model availability status."""
     is_ready = inference_service.model is not None
+    primary_ready = getattr(inference_service, "primary_model", None) is not None
     works_count = len(inference_service.df_works) if inference_service.df_works is not None else 0
+
+    manifest_path = Path(__file__).resolve().parent.parent / "data" / "MANIFEST.sha256"
+    manifest_sha = None
+    if manifest_path.exists():
+        manifest_sha = hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+
     return {
-        "status": "healthy" if is_ready else "degraded",
+        "status": "healthy" if (is_ready and primary_ready) else "degraded",
         "service": "SciGraph AI 2.0",
         "model_loaded": is_ready,
-        "model_name": (inference_service.model_card or {}).get("model_name", "HeteroGraphSAGE"),
+        "primary_model_loaded": primary_ready,
+        "model_name": "M1_LogisticRegression",
         "corpus_works_indexed": works_count,
-        "polite_pool": settings.OPENALEX_POLITE_EMAIL
+        "polite_pool": settings.OPENALEX_POLITE_EMAIL,
+        "data_snapshot": {
+            "openalex_retrieved_utc": "2026-10-15T08:08:00Z",
+            "manifest_sha256": manifest_sha,
+            "manifest_path": "data/MANIFEST.sha256"
+        }
     }
 
 

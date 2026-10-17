@@ -1,0 +1,20 @@
+{
+  "stage": 1,
+  "stage_name": "Measure the Ceiling and Calibrate Expectations",
+  "timestamp_utc": "2026-10-17T02:00:00Z",
+  "gate_status": "PASS",
+  "negative_binomial_dispersion_phi": 3.8633,
+  "variance_formula": "Var(W|mu) = mu + mu^2 / 3.8633",
+  "training_sample_size": 7500,
+  "test_sample_size": 4500,
+  "accuracy_ceiling_expected_value": 0.6504,
+  "irreducible_error_rate": 0.3496,
+  "boundary_papers_share_max_p_lt_60pct": 0.4433,
+  "plain_language_verdict": "Even a perfect expected-value predictor is wrong on about 35.0% of papers because citation arrivals follow an over-dispersed Negative Binomial process (phi=3.86). 44.3% of papers have max_k P_ik < 0.60. An 80-85% accuracy on this 3-tier task is mathematically unreachable with 2 years of observed data.",
+  "honest_paths_to_80_plus": [
+    "Selective prediction (abstain on lowest confidence papers)",
+    "Split-conformal prediction sets (guaranteed coverage, e.g. 90%)",
+    "Binary above/below median classification",
+    "Within-one-tier accuracy (extreme error suppression)"
+  ]
+}

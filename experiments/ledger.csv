@@ -1,0 +1,2 @@
+id,name,git_commit,val_acc,val_macro_f1,val_auroc,val_within1,val_high_precision,delta_vs_best_so_far,seed_std,decision,notes
+E00,baseline_repaired,1b3a8ef,0.5900,0.5569,0.7604,0.9880,0.4581,0.0000,0.0000,KEEP,Repaired baseline 51-dim LogReg (Stage 0 E00a-E00f)

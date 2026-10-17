@@ -108,6 +108,7 @@ class PaperPredictionResponse(BaseModel):
     primary_field: Optional[str] = None
     primary_topic: Optional[str] = None
     authors: List[str] = Field(default_factory=list)
+    author_details: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
     cutoff_year: int
     citations_at_cutoff: int
     predicted_impact_class: int

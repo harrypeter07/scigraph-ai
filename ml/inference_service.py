@@ -456,6 +456,18 @@ class ModelInferenceService:
             split_name = "external"
             in_train = False
 
+        author_details = []
+        for a in authorships[:10]:
+            aname = (a.get("author") or {}).get("display_name")
+            apos = a.get("author_position") or "middle"
+            inst_list = [i.get("display_name") for i in (a.get("institutions") or []) if isinstance(i, dict) and i.get("display_name")]
+            if aname:
+                author_details.append({
+                    "name": aname,
+                    "position": apos,
+                    "institutions": inst_list
+                })
+
         result_payload = {
             "paper_id": work_id,
             "doi": doi_val,
@@ -464,6 +476,7 @@ class ModelInferenceService:
             "primary_field": primary_field if not pd.isna(primary_field) else None,
             "primary_topic": primary_topic if not pd.isna(primary_topic) else None,
             "authors": author_names[:10],
+            "author_details": author_details,
             "cutoff_year": cutoff_year,
             "citations_at_cutoff": cits_at_cutoff,
             "predicted_impact_class": pred_cls,

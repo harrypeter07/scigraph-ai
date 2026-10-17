@@ -30,6 +30,8 @@ ml/gnn/checkpoints/*
 !ml/gnn/checkpoints/hetero_graphsage.pt
 !ml/gnn/checkpoints/MODEL_CARD.json
 !ml/gnn/checkpoints/text_encoder.joblib
+!ml/gnn/checkpoints/primary_model.joblib
+!ml/gnn/checkpoints/primary_model_meta.json
 *.pt
 !ml/gnn/checkpoints/hetero_graphsage.pt
 *.pth

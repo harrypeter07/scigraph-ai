@@ -172,10 +172,11 @@ class OpenAlexClient:
             "future_citations_5y": fut_cits
         }
 
-        # 1. Real Authorships from authorships.parquet + authors.parquet
+        # 1. Real Authorships from authorships.parquet + authors.parquet + institutions.parquet
         if not hasattr(self, "_corpus_authors_map"):
             authorships_path = settings.DATA_DIR / "authorships.parquet"
             authors_path = settings.DATA_DIR / "authors.parquet"
+            inst_path = settings.DATA_DIR / "institutions.parquet"
             self._corpus_authors_map = {}
             if authorships_path.exists() and authors_path.exists():
                 try:
@@ -184,18 +185,40 @@ class OpenAlexClient:
                     for aid, name in list(a_name_map.items()):
                         a_name_map[aid.split("/")[-1]] = name
 
+                    inst_name_map = {}
+                    if inst_path.exists():
+                        df_i = pd.read_parquet(inst_path)
+                        inst_name_map = dict(zip(df_i["institution_id"].astype(str), df_i["display_name"].astype(str)))
+                        for iid, iname in list(inst_name_map.items()):
+                            inst_name_map[iid.split("/")[-1]] = iname
+
                     df_auths = pd.read_parquet(authorships_path)
-                    for wid, aid, pos in zip(df_auths["work_id"].values, df_auths["author_id"].values, df_auths["author_position"].values):
+                    has_inst = "institution_id" in df_auths.columns
+                    for wid, aid, pos, iid in zip(
+                        df_auths["work_id"].values,
+                        df_auths["author_id"].values,
+                        df_auths["author_position"].values,
+                        df_auths["institution_id"].values if has_inst else [None] * len(df_auths)
+                    ):
                         w_clean = str(wid).split("/")[-1]
                         a_clean = str(aid).split("/")[-1] if aid else None
                         dname = a_name_map.get(str(aid)) or a_name_map.get(a_clean) or "Unknown Author"
+
+                        inst_list = []
+                        if pd.notnull(iid):
+                            iid_str = str(iid)
+                            iname = inst_name_map.get(iid_str) or inst_name_map.get(iid_str.split("/")[-1])
+                            if iname:
+                                inst_list.append({"id": iid_str, "display_name": iname})
+
                         if w_clean not in self._corpus_authors_map:
                             self._corpus_authors_map[w_clean] = []
                         self._corpus_authors_map[w_clean].append({
                             "author": {"display_name": dname, "id": str(aid) if aid else None},
-                            "author_position": str(pos) if pos else "middle"
+                            "author_position": str(pos) if pos else "middle",
+                            "institutions": inst_list
                         })
-                    logger.info(f"Indexed {len(self._corpus_authors_map):,} works with genuine author names.")
+                    logger.info(f"Indexed {len(self._corpus_authors_map):,} works with genuine author and institution names.")
                 except Exception as e:
                     logger.warning(f"Failed to load corpus authorships: {e}")
                     self._corpus_authors_map = {}
@@ -275,15 +298,14 @@ class OpenAlexClient:
         clean_id = self.clean_identifier(identifier)
         cache_key = f"work_{clean_id}"
 
+        # Check pre-ingested local corpus first (authoritative parquet tables)
+        local_work = self._lookup_local_corpus(clean_id)
+        if local_work:
+            return local_work
+
         cached = self._read_cache(cache_key)
         if cached:
             return cached
-
-        # Check pre-ingested local corpus before remote call
-        local_work = self._lookup_local_corpus(clean_id)
-        if local_work:
-            self._write_cache(cache_key, local_work)
-            return local_work
 
         url = f"{self.base_url}/works/{clean_id}"
 

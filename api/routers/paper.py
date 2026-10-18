@@ -175,65 +175,100 @@ async def test_get_work(paper_id: str):
     }
 
 
-@router.get("/test-stage/{stage}/{paper_id:path}")
-async def test_stage(stage: int, paper_id: str):
-    import time, traceback
+@router.get("/test-predict-step/{step}/{paper_id:path}")
+async def test_predict_step(step: int, paper_id: str):
+    import time, traceback, numpy as np
     try:
         clean_id = openalex_client.clean_identifier(paper_id)
         raw_work = await openalex_client.get_work(clean_id)
-        if stage == 1:
-            return {"stage": 1, "title": raw_work.get("title")}
-
         pub_year = int(raw_work.get("publication_year", 2018))
         cutoff_year = pub_year + 2
 
-        if stage == 2:
+        if step == 1:
+            # Parse fields and counts
+            counts_by_year = raw_work.get("counts_by_year", []) or []
+            cits_at_cutoff = sum(
+                int(c.get("cited_by_count", 0) or 0)
+                for c in counts_by_year
+                if isinstance(c, dict) and int(c.get("year", 9999) or 9999) <= cutoff_year
+            )
+            authorships = raw_work.get("authorships", [])
+            author_names = [(a.get("author") or {}).get("display_name") for a in authorships if (a.get("author") or {}).get("display_name")]
+            return {"step": 1, "cits_at_cutoff": cits_at_cutoff, "authors": len(author_names)}
+
+        if step == 2:
             primary_loc = raw_work.get("primary_location") or {}
             source = primary_loc.get("source") or {}
+            from ml.scientometrics.venue_resolver import venue_resolver
             v_res = venue_resolver.resolve(
                 issn_l=source.get("issn_l"),
                 venue_name=source.get("display_name", ""),
                 pub_year=pub_year
             )
-            return {"stage": 2, "venue": v_res.model_dump() if v_res else None}
+            return {"step": 2, "venue": v_res.model_dump() if v_res else None}
 
-        if stage == 3:
+        if step == 3:
             topic_obj = raw_work.get("primary_topic") or {}
             primary_field = (topic_obj.get("field") or {}).get("display_name") or raw_work.get("primary_field_name")
-            open_access = raw_work.get("open_access") or {}
-            econ_info = access_service.compute(open_access, raw_work.get("primary_location") or {}, field_name=primary_field)
-            return {"stage": 3, "econ": econ_info.model_dump()}
+            from ml.scientometrics.access_economics import access_service
+            econ_info = access_service.compute(raw_work.get("open_access") or {}, raw_work.get("primary_location") or {}, field_name=primary_field)
+            return {"step": 3, "econ": econ_info.model_dump()}
 
-        if stage == 4:
+        if step == 4:
             t0 = time.time()
+            from ml.scientometrics.lineage_engine import lineage_engine
             lineage_info = lineage_engine.compute(raw_work, cutoff_year=cutoff_year)
-            return {"stage": 4, "elapsed": round(time.time() - t0, 4), "lineage": lineage_info.model_dump()}
+            return {"step": 4, "elapsed": round(time.time() - t0, 4), "lineage": lineage_info.model_dump()}
 
-        if stage == 5:
-            from ml.features.builder import build_paper_features
-            t0 = time.time()
-            feats, _ = build_paper_features(raw_work, cutoff_offset=2)
-            return {"stage": 5, "elapsed": round(time.time() - t0, 4), "feats_shape": list(feats.shape)}
-
-        if stage == 6:
+        if step == 5:
             from ml.features.builder import build_paper_features
             feats, _ = build_paper_features(raw_work, cutoff_offset=2)
             scaled = inference_service.primary_scaler.transform(feats.reshape(1, -1))
             logits = inference_service.primary_model.decision_function(scaled)
-            return {"stage": 6, "logits": logits.tolist()}
+            return {"step": 5, "logits": logits.tolist()}
 
-        if stage == 7:
-            pred = inference_service.predict(raw_work)
-            return {"stage": 7, "pred_tier": pred.get("predicted_impact_class")}
+        if step == 6:
+            # Linear attribution calculation
+            from ml.features.builder import build_paper_features, FEATURE_GROUPS
+            from ml.explain.attribution import FEATURE_DISPLAY_NAMES
+            feats, _ = build_paper_features(raw_work, cutoff_offset=2)
+            scaled = inference_service.primary_scaler.transform(feats.reshape(1, -1))
+            logits = inference_service.primary_model.decision_function(scaled)
+            scaled_logits = logits / max(inference_service.primary_temperature, 1e-4)
+            exp_z = np.exp(scaled_logits - np.max(scaled_logits, axis=1, keepdims=True))
+            probs = (exp_z / np.sum(exp_z, axis=1, keepdims=True))[0]
+            pred_cls = int(np.argmax(probs))
+            coefs = inference_service.primary_model.coef_[pred_cls]
+            contribs = scaled[0] * coefs
+            return {"step": 6, "pred_cls": pred_cls, "contribs_len": len(contribs)}
 
-        if stage == 8:
-            pred = inference_service.predict(raw_work)
-            resp = PaperPredictionResponse(**pred)
-            return {"stage": 8, "title": resp.title, "tier": resp.predicted_impact_class}
+        if step == 7:
+            # Backtest calculation
+            window_start = cutoff_year + 1
+            window_end = pub_year + 5
+            counts_by_year = raw_work.get("counts_by_year", []) or []
+            actual_window = sum(
+                c.get("cited_by_count", 0)
+                for c in counts_by_year
+                if isinstance(c, dict) and window_start <= c.get("year", 0) <= window_end
+            )
+            # Check df_works lookup
+            stored_rows = inference_service.df_works[inference_service.df_works["work_id"].astype(str).str.endswith(clean_id)] if inference_service.df_works is not None else None
+            cohort_vals = None
+            if inference_service.df_works is not None and "future_citations_5y" in inference_service.df_works.columns:
+                cohort_vals = inference_service.df_works[
+                    inference_service.df_works["publication_year"] == pub_year
+                ]["future_citations_5y"].dropna().values
+            return {
+                "step": 7,
+                "actual_window": actual_window,
+                "stored_rows_count": len(stored_rows) if stored_rows is not None else 0,
+                "cohort_vals_len": len(cohort_vals) if cohort_vals is not None else 0
+            }
 
-        return {"error": f"Invalid stage: {stage}"}
+        return {"error": f"Invalid step: {step}"}
     except Exception as e:
-        return {"stage": stage, "error": str(e), "traceback": traceback.format_exc()}
+        return {"step": step, "error": str(e), "traceback": traceback.format_exc()}
 
 
 @router.get("/debug-predict/{paper_id:path}")

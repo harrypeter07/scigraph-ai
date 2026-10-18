@@ -70,6 +70,7 @@ def build_receipt(
     work_id: str,
     raw_work: Optional[Dict[str, Any]] = None,
     prediction: Optional[Dict[str, Any]] = None,
+    mode: str = "M",
 ) -> Dict[str, Any]:
     """Generates a tamper-evident prediction receipt frozen strictly as-of cutoff."""
     clean_id = str(work_id).split("/")[-1]
@@ -89,6 +90,30 @@ def build_receipt(
     pub_year = int(prediction["publication_year"])
     cutoff_year = int(prediction["cutoff_year"])
     split = str(prediction.get("split", "unindexed"))
+
+    # Apply Gemini mode G if requested
+    mode_str = mode.upper() if mode else "M"
+    gemini_reasoning = None
+    if mode_str == "G":
+        try:
+            from ml.gemini_service import gemini_service
+            t_info = inference_service.get_cohort_threshold(
+                prediction.get("primary_field"),
+                pub_year
+            )
+            gemini_res = gemini_service.predict(
+                paper_context=prediction,
+                cohort_info=t_info,
+                m1_prediction=prediction
+            )
+            prediction = dict(prediction)
+            prediction["predicted_impact_class"] = gemini_res["predicted_impact_class"]
+            prediction["predicted_impact_label"] = gemini_res["predicted_impact_label"]
+            prediction["calibrated_probabilities"] = gemini_res["calibrated_probabilities"]
+            gemini_reasoning = gemini_res.get("gemini_reasoning")
+        except Exception as e:
+            logger.warning(f"Gemini receipt build fallback: {e}")
+            mode_str = "M"
 
     # Extract strictly frozen inputs (values known <= cutoff_year)
     counts_by_year = raw_work.get("counts_by_year", [])
@@ -118,6 +143,7 @@ def build_receipt(
         "historical_citation_trajectory_to_cutoff": frozen_citations,
     }
 
+    model_label = "SciGraph-2.0-Gemini (Mode G)" if mode_str == "G" else "SciGraph-2.0-Primary-LogisticRegression"
     receipt_core = {
         "work_id": clean_id,
         "openalex_url": f"https://openalex.org/{clean_id}",
@@ -128,7 +154,9 @@ def build_receipt(
         "split": split,
         "in_training_data": bool(prediction.get("in_training_data", False)),
         "frozen_inputs": frozen_inputs,
-        "model_version": "SciGraph-2.0-Primary-LogisticRegression",
+        "model_version": model_label,
+        "mode": mode_str,
+        "gemini_reasoning": gemini_reasoning,
         "data_snapshot_id": get_data_snapshot_id(),
         "probabilities": prediction["calibrated_probabilities"],
         "predicted_tier": prediction["predicted_impact_label"],

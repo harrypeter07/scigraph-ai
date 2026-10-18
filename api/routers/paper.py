@@ -158,13 +158,17 @@ def get_oa_advantage_metrics():
 
 
 @router.get("/predict/{paper_id:path}", response_model=PaperPredictionResponse)
-async def predict_paper_impact(paper_id: str):
+async def predict_paper_impact(
+    paper_id: str,
+    mode: str = Query("M", description="Prediction mode: 'M' (Local Model M1) or 'G' (Gemini Intelligence)")
+):
     """Predict 5-year citation trajectory impact tier for paper_id.
     
     Accepts:
     - OpenAlex work ID: e.g. 'W2194775991'
     - Full OpenAlex URL: e.g. 'https://openalex.org/W2194775991'
     - DOI: e.g. '10.1038/nature12373' or 'doi:10.1038/nature12373'
+    - mode: 'M' for standard Local Model, 'G' for Gemini Intelligence
     """
     clean_id = openalex_client.clean_identifier(paper_id)
 
@@ -195,6 +199,47 @@ async def predict_paper_impact(paper_id: str):
     # 2. Run inference via production ModelInferenceService
     try:
         prediction_dict = inference_service.predict(raw_work)
+        
+        # 3. If Mode G (Gemini Intelligence) is requested, apply LLM scientometric reasoning
+        mode_clean = (mode or "M").strip().upper()
+        if mode_clean == "G":
+            try:
+                from ml.gemini_service import gemini_service
+                t_info = inference_service.get_cohort_threshold(
+                    prediction_dict.get("primary_field"),
+                    prediction_dict.get("publication_year")
+                )
+                gemini_res = gemini_service.predict(
+                    paper_context=prediction_dict,
+                    cohort_info=t_info,
+                    m1_prediction=prediction_dict
+                )
+                # Seamlessly update prediction payload with Gemini's intelligence
+                prediction_dict["predicted_impact_class"] = gemini_res["predicted_impact_class"]
+                prediction_dict["predicted_impact_label"] = gemini_res["predicted_impact_label"]
+                prediction_dict["predicted_label"] = gemini_res["predicted_label"]
+                prediction_dict["calibrated_probabilities"] = gemini_res["calibrated_probabilities"]
+                if gemini_res.get("predicted_future_citations_5y") is not None:
+                    prediction_dict["predicted_future_citations_5y"] = gemini_res["predicted_future_citations_5y"]
+                    prediction_dict["citations_in_window"] = gemini_res["predicted_future_citations_5y"]
+                    prediction_dict["citations_window"] = gemini_res["predicted_future_citations_5y"]
+                prediction_dict["gemini_reasoning"] = gemini_res.get("gemini_reasoning")
+                prediction_dict["mode"] = "G"
+                prediction_dict["model_version"] = gemini_res.get("model_version", "Gemini (Mode G)")
+                if prediction_dict.get("backtest"):
+                    prediction_dict["backtest"]["predicted_impact_class"] = gemini_res["predicted_impact_class"]
+                    prediction_dict["backtest"]["predicted_label"] = gemini_res["predicted_label"]
+                    if prediction_dict["backtest"].get("has_ground_truth"):
+                        prediction_dict["backtest"]["is_correct_class"] = bool(
+                            gemini_res["predicted_impact_class"] == prediction_dict["backtest"].get("actual_impact_class")
+                        )
+            except Exception as g_err:
+                logger.warning(f"Gemini evaluation failed, falling back to local M1: {g_err}")
+                prediction_dict["mode"] = "M"
+                prediction_dict["gemini_reasoning"] = f"Gemini fallback triggered ({g_err}). Evaluated using primary model."
+        else:
+            prediction_dict["mode"] = "M"
+
         return PaperPredictionResponse(**prediction_dict)
     except RuntimeError as r_err:
         logger.error(f"Inference service runtime error: {r_err}")

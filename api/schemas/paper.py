@@ -139,6 +139,8 @@ class PaperPredictionResponse(BaseModel):
     graph_context: Optional[Any] = None
     model_version: str = "M1_LogisticRegression"
     provenance: str = "openalex | scimago | core | model | computed"
+    gemini_reasoning: Optional[str] = None
+    mode: Optional[Literal["M", "G"]] = "M"
 
 
 class DatasetStatsResponse(BaseModel):

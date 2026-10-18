@@ -180,22 +180,28 @@ async def _load_live_work(work_id: str) -> tuple[str, dict]:
 
 
 @router.post("/receipt/{work_id}")
-async def create_verification_receipt(work_id: str):
+async def create_verification_receipt(
+    work_id: str,
+    mode: str = Query("M", description="Prediction mode: 'M' (local model) or 'G' (Gemini intelligence)")
+):
     """Generate a tamper-evident prediction receipt frozen strictly as-of cutoff."""
     clean_id, raw_work = await _load_live_work(work_id)
     try:
-        return build_receipt(clean_id, raw_work=raw_work)
+        return build_receipt(clean_id, raw_work=raw_work, mode=mode)
     except Exception as exc:
         logger.error(f"Failed to build receipt for {clean_id}: {exc}")
         raise HTTPException(status_code=500, detail=str(exc))
 
 
 @router.get("/reveal/{work_id}")
-async def reveal_ground_truth(work_id: str):
+async def reveal_ground_truth(
+    work_id: str,
+    mode: str = Query("M", description="Prediction mode: 'M' (local model) or 'G' (Gemini intelligence)")
+):
     """Reveal post-cutoff ground truth citations (years pub+3..pub+5) and compare against receipt."""
     clean_id, raw_work = await _load_live_work(work_id)
     try:
-        receipt = build_receipt(clean_id, raw_work=raw_work)
+        receipt = build_receipt(clean_id, raw_work=raw_work, mode=mode)
         return build_reveal(clean_id, receipt=receipt, raw_work=raw_work)
     except Exception as exc:
         logger.error(f"Failed to reveal ground truth for {clean_id}: {exc}")
@@ -203,14 +209,46 @@ async def reveal_ground_truth(work_id: str):
 
 
 @router.get("/compare/{work_id}")
-async def compare_predicted_and_actual(work_id: str):
+async def compare_predicted_and_actual(
+    work_id: str,
+    mode: str = Query("M", description="Prediction mode: 'M' (local model) or 'G' (Gemini intelligence)")
+):
     """Live model prediction and observed outcome in one payload for teacher verification."""
     clean_id, raw_work = await _load_live_work(work_id)
     try:
         prediction = inference_service.predict(raw_work)
-        receipt = build_receipt(clean_id, raw_work=raw_work, prediction=prediction)
+        mode_clean = (mode or "M").strip().upper()
+        if mode_clean == "G":
+            try:
+                from ml.gemini_service import gemini_service
+                t_info = inference_service.get_cohort_threshold(
+                    prediction.get("primary_field"),
+                    prediction.get("publication_year")
+                )
+                gemini_res = gemini_service.predict(
+                    paper_context=prediction,
+                    cohort_info=t_info,
+                    m1_prediction=prediction
+                )
+                prediction["predicted_impact_class"] = gemini_res["predicted_impact_class"]
+                prediction["predicted_impact_label"] = gemini_res["predicted_impact_label"]
+                prediction["predicted_label"] = gemini_res["predicted_label"]
+                prediction["calibrated_probabilities"] = gemini_res["calibrated_probabilities"]
+                if gemini_res.get("predicted_future_citations_5y") is not None:
+                    prediction["predicted_future_citations_5y"] = gemini_res["predicted_future_citations_5y"]
+                prediction["gemini_reasoning"] = gemini_res.get("gemini_reasoning")
+                prediction["mode"] = "G"
+                prediction["model_version"] = gemini_res.get("model_version", "Gemini 2.5 Flash (Mode G)")
+            except Exception as e:
+                logger.warning(f"Gemini compare fallback: {e}")
+                mode_clean = "M"
+
+        receipt = build_receipt(clean_id, raw_work=raw_work, prediction=prediction, mode=mode_clean)
         reveal = build_reveal(clean_id, receipt=receipt, raw_work=raw_work)
         bt = prediction.get("backtest") or {}
+        actual_class = reveal.get("actual_impact_class") if reveal.get("actual_impact_class") is not None else bt.get("actual_impact_class")
+        is_correct = bool(prediction.get("predicted_impact_class") == actual_class)
+
         return {
             "work_id": clean_id,
             "title": prediction.get("title"),
@@ -220,6 +258,8 @@ async def compare_predicted_and_actual(work_id: str):
             "cutoff_year": prediction.get("cutoff_year"),
             "split": prediction.get("split"),
             "in_training_data": prediction.get("in_training_data"),
+            "mode": mode_clean,
+            "gemini_reasoning": prediction.get("gemini_reasoning"),
             "prediction": prediction,
             "receipt": receipt,
             "reveal": reveal,
@@ -233,11 +273,12 @@ async def compare_predicted_and_actual(work_id: str):
                 "probabilities": prediction.get("calibrated_probabilities"),
                 "predicted_window_citations": prediction.get("predicted_future_citations_5y"),
                 "actual_tier": reveal.get("actual_tier") or bt.get("actual_label"),
-                "actual_class": reveal.get("actual_impact_class"),
+                "actual_class": actual_class,
                 "actual_window_citations": reveal.get("window_total_citations"),
                 "yearly_actual": reveal.get("yearly_citations_breakdown"),
                 "cohort_thresholds": reveal.get("cohort_thresholds"),
-                "is_correct": reveal.get("is_correct"),
+                "is_correct": is_correct,
+                "gemini_reasoning": prediction.get("gemini_reasoning"),
                 "receipt_sha256": receipt.get("receipt_sha256"),
             },
         }

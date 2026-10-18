@@ -157,6 +157,24 @@ def get_oa_advantage_metrics():
 
 
 
+@router.get("/test-clean/{paper_id:path}")
+def test_clean_identifier(paper_id: str):
+    return {"clean_id": openalex_client.clean_identifier(paper_id)}
+
+
+@router.get("/test-work/{paper_id:path}")
+async def test_get_work(paper_id: str):
+    clean_id = openalex_client.clean_identifier(paper_id)
+    raw = await openalex_client.get_work(clean_id)
+    return {
+        "title": raw.get("title"),
+        "publication_year": raw.get("publication_year"),
+        "citations_at_cutoff": raw.get("citations_at_cutoff"),
+        "counts": len(raw.get("counts_by_year", [])),
+        "authors": len(raw.get("authorships", []))
+    }
+
+
 @router.get("/debug-predict/{paper_id:path}")
 async def debug_predict(paper_id: str):
     import time, traceback

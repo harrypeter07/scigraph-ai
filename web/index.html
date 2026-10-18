@@ -1403,9 +1403,13 @@
                             <p class="section-desc">Cutoff-only features, then predicted vs actual window citations.</p>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <div class="mode-toggle-group">
-                                <button type="button" class="mode-toggle-btn active" id="teacherModeBtnM" onclick="setPredictionMode('M')">Mode M</button>
-                                <button type="button" class="mode-toggle-btn mode-g" id="teacherModeBtnG" onclick="setPredictionMode('G')">Mode G</button>
+                            <div class="engine-segmented-control" role="tablist">
+                                <button type="button" class="seg-btn active" id="teacherModeBtnM" onclick="setPredictionMode('M')">
+                                    <span>Mode M</span>
+                                </button>
+                                <button type="button" class="seg-btn mode-g" id="teacherModeBtnG" onclick="setPredictionMode('G')">
+                                    <span>Mode G</span>
+                                </button>
                             </div>
                             <button class="btn-primary" id="btnTeacherFreeze" onclick="teacherPredictAndCompare()">Run prediction</button>
                         </div>
@@ -1682,8 +1686,8 @@
                         <!-- Model Card -->
                         <div style="background: #FFFFFF; border: 2px solid var(--accent-forest); border-radius: 6px; padding: 1.25rem;">
                             <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--accent-forest); letter-spacing: 0.05em;">Our Primary Model</div>
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreModelAcc">55.5%</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreModelF1">0.5284</strong></div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreModelAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreModelF1">--</strong></div>
                             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
                                 Outperforms baselines by considering the paper's disciplinary field, open-access status, and author network alongside early citation count.
                             </p>
@@ -1692,8 +1696,8 @@
                         <!-- Majority Guess Card -->
                         <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
                             <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Majority Guess Baseline</div>
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreMajAcc">44.3%</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreMajF1">0.2045</strong></div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreMajAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreMajF1">--</strong></div>
                             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
                                 Blindly guessing the most common tier (Low) fails to identify high-impact papers.
                             </p>
@@ -1702,8 +1706,8 @@
                         <!-- Early Citations Only Card -->
                         <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
                             <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Early Citations Only Baseline</div>
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreEarlyAcc">52.8%</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreEarlyF1">0.4721</strong></div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreEarlyAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreEarlyF1">--</strong></div>
                             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
                                 Using only early citation count without field adjustments struggles with papers from smaller scientific fields.
                             </p>
@@ -1738,12 +1742,12 @@
                         <label for="paperInput" style="font-size: 0.84rem; font-weight: 600; color: var(--text-ink); margin-bottom: 0;">
                             Paper Identifier (OpenAlex Work ID, DOI, or Canonical Title)
                         </label>
-                        <div class="mode-toggle-group" title="Toggle prediction engine: Mode M (Local Model) or Mode G (Google Gemini Intelligence)">
-                            <button type="button" class="mode-toggle-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">
-                                Mode M
+                        <div class="engine-segmented-control" role="tablist">
+                            <button type="button" class="seg-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">
+                                <span>Mode M (Scientometrics)</span>
                             </button>
-                            <button type="button" class="mode-toggle-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">
-                                Mode G
+                            <button type="button" class="seg-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">
+                                <span>Mode G (Gemini AI)</span>
                             </button>
                         </div>
                     </div>
@@ -2345,7 +2349,7 @@
                         <div style="background: var(--bg-surface-subtle); border-left: 3px solid var(--warning-amber); padding: 0.65rem 0.85rem; border-radius: 4px;">
                             <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-ink);">Breakthrough Elite Discovery (High-Class Recall: 60.3%)</div>
                             <div style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px;">
-                                Class recall is capped at <strong>60.3%</strong> due to heavy-tailed Negative Binomial boundary arrival variance ($\phi = 3.86$) and delayed recognition ("sleeping beauty" papers).
+                                Class recall is capped at <strong>60.3%</strong> due to heavy-tailed Negative Binomial boundary arrival variance (&phi; = 3.86) and delayed recognition ("sleeping beauty" papers).
                             </div>
                         </div>
                     </div>
@@ -2432,9 +2436,13 @@
                     <div class="editorial-card span-12">
                         <div class="card-header-flex">
                             <span class="card-kicker">Research Ideation & Topic Validation</span>
-                            <div class="mode-toggle-group" title="Engine Mode for Topic Exploration">
-                                <button type="button" class="mode-toggle-btn active" id="topicModeBtnM" onclick="setTopicMode('M')">Mode M (Scientometrics)</button>
-                                <button type="button" class="mode-toggle-btn mode-g" id="topicModeBtnG" onclick="setTopicMode('G')">Mode G (Gemini AI)</button>
+                            <div class="engine-segmented-control" role="tablist">
+                                <button type="button" class="seg-btn active" id="topicModeBtnM" onclick="setPredictionMode('M')">
+                                    <span>Mode M (Scientometrics)</span>
+                                </button>
+                                <button type="button" class="seg-btn mode-g" id="topicModeBtnG" onclick="setPredictionMode('G')">
+                                    <span>Mode G (Gemini AI)</span>
+                                </button>
                             </div>
                         </div>
 
@@ -3693,7 +3701,8 @@
             currentPredictionMode = (mode || 'M').toUpperCase();
             const isM = (currentPredictionMode === 'M');
             
-            // Sync all Mode buttons across topbar, predictor, and teacher panes
+            // Global Synchronization: Sync ALL mode buttons and variables
+            currentTopicMode = currentPredictionMode;
             const syncBtn = (idM, idG) => {
                 const bM = document.getElementById(idM);
                 const bG = document.getElementById(idG);
@@ -3703,6 +3712,14 @@
             syncBtn('topbarModeBtnM', 'topbarModeBtnG');
             syncBtn('predModeBtnM', 'predModeBtnG');
             syncBtn('teacherModeBtnM', 'teacherModeBtnG');
+            syncBtn('topicModeBtnM', 'topicModeBtnG');
+            
+            const topicPill = document.getElementById('topicActiveEnginePill');
+            if (topicPill) {
+                topicPill.textContent = isM ? 'Mode M (Scientometrics)' : 'Mode G (Gemini Intelligence)';
+                topicPill.style.background = isM ? '#F1F5F9' : '#DBEAFE';
+                topicPill.style.color = isM ? '#475569' : '#1E40AF';
+            }
 
             // If a prediction or teacher view is currently displayed, re-run with selected mode
             const activeView = document.querySelector('.view-pane.active');
@@ -3981,11 +3998,11 @@
             const provPill = document.getElementById('forecastProvenancePill');
             if (provPill) {
                 if (data.mode === 'G' || data.gemini_reasoning) {
-                    provPill.textContent = '✨ Gemini 2.5 Flash (Mode G)';
+                    provPill.textContent = 'Gemini 2.5 Flash (Mode G)';
                     provPill.style.background = '#DBEAFE';
                     provPill.style.color = '#1D4ED8';
                 } else {
-                    provPill.textContent = '🤖 M1_LogisticRegression (Mode M)';
+                    provPill.textContent = 'M1_LogisticRegression (Mode M)';
                     provPill.style.background = '';
                     provPill.style.color = '';
                 }

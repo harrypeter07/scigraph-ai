@@ -7,10 +7,14 @@ Provides two authentic, mathematically grounded attribution methods:
 Completely eliminates legacy hardcoded attribution weights.
 """
 
+from __future__ import annotations
 from typing import Dict, List, Tuple, Any, Optional
 from pathlib import Path
 import json
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 import numpy as np
 import pandas as pd
 from sklearn.metrics import f1_score
@@ -90,6 +94,8 @@ def compute_local_occlusion_attributions(
     - Measures absolute drop/change in predicted class probability.
     - Normalizes attributions to sum to 1.0.
     """
+    if torch is None or model is None:
+        return []
     model.eval()
     train_means = get_train_feature_means()
     x_paper_orig = x_dict["paper"]

@@ -69,22 +69,40 @@ class ScientometricVenueResolver:
         return re.sub(r"[^a-zA-Z0-9]", "", text.lower())
 
     def _load_datasets(self):
-        # 1. Load SCImago
+        # 1. Load SCImago for corpus venues (lean memory footprint ~11MB instead of 266MB)
         if self.scimago_path.exists():
-            df_scimago = pd.read_parquet(self.scimago_path)
-            for row in df_scimago.itertuples(index=False):
-                issn = getattr(row, "issn")
-                yr = int(getattr(row, "year"))
-                if issn not in self.scimago_lookup:
-                    self.scimago_lookup[issn] = {}
-                sjr_val = getattr(row, "sjr")
-                h_val = getattr(row, "h_index")
-                self.scimago_lookup[issn][yr] = {
-                    "quartile": getattr(row, "quartile"),
-                    "sjr": float(sjr_val) if pd.notnull(sjr_val) else None,
-                    "h_index": float(h_val) if pd.notnull(h_val) else None
-                }
-            logger.info(f"VenueResolver: Loaded {len(self.scimago_lookup):,} SCImago ISSN entries.")
+            sources_path = settings.DATA_DIR / "sources.parquet"
+            filters = None
+            if sources_path.exists():
+                try:
+                    df_src = pd.read_parquet(sources_path, columns=["issn_l"])
+                    corpus_issns = list(set(df_src["issn_l"].dropna().str.replace("-", "").str.upper()))
+                    if corpus_issns:
+                        filters = [("issn", "in", corpus_issns)]
+                except Exception as e:
+                    logger.warning(f"VenueResolver: Could not load corpus ISSNs from sources.parquet: {e}")
+
+            try:
+                df_scimago = pd.read_parquet(
+                    self.scimago_path,
+                    columns=["issn", "year", "quartile", "sjr", "h_index"],
+                    filters=filters
+                )
+                for row in df_scimago.itertuples(index=False):
+                    issn = getattr(row, "issn")
+                    yr = int(getattr(row, "year"))
+                    if issn not in self.scimago_lookup:
+                        self.scimago_lookup[issn] = {}
+                    sjr_val = getattr(row, "sjr")
+                    h_val = getattr(row, "h_index")
+                    self.scimago_lookup[issn][yr] = {
+                        "quartile": getattr(row, "quartile"),
+                        "sjr": float(sjr_val) if pd.notnull(sjr_val) else None,
+                        "h_index": float(h_val) if pd.notnull(h_val) else None
+                    }
+                logger.info(f"VenueResolver: Loaded {len(self.scimago_lookup):,} SCImago ISSN entries ({len(df_scimago):,} records).")
+            except Exception as e:
+                logger.error(f"VenueResolver: Failed to load SCImago parquet: {e}")
         else:
             logger.warning(f"VenueResolver: SCImago dataset not found at {self.scimago_path}")
 
@@ -123,6 +141,34 @@ class ScientometricVenueResolver:
         # Sort by year descending to get latest edition <= pub_year
         valid_editions.sort(key=lambda x: x[0], reverse=True)
         return valid_editions[0][1]
+
+    def _lookup_scimago_dynamic(self, issn: str) -> Optional[Dict[int, Dict[str, Any]]]:
+        """Dynamically queries SCImago for an unseen ISSN via parquet pushdown filter without full table scan."""
+        if not self.scimago_path.exists() or not issn:
+            return None
+        try:
+            df_single = pd.read_parquet(
+                self.scimago_path,
+                columns=["issn", "year", "quartile", "sjr", "h_index"],
+                filters=[("issn", "==", issn)]
+            )
+            if df_single.empty:
+                return None
+            res = {}
+            for row in df_single.itertuples(index=False):
+                yr = int(getattr(row, "year"))
+                sjr_val = getattr(row, "sjr")
+                h_val = getattr(row, "h_index")
+                res[yr] = {
+                    "quartile": getattr(row, "quartile"),
+                    "sjr": float(sjr_val) if pd.notnull(sjr_val) else None,
+                    "h_index": float(h_val) if pd.notnull(h_val) else None
+                }
+            self.scimago_lookup[issn] = res
+            return res
+        except Exception as e:
+            logger.debug(f"Dynamic SCImago query failed for {issn}: {e}")
+            return None
 
     def resolve(
         self,
@@ -219,8 +265,10 @@ class ScientometricVenueResolver:
         # 2. Check SCImago by ISSN-L
         issns = self._normalize_issn(venue_issn_l)
         for issn in issns:
-            if issn in self.scimago_lookup:
-                year_map = self.scimago_lookup[issn]
+            year_map = self.scimago_lookup.get(issn)
+            if year_map is None:
+                year_map = self._lookup_scimago_dynamic(issn)
+            if year_map:
                 valid_years = [y for y in year_map.keys() if y <= pub_year]
                 if not valid_years:
                     continue

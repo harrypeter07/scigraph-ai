@@ -163,7 +163,7 @@ def health_check():
     return {
         "status": "healthy" if primary_ready else "degraded",
         "service": "SciGraph AI 2.0",
-        "deployed_commit": "deploy-v5-step-loc",
+        "deployed_commit": "deploy-v6-memory-optimized",
         "model_loaded": primary_ready,
         "primary_model_loaded": primary_ready,
         "gnn_model_loaded": inference_service.model is not None,
@@ -178,10 +178,16 @@ def health_check():
     }
 
 
-# Serve Web Dashboard at root /
+# Serve Web Dashboard and Static Assets
 web_dir = Path(__file__).resolve().parent.parent / "web"
 if web_dir.exists():
     app.mount("/static", StaticFiles(directory=str(web_dir)), name="static")
+    if (web_dir / "css").exists():
+        app.mount("/css", StaticFiles(directory=str(web_dir / "css")), name="css")
+    if (web_dir / "js").exists():
+        app.mount("/js", StaticFiles(directory=str(web_dir / "js")), name="js")
+    if (web_dir / "views").exists():
+        app.mount("/views", StaticFiles(directory=str(web_dir / "views")), name="views")
 
     @app.get("/")
     def serve_dashboard():

@@ -23,6 +23,9 @@ from api.openalex_client import (
     OpenAlexValidationError
 )
 from ml.inference_service import inference_service
+from ml.scientometrics.venue_resolver import venue_resolver
+from ml.scientometrics.access_economics import access_service
+from ml.scientometrics.lineage_engine import lineage_engine
 
 logger = logging.getLogger("scigraph.api.paper")
 

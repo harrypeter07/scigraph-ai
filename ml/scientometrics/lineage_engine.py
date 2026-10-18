@@ -137,13 +137,16 @@ class ScientometricLineageEngine:
         if not self.edges_path.exists() or not target_ids:
             return res
         try:
+            import pyarrow.parquet as pq
             search_wids = list(target_ids) + [f"https://openalex.org/{t}" for t in target_ids]
-            df = pd.read_parquet(
+            tbl = pq.read_table(
                 self.edges_path,
                 columns=["citing_work_id", "referenced_work_id"],
                 filters=[("referenced_work_id", "in", search_wids)]
             )
-            for citing, cited in zip(df["citing_work_id"].values, df["referenced_work_id"].values):
+            c_vals = tbl["citing_work_id"].to_pylist()
+            r_vals = tbl["referenced_work_id"].to_pylist()
+            for citing, cited in zip(c_vals, r_vals):
                 citing_c = str(citing).split("/")[-1]
                 cited_c = str(cited).split("/")[-1]
                 if cited_c in res:

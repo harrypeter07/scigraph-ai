@@ -72,15 +72,17 @@ class ScientometricVenueResolver:
         # 1. Load SCImago
         if self.scimago_path.exists():
             df_scimago = pd.read_parquet(self.scimago_path)
-            for _, row in df_scimago.iterrows():
-                issn = row["issn"]
-                yr = int(row["year"])
+            for row in df_scimago.itertuples(index=False):
+                issn = getattr(row, "issn")
+                yr = int(getattr(row, "year"))
                 if issn not in self.scimago_lookup:
                     self.scimago_lookup[issn] = {}
+                sjr_val = getattr(row, "sjr")
+                h_val = getattr(row, "h_index")
                 self.scimago_lookup[issn][yr] = {
-                    "quartile": row["quartile"],
-                    "sjr": float(row["sjr"]) if pd.notnull(row["sjr"]) else None,
-                    "h_index": float(row["h_index"]) if pd.notnull(row["h_index"]) else None
+                    "quartile": getattr(row, "quartile"),
+                    "sjr": float(sjr_val) if pd.notnull(sjr_val) else None,
+                    "h_index": float(h_val) if pd.notnull(h_val) else None
                 }
             logger.info(f"VenueResolver: Loaded {len(self.scimago_lookup):,} SCImago ISSN entries.")
         else:
@@ -93,11 +95,11 @@ class ScientometricVenueResolver:
             df_core["prio"] = df_core["rank"].map(lambda r: rank_prio.get(r, 0))
             df_core = df_core.sort_values(by=["edition_year", "prio"], ascending=[False, False])
 
-            for _, row in df_core.iterrows():
-                t = self._clean_str(str(row.get("title", "")))
-                a = self._clean_str(str(row.get("acronym", "")))
-                rk = str(row.get("rank", "Unranked"))
-                ey = int(row.get("edition_year", 2020))
+            for row in df_core.itertuples(index=False):
+                t = self._clean_str(str(getattr(row, "title", "")))
+                a = self._clean_str(str(getattr(row, "acronym", "")))
+                rk = str(getattr(row, "rank", "Unranked"))
+                ey = int(getattr(row, "edition_year", 2020))
                 if t:
                     self.core_title_history.setdefault(t, []).append((ey, rk))
                     if t not in self.core_title_lookup:

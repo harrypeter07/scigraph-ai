@@ -14,6 +14,7 @@ import re
 import json
 import logging
 import threading
+from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
 logger = logging.getLogger("scigraph.gemini")
@@ -183,6 +184,42 @@ Ensure the probabilities sum to approximately 1.0. Do NOT return any markdown wr
 """
         return prompt
 
+    def _generate_with_retry(self, prompt: str, json_mode: bool = True) -> str:
+        """Executes Gemini generation with auto-rotation across API keys on 429/quota."""
+        if not HAS_GENAI or not self._keys:
+            raise RuntimeError("Gemini client or keys not available")
+
+        attempts = min(4, len(self._keys))
+        last_error = None
+
+        for attempt in range(attempts):
+            api_key = self.get_active_key()
+            try:
+                client = genai.Client(api_key=api_key)
+                cfg = None
+                if hasattr(types, "GenerateContentConfig") and json_mode:
+                    cfg = types.GenerateContentConfig(
+                        temperature=0.15,
+                        response_mime_type="application/json"
+                    )
+                response = client.models.generate_content(
+                    model=self._model_name,
+                    contents=prompt,
+                    config=cfg
+                )
+                raw_text = response.text if hasattr(response, "text") else str(response)
+                return raw_text
+            except Exception as exc:
+                err_msg = str(exc)
+                logger.warning(f"Gemini API attempt {attempt + 1} with key index {self._current_key_idx} failed: {err_msg}")
+                last_error = err_msg
+                if "429" in err_msg or "quota" in err_msg.lower() or "resource_exhausted" in err_msg.lower():
+                    self.rotate_key()
+                elif "403" in err_msg or "api_key" in err_msg.lower():
+                    self.rotate_key()
+
+        raise RuntimeError(f"All Gemini retry attempts exhausted. Last error: {last_error}")
+
     def predict(
         self,
         paper_context: Dict[str, Any],
@@ -195,51 +232,21 @@ Ensure the probabilities sum to approximately 1.0. Do NOT return any markdown wr
             return self._fallback_prediction(m1_prediction, reason="Gemini client or keys not available")
 
         prompt = self._build_prompt(paper_context, cohort_info, m1_prediction)
-        
-        # Try up to len(self._keys) times to rotate through keys if quota or rate limit hits
-        attempts = min(3, len(self._keys))
-        last_error = None
+        try:
+            raw_text = self._generate_with_retry(prompt, json_mode=True)
+            parsed = self._parse_gemini_json(raw_text)
+            if parsed:
+                parsed["mode"] = "G"
+                parsed["model_version"] = f"Gemini ({self._model_name} Intelligence Mode G)"
+                parsed["provenance"] = "openalex | gemini_ai | cohort_grounded"
+                return parsed
+            else:
+                logger.warning(f"Failed to parse JSON from Gemini response: {raw_text[:200]}")
+        except Exception as exc:
+            logger.error(f"Gemini predict failed: {exc}")
+            return self._fallback_prediction(m1_prediction, reason=f"Gemini API error: {exc}")
 
-        for attempt in range(attempts):
-            api_key = self.get_active_key()
-            try:
-                client = genai.Client(api_key=api_key)
-                
-                # Execute generation
-                response = client.models.generate_content(
-                    model=self._model_name,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        temperature=0.1,  # Low temperature for deterministic scientometric accuracy
-                        response_mime_type="application/json"
-                    ) if hasattr(types, "GenerateContentConfig") else None
-                )
-
-                raw_text = response.text if hasattr(response, "text") else str(response)
-                parsed = self._parse_gemini_json(raw_text)
-                
-                if parsed:
-                    # Successfully parsed
-                    parsed["mode"] = "G"
-                    parsed["model_version"] = f"Gemini ({self._model_name} Intelligence Mode G)"
-                    parsed["provenance"] = "openalex | gemini_ai | cohort_grounded"
-                    return parsed
-                else:
-                    logger.warning(f"Failed to parse JSON from Gemini response: {raw_text[:200]}")
-                    last_error = "JSON parse error from Gemini output"
-            except Exception as exc:
-                err_msg = str(exc)
-                logger.warning(f"Gemini API attempt {attempt + 1} with key index {self._current_key_idx} failed: {err_msg}")
-                last_error = err_msg
-                # If quota/rate limit error, rotate to next key
-                if "429" in err_msg or "quota" in err_msg.lower() or "resource_exhausted" in err_msg.lower():
-                    self.rotate_key()
-                elif "403" in err_msg or "api_key" in err_msg.lower():
-                    self.rotate_key()
-
-        # If all attempts failed, fallback gracefully to M1
-        logger.error(f"All Gemini attempts exhausted. Falling back to primary model. Last error: {last_error}")
-        return self._fallback_prediction(m1_prediction, reason=f"Gemini API error: {last_error}")
+        return self._fallback_prediction(m1_prediction, reason="JSON parse failure from Gemini")
 
     def _parse_gemini_json(self, raw_text: str) -> Optional[Dict[str, Any]]:
         """Cleans and extracts JSON object from Gemini response text."""
@@ -344,6 +351,127 @@ Ensure the probabilities sum to approximately 1.0. Do NOT return any markdown wr
             "gemini_reasoning": f"Local baseline inference ({reason}).",
             "model_version": "M1_LogisticRegression (Fallback)",
             "provenance": "model | fallback"
+        }
+
+    def analyze_topic_feasibility(self, topic_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Provides expert scientometric analysis and strategic research roadmap for a topic."""
+        if not self.is_available():
+            raise RuntimeError("Gemini service is unavailable or no valid API keys in pool.")
+
+        q = topic_data.get("query", "Unknown Topic")
+        t_info = topic_data.get("topic_info", {})
+        f_metrics = topic_data.get("feasibility_metrics", {})
+        venues = topic_data.get("top_venues", [])
+        seminal = topic_data.get("seminal_papers", [])
+        recent = topic_data.get("recent_papers", [])
+        pillars = f_metrics.get("pillars", {})
+
+        venues_summary = "\n".join([
+            f"- {v.get('venue_name')}: {v.get('publication_count', 0)} papers (Rank: {v.get('quartile') or v.get('core_rank') or 'Standard'})"
+            for v in venues[:6]
+        ])
+
+        seminal_summary = "\n".join([
+            f"- '{p.get('title')}' ({p.get('publication_year')}) | {p.get('citations'):,} citations | Venue: {p.get('venue_name')}"
+            for p in seminal[:4]
+        ])
+
+        recent_summary = "\n".join([
+            f"- '{p.get('title')}' ({p.get('publication_year')}) | {p.get('citations'):,} citations"
+            for p in recent[:4]
+        ])
+
+        prompt = f"""You are a World-Class Scientometrician and Principal Research Advisor at a top university.
+A graduate researcher wants to publish a high-impact research paper on the topic: "{q}".
+
+We crawled the following empirical metadata live from OpenAlex, SCImago, and DOAJ:
+- Standardized Field: {t_info.get('field')} -> {t_info.get('subfield')} ({t_info.get('domain')})
+- Formal Topic Name: {t_info.get('display_name')}
+- Scope: {t_info.get('description')}
+- Total Literature Volume: {t_info.get('total_works_indexed', 0):,} papers indexed
+- 3-Year Publication CAGR: {t_info.get('cagr_3yr_pct', 0)}%
+- Saturation Assessment: {t_info.get('saturation_state')}
+- Algorithmic Feasibility Score: {f_metrics.get('success_rate_pct', 70)}% ({f_metrics.get('recommendation_tier')})
+- Growth Pillar: {pillars.get('growth_velocity', {}).get('score')}/100 ({pillars.get('growth_velocity', {}).get('summary')})
+- Citation Intensity: {pillars.get('citation_intensity', {}).get('score')}/100 ({pillars.get('citation_intensity', {}).get('summary')})
+- Venue Accessibility: {pillars.get('venue_accessibility', {}).get('score')}/100 ({pillars.get('venue_accessibility', {}).get('summary')})
+
+Top Publishing Venues in this Area:
+{venues_summary if venues_summary else "General multidisciplinary outlets"}
+
+Key Historical Seminal Papers:
+{seminal_summary if seminal_summary else "Standard baseline corpus"}
+
+Recent Breakthrough Papers (2022-2026):
+{recent_summary if recent_summary else "Active recent preprint activity"}
+
+Task: Provide deep, concrete, actionable academic guidance for an author aiming to write a paper in this topic that gets accepted into a top-tier venue and cited heavily. Do NOT speak in vague platitudes. Give technical, discipline-specific advice.
+
+Respond ONLY with valid, raw JSON matching this exact structure:
+{{
+  "mode": "G",
+  "executive_summary": "Thorough 2-3 sentence strategic verdict on why this topic is viable or challenging right now based on its CAGR and citation density.",
+  "novel_research_gaps": [
+    "Specific technical research gap 1 with actionable niche",
+    "Specific technical research gap 2 with actionable niche",
+    "Specific technical research gap 3 with actionable niche"
+  ],
+  "recommended_methodology": [
+    "Concrete dataset or benchmark suggestion to evaluate on",
+    "Essential baseline models or algorithms that must be compared against",
+    "Evaluation metric or ablation protocol required for acceptance"
+  ],
+  "common_pitfalls": [
+    "Major trap or flaw that causes reviewer rejection in this specific topic",
+    "Another common pitfall in experimental setup or evaluation"
+  ],
+  "suggested_venues": [
+    "Specific venue name and why it is the optimal target",
+    "Secondary venue target"
+  ]
+}}
+"""
+        raw_response = self._generate_with_retry(prompt, json_mode=True)
+        cleaned = raw_response.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        elif cleaned.startswith("```"):
+            cleaned = cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+
+        try:
+            parsed = json.loads(cleaned)
+            parsed["mode"] = "G"
+            return parsed
+        except Exception:
+            match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+            if match:
+                try:
+                    p = json.loads(match.group(0))
+                    p["mode"] = "G"
+                    return p
+                except Exception:
+                    pass
+
+        return {
+            "mode": "G",
+            "executive_summary": cleaned[:400],
+            "novel_research_gaps": [
+                f"Empirical evaluation of '{q}' under distribution shifts.",
+                f"Algorithmic efficiency and low-resource constraints in {t_info.get('subfield')}.",
+                f"Theoretical generalization guarantees for '{q}' architectures."
+            ],
+            "recommended_methodology": [
+                "Benchmark on standard public datasets with 5-fold cross-validation.",
+                "Include comprehensive ablation studies on all hyperparameter components."
+            ],
+            "common_pitfalls": [
+                "Failing to compare against contemporary strong baselines from the last 2 years.",
+                "Reporting metrics without confidence intervals or error margins."
+            ],
+            "suggested_venues": [v.get("venue_name") for v in venues[:3] if v.get("venue_name")]
         }
 
 

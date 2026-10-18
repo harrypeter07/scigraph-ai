@@ -31,6 +31,7 @@ from api.config import settings
 from ml.inference_service import inference_service
 from api.routers.paper import router as paper_router
 from api.routers.verification import router as verify_router
+from api.routers.topic import router as topic_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -78,6 +79,7 @@ app.add_middleware(
 app.include_router(paper_router, prefix="/api/v1/papers")
 app.include_router(paper_router, prefix="/api/v1/paper")
 app.include_router(verify_router, prefix="/api/v1/verify")
+app.include_router(topic_router)
 
 
 _cached_splits = None

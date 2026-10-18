@@ -163,7 +163,7 @@ def health_check():
     return {
         "status": "healthy" if primary_ready else "degraded",
         "service": "SciGraph AI 2.0",
-        "deployed_commit": "deploy-v8-full-ui-stable",
+        "deployed_commit": "deploy-v9-high-contrast-ui",
         "model_loaded": primary_ready,
         "primary_model_loaded": primary_ready,
         "gnn_model_loaded": inference_service.model is not None,

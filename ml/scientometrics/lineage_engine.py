@@ -128,25 +128,29 @@ class ScientometricLineageEngine:
         self.works_path = works_path or (settings.DATA_DIR / "works.parquet")
 
         self.works_cache: Dict[str, Dict[str, Any]] = {}
-        self._citers_map: Optional[Dict[str, Set[str]]] = None
         self._load_works_cache()
 
-    def _get_citers_map(self) -> Dict[str, Set[str]]:
-        if self._citers_map is None:
-            self._citers_map = {}
-            if self.edges_path.exists():
-                try:
-                    df = pd.read_parquet(self.edges_path)
-                    for citing, cited in zip(df['citing_work_id'].values, df['referenced_work_id'].values):
-                        citing_c = str(citing).split('/')[-1]
-                        cited_c = str(cited).split('/')[-1]
-                        if cited_c not in self._citers_map:
-                            self._citers_map[cited_c] = set()
-                        self._citers_map[cited_c].add(citing_c)
-                    logger.info(f"LineageEngine: Indexed {len(self._citers_map):,} cited entities for fast CD calculation.")
-                except Exception as e:
-                    logger.warning(f"LineageEngine: Failed to index citation edges: {e}")
-        return self._citers_map
+    def _get_citers_for_works(self, target_ids: Set[str]) -> Dict[str, Set[str]]:
+        """Efficiently queries citing works ONLY for the specified target IDs using parquet pushdown filters.
+        Avoids loading all 1.76M rows into memory, eliminating out-of-memory container crashes."""
+        res: Dict[str, Set[str]] = {t: set() for t in target_ids}
+        if not self.edges_path.exists() or not target_ids:
+            return res
+        try:
+            search_wids = list(target_ids) + [f"https://openalex.org/{t}" for t in target_ids]
+            df = pd.read_parquet(
+                self.edges_path,
+                columns=["citing_work_id", "referenced_work_id"],
+                filters=[("referenced_work_id", "in", search_wids)]
+            )
+            for citing, cited in zip(df["citing_work_id"].values, df["referenced_work_id"].values):
+                citing_c = str(citing).split("/")[-1]
+                cited_c = str(cited).split("/")[-1]
+                if cited_c in res:
+                    res[cited_c].add(citing_c)
+        except Exception as e:
+            logger.warning(f"LineageEngine: Failed to query citation edges for targeted works: {e}")
+        return res
 
     def compute(self, raw_work: Optional[Dict[str, Any]] = None, cutoff_year: Optional[int] = None) -> BidirectionalLineageResult:
         if not raw_work or not isinstance(raw_work, dict):
@@ -284,9 +288,10 @@ class ScientometricLineageEngine:
         # When >= 5 foundational references are observed within the indexed citation graph,
         # compute authentic CD index = (n_i - n_j) / (n_i + n_j + n_k).
         if tracked_refs_count >= 5:
-            citers_map = self._get_citers_map()
             focal_clean = clean_id
             refs_clean = {str(r).split("/")[-1] for r in refs if r}
+            targets = refs_clean | {focal_clean}
+            citers_map = self._get_citers_for_works(targets)
 
             citers_focal = citers_map.get(focal_clean, set()) - {focal_clean}
             citers_refs = set()

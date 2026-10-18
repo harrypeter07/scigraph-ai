@@ -240,6 +240,7 @@ class OpenAlexClient:
                             "year": int(r["year"]),
                             "cited_by_count": int(r["cited_by_count"])
                         })
+                    raw_work["counts_by_year"] = c_list
             except Exception as e:
                 logger.warning(f"Failed to query counts by year for {clean_id}: {e}")
 

@@ -175,6 +175,67 @@ async def test_get_work(paper_id: str):
     }
 
 
+@router.get("/test-stage/{stage}/{paper_id:path}")
+async def test_stage(stage: int, paper_id: str):
+    import time, traceback
+    try:
+        clean_id = openalex_client.clean_identifier(paper_id)
+        raw_work = await openalex_client.get_work(clean_id)
+        if stage == 1:
+            return {"stage": 1, "title": raw_work.get("title")}
+
+        pub_year = int(raw_work.get("publication_year", 2018))
+        cutoff_year = pub_year + 2
+
+        if stage == 2:
+            primary_loc = raw_work.get("primary_location") or {}
+            source = primary_loc.get("source") or {}
+            v_res = venue_resolver.resolve(
+                issn_l=source.get("issn_l"),
+                venue_name=source.get("display_name", ""),
+                pub_year=pub_year
+            )
+            return {"stage": 2, "venue": v_res.model_dump() if v_res else None}
+
+        if stage == 3:
+            topic_obj = raw_work.get("primary_topic") or {}
+            primary_field = (topic_obj.get("field") or {}).get("display_name") or raw_work.get("primary_field_name")
+            open_access = raw_work.get("open_access") or {}
+            econ_info = access_service.compute(open_access, raw_work.get("primary_location") or {}, field_name=primary_field)
+            return {"stage": 3, "econ": econ_info.model_dump()}
+
+        if stage == 4:
+            t0 = time.time()
+            lineage_info = lineage_engine.compute(raw_work, cutoff_year=cutoff_year)
+            return {"stage": 4, "elapsed": round(time.time() - t0, 4), "lineage": lineage_info.model_dump()}
+
+        if stage == 5:
+            from ml.features.builder import build_paper_features
+            t0 = time.time()
+            feats, _ = build_paper_features(raw_work, cutoff_offset=2)
+            return {"stage": 5, "elapsed": round(time.time() - t0, 4), "feats_shape": list(feats.shape)}
+
+        if stage == 6:
+            from ml.features.builder import build_paper_features
+            feats, _ = build_paper_features(raw_work, cutoff_offset=2)
+            scaled = inference_service.primary_scaler.transform(feats.reshape(1, -1))
+            logits = inference_service.primary_model.decision_function(scaled)
+            return {"stage": 6, "logits": logits.tolist()}
+
+        if stage == 7:
+            pred = inference_service.predict(raw_work)
+            return {"stage": 7, "pred_tier": pred.get("predicted_impact_class")}
+
+        if stage == 8:
+            pred = inference_service.predict(raw_work)
+            resp = PaperPredictionResponse(**pred)
+            return {"stage": 8, "title": resp.title, "tier": resp.predicted_impact_class}
+
+        return {"error": f"Invalid stage: {stage}"}
+    except Exception as e:
+        return {"stage": stage, "error": str(e), "traceback": traceback.format_exc()}
+
+
 @router.get("/debug-predict/{paper_id:path}")
 async def debug_predict(paper_id: str):
     import time, traceback

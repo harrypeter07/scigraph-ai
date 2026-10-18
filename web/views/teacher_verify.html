@@ -1,0 +1,395 @@
+            <section id="viewTeacherVerify" class="view-pane">
+                <div class="bento">
+                <div class="page-header bento-tile span-12">
+                    <div class="tile-row">
+                        <div>
+                            <h1 class="page-title">Predict &amp; Verify</h1>
+                            <p class="page-description">
+                                Pick a held-out paper, run the served model, and compare predicted vs actual citations in years 3–5.
+                            </p>
+                        </div>
+                        <span class="heldout-badge" style="background:#DCFCE7; color:#15803D; padding:4px 10px; border-radius:999px; font-weight:600; font-size:0.68rem; display:inline-flex; align-items:center; gap:6px; border: 1px solid rgba(21,128,61,0.2); white-space:nowrap;">
+                            <span style="width: 7px; height: 7px; border-radius: 50%; background: #15803D;"></span>
+                            Held-out
+                        </span>
+                    </div>
+
+                    <details style="margin-top: 0.4rem; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.4rem 0.65rem;">
+                        <summary style="cursor: pointer; font-size: 0.72rem; font-weight: 600; color: var(--accent-forest);">For experts</summary>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; line-height: 1.6;">
+                            <p><strong>Cutoff:</strong> The moment 2 years after publication where feature observation stops. Any citation after this date is locked out.</p>
+                            <p><strong>Tier:</strong> Citation impact category relative to all papers in the same field and year: Low (&lt;50th percentile), Medium (50th–90th percentile), or High (&ge;90th percentile).</p>
+                            <p><strong>Cohort:</strong> Empirical distribution of papers sharing the same publication year and discipline, used to set objective percentiles.</p>
+                            <p><strong>Calibration:</strong> Temperature scaling applied to model outputs so that predicted probabilities reflect true empirical error frequencies.</p>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- 1. Pick a held-out paper (dropdown / buttons only) -->
+                <div class="editorial-panel span-6">
+                    <h3 class="section-title">1. Pick a held-out paper</h3>
+                    <p class="section-desc">Dropdown, preset, or any OpenAlex ID / DOI. Nothing runs until you click Run prediction.</p>
+
+                    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem;">
+                        <select id="teacherPaperSelect" class="search-input" style="flex: 1; min-width: 280px;" onchange="onTeacherPaperSelected(this.value)">
+                            <option value="">Loading held-out test papers...</option>
+                        </select>
+                        <button class="btn-secondary" id="teacherRandomBtn" onclick="teacherPickRandomPaper()">Random paper</button>
+                    </div>
+                    <div class="tier-quick-buttons" style="margin-top: 0.75rem;">
+                        <button type="button" class="tier-btn high" onclick="teacherPickPreset(0)">Example A</button>
+                        <button type="button" class="tier-btn medium" onclick="teacherPickPreset(1)">Example B</button>
+                        <button type="button" class="tier-btn low" onclick="teacherPickPreset(2)">Example C</button>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem;">
+                        <input type="text" id="teacherPaperIdInput" class="search-input" style="flex: 1; min-width: 260px;" placeholder="Or paste OpenAlex ID / DOI (e.g. W2752782242)">
+                        <button class="btn-secondary" onclick="teacherLoadPaperById()">Load ID</button>
+                    </div>
+
+                    <div id="teacherPaperError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherPaperCard" style="display: none; margin-top: 1rem; background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                        <div style="font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; color: var(--text-ink);" id="teacherPaperTitle"></div>
+                        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.4rem; font-size: 0.8rem; color: var(--text-secondary);">
+                            <span>ID: <strong id="teacherPaperId" style="font-family: var(--font-mono);"></strong></span>
+                            <span>•</span>
+                            <span>Published: <strong id="teacherPaperYear"></strong></span>
+                            <span>•</span>
+                            <span>Field: <strong id="teacherPaperField"></strong></span>
+                            <span>•</span>
+                            <span>Venue: <strong id="teacherPaperVenue"></strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Run live prediction vs actual -->
+                <div class="editorial-panel span-6">
+                    <div class="tile-row">
+                        <div>
+                            <h3 class="section-title">2. Run live prediction</h3>
+                            <p class="section-desc">Cutoff-only features, then predicted vs actual window citations.</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="engine-segmented-control" role="tablist">
+                                <button type="button" class="seg-btn active" id="teacherModeBtnM" onclick="setPredictionMode('M')">
+                                    <span>Mode M</span>
+                                </button>
+                                <button type="button" class="seg-btn mode-g" id="teacherModeBtnG" onclick="setPredictionMode('G')">
+                                    <span>Mode G</span>
+                                </button>
+                            </div>
+                            <button class="btn-primary" id="btnTeacherFreeze" onclick="teacherPredictAndCompare()">Run prediction</button>
+                        </div>
+                    </div>
+                    <div id="teacherRunLoader" class="sg-loader"><span class="sg-spinner"></span><span id="teacherRunLoaderText">Running live prediction on cutoff-only features. Predicted vs actual numbers will appear here.</span></div>
+
+                    <div id="teacherFreezeError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+                </div>
+
+                    <div id="teacherFreezeResult" class="bento span-12" style="display: none; margin-top: 0;">
+                        <!-- What the model saw -->
+                        <div class="span-4" style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.55rem;">
+                            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.5rem;">What the model saw (citations up to cutoff only)</div>
+                            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem;">
+                                <div>Cutoff year: <strong id="teacherCutoffYear"></strong></div>
+                                <div>Total early citations: <strong id="teacherEarlyCitations" style="color: var(--accent-forest); font-size: 1.1rem;"></strong></div>
+                            </div>
+                            <div class="data-table-wrap">
+                                <table class="editorial-table" style="font-size: 0.82rem;">
+                                    <thead><tr><th>Year</th><th>Early Citations Observed</th><th>Status</th></tr></thead>
+                                    <tbody id="teacherEarlyCitationsTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="dual-eval-grid span-8" id="teacherSideBySide">
+                            <div class="eval-panel forecast-side">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label forecast">Predicted (model, cutoff only)</span>
+                                        <span class="provenance-pill">M1 live inference</span>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Predicted citations in years 3–5</div>
+                                    <div class="pred-number" id="teacherPredWindowCits">—</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 0.2rem;">window total (pub+3 to pub+5)</div>
+                                    <div style="margin-top: 0.85rem; font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono);">Predicted impact tier</div>
+                                    <div class="outcome-badge" id="teacherPredictedTier" style="margin-top: 0.25rem;"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.75rem; font-size: 0.82rem; flex-wrap: wrap; margin-top: 0.85rem;" id="teacherProbabilities"></div>
+                            </div>
+                            <div class="eval-panel truth-side">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label truth">Actual (held-out outcome)</span>
+                                        <span id="teacherCmpMatch" class="verdict-match-tag"></span>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Observed citations in years 3–5</div>
+                                    <div class="actual-number" id="teacherActualWindowCits">—</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 0.2rem;">sum of yearly OpenAlex counts</div>
+                                    <div style="margin-top: 0.85rem; font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono);">Actual impact tier</div>
+                                    <div class="outcome-badge" id="teacherActualTierInline" style="margin-top: 0.25rem;"></div>
+                                </div>
+                                <div style="margin-top: 0.85rem; font-size: 0.82rem; color: var(--text-secondary);">
+                                    Cohort p50 / p90: <strong id="teacherCohortInline">—</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="year-chart-wrap span-4" style="margin-bottom: 0;">
+                            <div style="font-size: 0.68rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.35rem;">Predicted vs actual</div>
+                            <div class="year-chart" id="teacherCompareBars" style="height: 92px;"></div>
+                        </div>
+                        <div class="year-chart-wrap span-4">
+                            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.65rem;">Yearly citations (green = before/at cutoff, blue = actual window)</div>
+                            <div class="year-chart" id="teacherYearChart"></div>
+                            <div style="display:flex; gap:1rem; flex-wrap:wrap; font-size:0.74rem; color:var(--text-secondary); margin-top:0.5rem;">
+                                <span><strong style="color:var(--accent-forest);">■</strong> Observed at or before cutoff (model input)</span>
+                                <span><strong style="color:var(--warning-amber);">■</strong> Cutoff year</span>
+                                <span><strong style="color:var(--accent-blue);">■</strong> Actual years 3–5 (held out)</span>
+                            </div>
+                        </div>
+                        <div class="span-4" style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; overflow: hidden;">
+                            <div style="padding: 0.4rem 0.55rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.68rem; font-weight: 700;">2-hop neighborhood</div>
+                            <div id="cyTeacher" style="height: 180px; width: 100%;"></div>
+                        </div>
+
+                        <!-- Gemini Reasoning Tile (Visible when Mode G is active) -->
+                        <div class="span-12 gemini-reasoning-panel" id="teacherGeminiReasoningTile" style="display: none;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="background: #2563EB; color: #FFF; padding: 2px 7px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">MODE G</span>
+                                    <strong style="font-size: 0.84rem; color: #1E40AF;">Google Gemini Scientometric Intelligence &amp; Reasoning</strong>
+                                </div>
+                                <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);">LLM-Synthesized Forecast</span>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--text-ink); line-height: 1.5; margin-bottom: 0;" id="teacherGeminiReasoningText"></p>
+                        </div>
+
+                        <!-- Cryptographic Receipt Hash -->
+                        <div class="span-12" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 0.45rem 0.6rem;">
+                            <div style="font-size: 0.74rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.25rem;">Receipt SHA-256 Digest (Tamper-Evident Fingerprint)</div>
+                            <code id="teacherReceiptHash" style="font-family: var(--font-mono); font-size: 0.8rem; word-break: break-all; color: var(--accent-forest); font-weight: 600;"></code>
+                        </div>
+                    </div>
+
+                <!-- 3. Show what really happened -->
+                <div class="editorial-panel span-6">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">3. Year-by-year actual citations</h3>
+                            <p class="section-desc">Raw OpenAlex counts in years 3–5 after publication, used to score the live forecast above.</p>
+                        </div>
+                        <button class="btn-secondary" id="btnTeacherReveal" onclick="teacherRevealReality()">Refresh actual counts</button>
+                    </div>
+
+                    <div id="teacherRevealError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherRevealResult" style="display: none; margin-top: 1rem;">
+                        <!-- Ground Truth Reveal Table -->
+                        <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                            <div style="font-size: 0.76rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 0.5rem;">Citations in years 3-5 after publication</div>
+                            <div class="data-table-wrap">
+                                <table class="editorial-table" style="font-size: 0.84rem;">
+                                    <thead><tr><th>Evaluation Year</th><th>Yearly Citations</th><th>Window Phase</th></tr></thead>
+                                    <tbody id="teacherRealityTable"></tbody>
+                                    <tfoot>
+                                        <tr style="font-weight: 700; background: var(--bg-surface-subtle);">
+                                            <td>Total citations in years 3-5 after publication</td>
+                                            <td id="teacherRealityTotal" style="color: var(--accent-forest); font-size: 1rem;"></td>
+                                            <td>Full 3-Year Evaluation Window</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Verdict Card -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600;">Cohort Thresholds</div>
+                                <div style="font-size: 0.84rem; margin-top: 0.35rem;">
+                                    p50: <strong id="teacherCohortP50"></strong> • p90: <strong id="teacherCohortP90"></strong>
+                                </div>
+                            </div>
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600;">Actual Outcome Tier</div>
+                                <div style="font-size: 1.15rem; font-weight: 700; margin-top: 0.25rem; color: var(--text-ink);" id="teacherActualTier"></div>
+                            </div>
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-start;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.25rem;">Prediction Result</div>
+                                <span id="teacherVerdictBadge" style="font-size: 1rem; font-weight: 700; padding: 4px 12px; border-radius: 6px;"></span>
+                            </div>
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column; justify-content: center;">
+                                <div style="font-size: 0.74rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; margin-bottom: 0.25rem;">Receipt Integrity</div>
+                                <div id="teacherReceiptIntegrity" style="font-size: 0.82rem; font-weight: 600; color: var(--success-green); display: flex; align-items: center; gap: 0.35rem;">
+                                    <span>✔</span> <span>Receipt unchanged: Verified against immutable prediction ledger</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Check it yourself -->
+                        <div style="background: var(--accent-blue-subtle); border: 1px solid rgba(29,78,216,0.2); border-radius: 6px; padding: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.88rem; color: var(--accent-blue);">4. Check it yourself</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;">Add the three yearly numbers and compare.</div>
+                                </div>
+                                <a id="teacherOpenAlexLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="color: var(--accent-blue); font-weight: 600;">
+                                    Inspect Live Record on OpenAlex &nearr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Spot-check 20 random papers live against OpenAlex -->
+                <div class="editorial-panel span-6">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">5. Spot-check 20 random papers live against OpenAlex</h3>
+                            <p class="section-desc">Queries the official api.openalex.org in real time for 20 randomly sampled papers to verify stored database records.</p>
+                        </div>
+                        <button class="btn-secondary" id="btnTeacherSpotcheck" onclick="teacherRunSpotcheck()">Spot-check 20 random papers live against OpenAlex</button>
+                    </div>
+
+                    <div id="teacherSpotcheckError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherSpotcheckResult" style="display: none; margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                            <div style="font-size: 0.92rem; font-weight: 700;">
+                                Match Rate: <span id="teacherMatchRate" style="color: var(--accent-forest); font-size: 1.15rem;"></span>
+                            </div>
+                            <div style="font-size: 0.82rem; color: var(--text-secondary);">
+                                (<span id="teacherMatchCount"></span> matched live OpenAlex records out of <span id="teacherValidCount"></span> audited)
+                            </div>
+                        </div>
+
+                        <div class="data-table-wrap">
+                            <table class="editorial-table" style="font-size: 0.8rem;">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Year</th>
+                                        <th>Stored Window Count</th>
+                                        <th>Live Window Count</th>
+                                        <th>Tier Match</th>
+                                        <th>Audit Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="teacherSpotcheckTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Download Held-Out Predictions CSV -->
+                <div class="editorial-panel span-4">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">6. Download all 4,500 test predictions (CSV)</h3>
+                            <p class="section-desc">Every single held-out test prediction with raw titles, cutoff inputs, citations in years 3-5 after publication, and model probabilities.</p>
+                        </div>
+                        <a href="/api/v1/verify/heldout.csv" class="btn-secondary" download="heldout_test_predictions.csv">
+                            📥 Download all 4,500 test predictions (CSV)
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 7. Leakage test -->
+                <div class="editorial-panel span-8">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <h3 class="section-title">7. Leakage test</h3>
+                            <p class="section-desc">Verifies that the model is strictly blind to future events while remaining sensitive to genuine pre-cutoff evidence.</p>
+                        </div>
+                        <button class="btn-secondary" id="btnTeacherLeakage" onclick="teacherRunLeakage()">Run Leakage Test on This Paper</button>
+                    </div>
+
+                    <div id="teacherLeakageError" style="display: none; margin-top: 0.75rem; padding: 0.75rem; background: var(--destructive-bg); border: 1px solid var(--destructive-red); border-radius: 6px; color: var(--destructive-red); font-size: 0.82rem;"></div>
+
+                    <div id="teacherLeakageResult" style="display: none; margin-top: 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <!-- Negative Control -->
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                                    <span style="background: var(--success-bg); color: var(--success-green); font-weight: 700; font-size: 0.74rem; padding: 2px 6px; border-radius: 4px;">NEGATIVE CONTROL</span>
+                                    <strong style="font-size: 0.84rem;">Future citations injected</strong>
+                                </div>
+                                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.5rem;" id="teacherNegDesc"></p>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Future citations injected: <strong id="teacherNegAdded"></strong>
+                                </div>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Probability delta: <strong id="teacherNegDelta" style="font-family: var(--font-mono); color: var(--accent-forest);"></strong>
+                                </div>
+                                <div style="font-size: 0.82rem; font-weight: 700; color: var(--success-green); margin-top: 0.5rem;" id="teacherNegVerdict"></div>
+                            </div>
+
+                            <!-- Positive Control -->
+                            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                                    <span style="background: var(--accent-blue-subtle); color: var(--accent-blue); font-weight: 700; font-size: 0.74rem; padding: 2px 6px; border-radius: 4px;">POSITIVE CONTROL</span>
+                                    <strong style="font-size: 0.84rem;">Historical citations added</strong>
+                                </div>
+                                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.5rem;" id="teacherPosDesc"></p>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Historical citations added: <strong id="teacherPosAdded"></strong>
+                                </div>
+                                <div style="font-size: 0.8rem; margin-bottom: 0.25rem;">
+                                    Probability delta: <strong id="teacherPosDelta" style="font-family: var(--font-mono); color: var(--accent-blue);"></strong>
+                                </div>
+                                <div style="font-size: 0.82rem; font-weight: 700; color: var(--accent-blue); margin-top: 0.5rem;" id="teacherPosVerdict"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Scoreboard -->
+                <div class="editorial-panel span-12">
+                    <h3 class="section-title">8. Benchmark Scoreboard</h3>
+                    <p class="section-desc">Evaluated across all 4,500 held-out test papers (2018–2020).</p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        <!-- Model Card -->
+                        <div style="background: #FFFFFF; border: 2px solid var(--accent-forest); border-radius: 6px; padding: 1.25rem;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--accent-forest); letter-spacing: 0.05em;">Our Primary Model</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreModelAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreModelF1">--</strong></div>
+                            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+                                Outperforms baselines by considering the paper's disciplinary field, open-access status, and author network alongside early citation count.
+                            </p>
+                        </div>
+
+                        <!-- Majority Guess Card -->
+                        <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Majority Guess Baseline</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreMajAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreMajF1">--</strong></div>
+                            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+                                Blindly guessing the most common tier (Low) fails to identify high-impact papers.
+                            </p>
+                        </div>
+
+                        <!-- Early Citations Only Card -->
+                        <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
+                            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Early Citations Only Baseline</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreEarlyAcc">--%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreEarlyF1">--</strong></div>
+                            <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
+                                Using only early citation count without field adjustments struggles with papers from smaller scientific fields.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer with data snapshot and model version -->
+                <div class="span-12" style="padding: 0.35rem 0.15rem; font-size: 0.68rem; color: var(--text-secondary); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>Data Snapshot: <strong id="teacherFooterSnapshot">Loading...</strong></div>
+                    <div>Model Version: <strong id="teacherFooterVersion">Loading...</strong></div>
+                </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW 1: CITATION IMPACT PREDICTOR          -->
+            <!-- ========================================== -->

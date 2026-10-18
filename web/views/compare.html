@@ -1,0 +1,42 @@
+            <section id="viewCompare" class="view-pane">
+                <div class="bento">
+                <div class="page-header bento-tile span-12">
+                    <h1 class="page-title">Comparative Paper Analysis</h1>
+                    <p class="page-description">
+                        Evaluate two distinct papers side-by-side at their respective 2-year cutoff boundaries 
+                        to understand differences in their structural trajectories and predicted impacts.
+                    </p>
+                </div>
+
+                <div class="editorial-panel span-12">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                        <div>
+                            <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-ink); margin-bottom: 0.35rem; display: block;">Paper A Identifier</label>
+                            <input type="text" id="compInputA" class="search-input" value="W2752782242" placeholder="OpenAlex ID or DOI...">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-ink); margin-bottom: 0.35rem; display: block;">Paper B Identifier</label>
+                            <input type="text" id="compInputB" class="search-input" value="W2147415463" placeholder="OpenAlex ID or DOI...">
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="comparePapers()">Compare Papers at Cutoff</button>
+                </div>
+
+                <div id="compareResultsArea" class="data-table-wrap span-12" style="display: none;">
+                    <table class="editorial-table">
+                        <thead>
+                            <tr>
+                                <th>Scientometric Metric</th>
+                                <th id="compHeaderA">Paper A</th>
+                                <th id="compHeaderB">Paper B</th>
+                            </tr>
+                        </thead>
+                        <tbody id="compareTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </section>
+
+            <!-- SECTION: TOPIC FEASIBILITY & RESEARCH SUCCESS RATE EXPLORER -->

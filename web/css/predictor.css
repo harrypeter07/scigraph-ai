@@ -1,0 +1,273 @@
+        /* ========================================================= */
+        /* 5. PREDICTION HERO & DUAL EVALUATION                      */
+        /* ========================================================= */
+        .paper-title-lead {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-ink);
+            letter-spacing: -0.02em;
+            line-height: 1.35;
+            margin: 0.45rem 0 0.35rem;
+        }
+
+        .paper-authors-line {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.35rem;
+        }
+
+        .metadata-tags-row {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .meta-tag {
+            background-color: var(--bg-surface-subtle);
+            border: 1px solid var(--border-subtle);
+            padding: 0.22rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.74rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .meta-tag strong {
+            color: var(--text-ink);
+            font-weight: 600;
+        }
+
+        .scientometrics-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 0.65rem;
+            background-color: var(--bg-surface-subtle);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.75rem 0.9rem;
+            margin: 0.85rem 0;
+        }
+
+        .dual-eval-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--bento-gap);
+            margin-top: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .dual-eval-grid { grid-template-columns: 1fr; }
+        }
+
+        .eval-panel {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        .eval-panel.forecast-side {
+            border-top: 3px solid var(--accent-blue);
+        }
+
+        .eval-panel.truth-side {
+            border-top: 3px solid var(--accent-forest);
+            background-color: #FBFDFB;
+        }
+
+        .eval-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.65rem;
+        }
+
+        .eval-badge-label {
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .eval-badge-label.forecast { color: var(--accent-blue); }
+        .eval-badge-label.truth { color: var(--accent-forest); }
+
+        .pred-number {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .actual-number {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--accent-forest);
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .outcome-badge {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            letter-spacing: -0.01em;
+            margin-top: 0.35rem;
+        }
+
+        .outcome-badge.high { background-color: var(--success-bg); color: var(--success-green); border: 1px solid rgba(5, 150, 105, 0.25); }
+        .outcome-badge.medium { background-color: var(--accent-blue-subtle); color: var(--accent-blue); border: 1px solid rgba(37, 99, 235, 0.25); }
+        .outcome-badge.low { background-color: var(--bg-surface-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+
+        .verdict-match-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+        }
+        .verdict-match-tag.match {
+            background-color: var(--success-bg);
+            color: var(--success-green);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+        .verdict-match-tag.misaligned {
+            background-color: #FEF3C7;
+            color: #92400E;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .prob-bar-container {
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .prob-bar-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.74rem;
+            color: var(--text-secondary);
+        }
+
+        .prob-bar-bg {
+            height: 6px;
+            background: #E2E8F0;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .prob-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.4s ease;
+        }
+
+        /* Subgraph Canvas */
+        #cy {
+            width: 100%;
+            height: 250px;
+            background-color: #FAFAFC;
+            border-radius: 8px;
+        }
+
+        .graph-controls {
+            position: absolute;
+            top: 0.8rem;
+            right: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            z-index: 20;
+        }
+
+        .graph-tool-btn {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-strong);
+            color: var(--text-ink);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+            transition: background 0.15s ease;
+        }
+
+        .graph-tool-btn:hover {
+            background-color: var(--bg-surface-subtle);
+        }
+
+        /* Timeline Trajectory Chart */
+        .year-chart-wrap {
+            margin-top: 0.75rem;
+            background: #FFFFFF;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.75rem 0.9rem;
+        }
+        .year-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 100px;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 1.8rem;
+        }
+        .year-bar-col {
+            flex: 1;
+            min-width: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+        }
+        .year-bar {
+            width: 100%;
+            max-width: 34px;
+            border-radius: 4px 4px 0 0;
+            background: var(--accent-blue);
+            transition: height 0.3s ease;
+        }
+        .year-bar.window { background: var(--accent-forest); }
+        .year-bar.cutoff { background: var(--warning-amber); }
+        .year-bar-label {
+            position: absolute;
+            bottom: -1.55rem;
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            color: var(--text-tertiary);
+            white-space: nowrap;
+        }
+        .year-bar-val {
+            font-size: 0.68rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+

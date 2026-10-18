@@ -1,0 +1,294 @@
+            <section id="viewPredictor" class="view-pane active">
+                <div class="bento">
+                <div class="page-header bento-tile span-12">
+                    <h1 class="page-title">Citation Impact Predictor</h1>
+                    <p class="page-description">
+                        Forecasts citations in years 3-5 after publication strictly conditioned on information 
+                        available at the 2-year cutoff boundary (t &le; t_pub + 2y). Zero future citations are accessed during inference.
+                    </p>
+                </div>
+
+                <!-- Input Workspace Panel with Impact Tier Preset Dropdown -->
+                <div class="editorial-panel span-12">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <label for="paperInput" style="font-size: 0.84rem; font-weight: 600; color: var(--text-ink); margin-bottom: 0;">
+                            Paper Identifier (OpenAlex Work ID, DOI, or Canonical Title)
+                        </label>
+                        <div class="engine-segmented-control" role="tablist">
+                            <button type="button" class="seg-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">
+                                <span>Mode M (Scientometrics)</span>
+                            </button>
+                            <button type="button" class="seg-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">
+                                <span>Mode G (Gemini AI)</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="search-bar-wrap">
+                        <input type="text" id="paperInput" class="search-input" placeholder="e.g. W2752782242, 10.1109/cvpr.2018.00745, or Squeeze-and-Excitation Networks" value="W2752782242">
+                        <button class="btn-primary" id="btnRunPrediction" onclick="runPrediction()">Generate Forecast</button>
+                    </div>
+
+                                        <div class="preset-toolbar">
+                        <div class="preset-select-wrap">
+                            <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap;">Preset Evaluation Papers:</span>
+                            <select id="presetPaperSelect" class="preset-dropdown" onchange="onPresetSelect(this.value)">
+                                <option value="W2752782242" selected>High Impact (&ge;90th) &mdash; Squeeze-and-Excitation Networks (CVPR 2018)</option>
+                                <option value="W2603777577">Medium Impact (50&ndash;90th) &mdash; Arbitrary Style Transfer (AdaIN) (ICCV 2017)</option>
+                                <option value="W2580662672">Low Impact (&lt;50th) &mdash; Gate-Variants of GRU Neural Networks (2017)</option>
+                                <option value="W2619383789">Medium Impact (Survey) &mdash; Multimodal Machine Learning (TPAMI 2018)</option>
+                                <option value="W1991691398">Low Impact (Re-issue) &mdash; Psychology of Human-Computer Interaction</option>
+                            </select>
+                        </div>
+                        <div class="tier-quick-buttons">
+                            <button type="button" class="tier-btn high" onclick="loadSample('W2752782242')">High Impact (&ge;90th)</button>
+                            <button type="button" class="tier-btn medium" onclick="loadSample('W2603777577')">Medium Impact (50&ndash;90th)</button>
+                            <button type="button" class="tier-btn low" onclick="loadSample('W2580662672')">Low Impact (&lt;50th)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Async Loader Area -->
+                <div id="predictionLoadingArea" class="editorial-panel span-12" style="display: none; padding: 2.2rem; text-align: center; margin-top: 0.6rem;">
+                    <div class="sg-spinner" style="margin: 0 auto 0.8rem; width: 34px; height: 34px; border: 3px solid rgba(36,107,80,0.18); border-top-color: var(--accent-forest); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-ink);" id="predictionLoadingTitle">Extracting 2-Hop Citation Graph &amp; Applying Temporal Firewall...</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.35rem;" id="predictionLoadingSubtitle">Conditioned strictly on t &le; t_pub + 2y. Comparing with held-out ground truth.</div>
+                </div>
+
+                <!-- Live Results Container (Dynamically Populated) -->
+                <div id="predictionResultsArea" class="bento span-12" style="display: none;">
+                    
+                    <!-- Paper Lead Card -->
+                    <div class="editorial-panel span-8">
+                        <div class="metadata-tags-row">
+                            <span class="meta-tag">Pub Year: <strong id="resPubYear">—</strong></span>
+                            <span class="meta-tag">Cutoff Boundary: <strong id="resCutoffYear">—</strong> (t_cutoff)</span>
+                            <span class="meta-tag">Cutoff Citations: <strong id="resCutoffCits">—</strong></span>
+                            <span class="meta-tag">Split: <strong id="resSplitStatus">—</strong></span>
+                            <span class="meta-tag"><a id="resOpenAlexLink" href="#" target="_blank" style="color: var(--accent-forest); text-decoration: none; font-weight: 600;">OpenAlex Verified Record ↗</a></span>
+                        </div>
+                        <h2 class="paper-title-lead" id="resPaperTitle">—</h2>
+                        <div class="paper-authors-line" id="resAuthorsLine">—</div>
+                        <div style="font-size: 0.82rem; color: var(--text-secondary);" id="resVenueLine">—</div>
+
+                        <!-- Scientometrics & Access Economics Strip (Clean without zero placeholders) -->
+                        <div class="scientometrics-bar" id="scientometricsBar">
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Publication Venue Prestige</div>
+                                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-ink);" id="econVenuePrestige">—</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Publishing Access Model</div>
+                                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-ink);" id="econModelVal">—</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Author Processing Charge (APC)</div>
+                                <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-ink);" id="econApcVal">—</div>
+                            </div>
+                            <div id="econAdvCol" style="display: none;">
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">Empirical OA Advantage</div>
+                                <div style="font-size: 0.88rem; font-weight: 700; color: var(--accent-forest);" id="econAdvVal">—</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.7rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary); margin-bottom: 0.2rem;">CD Disruption Index</div>
+                                <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-ink);" id="econDisruptionVal">—</div>
+                            </div>
+                        </div>
+
+                        <!-- SIDE-BY-SIDE DUAL EVALUATION CARD: BLIND PREDICTION vs OBSERVED GROUND TRUTH -->
+                        <div class="dual-eval-grid">
+                            <!-- Column 1: Blind Model Forecast -->
+                            <div class="eval-panel forecast-side">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label forecast">Model Forecast (t_cutoff Blind Inference)</span>
+                                        <span class="provenance-pill" id="forecastProvenancePill">M1_LogisticRegression</span>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Predicted citations in years 3–5</div>
+                                    <div class="pred-number" id="resPredWindowCits">—</div>
+                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin: 0.75rem 0 0.2rem;">Predicted Impact Tier</div>
+                                    <div class="outcome-badge" id="resImpactBadge">—</div>
+                                </div>
+
+                                <div class="prob-bar-container">
+                                    <div class="prob-bar-row">
+                                        <span>High Tier (≥90th Percentile)</span>
+                                        <strong id="probHighVal">—</strong>
+                                    </div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probHighBar" style="width: 0%; background-color: var(--accent-forest);"></div></div>
+
+                                    <div class="prob-bar-row">
+                                        <span>Medium Tier (50–90th Percentile)</span>
+                                        <strong id="probMedVal">—</strong>
+                                    </div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probMedBar" style="width: 0%; background-color: var(--accent-blue);"></div></div>
+
+                                    <div class="prob-bar-row">
+                                        <span>Low Tier (&lt;50th Percentile)</span>
+                                        <strong id="probLowVal">—</strong>
+                                    </div>
+                                    <div class="prob-bar-bg"><div class="prob-bar-fill" id="probLowBar" style="width: 0%; background-color: var(--text-tertiary);"></div></div>
+                                </div>
+
+                                <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.35;">
+                                    Inference strictly isolated to citation graph & metadata as of t &le; t_pub + 2y. Zero future data leakage.
+                                </div>
+                            </div>
+
+                            <!-- Column 2: Ground-Truth Empirical Verification -->
+                            <div class="eval-panel truth-side" id="sideBySideTruthPanel">
+                                <div>
+                                    <div class="eval-header-row">
+                                        <span class="eval-badge-label truth">Observed Ground Truth (Held-Out)</span>
+                                        <span class="provenance-pill" id="btProvenanceTag">OpenAlex Corpus (works.parquet)</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                                        <div>
+                                            <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.2rem;">Actual Historical Impact Tier</div>
+                                            <div class="outcome-badge" id="btActualBadge" style="margin-top: 0;">—</div>
+                                        </div>
+                                        <div id="btMatchBadge" class="verdict-match-tag match">
+                                            —
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="truth-stat-grid">
+                                    <div>
+                                        <div class="truth-stat-label">Citations at Cutoff (t_cutoff)</div>
+                                        <div class="truth-stat-value" id="btCutoffStatVal">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Observed Citations in years 3–5</div>
+                                        <div class="truth-stat-value highlight" id="btActualCitsVal">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Predicted Citations in years 3–5</div>
+                                        <div class="truth-stat-value" id="btPredCitsVal">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Field Cohort Percentile</div>
+                                        <div class="truth-stat-value" id="btCohortPctVal">—</div>
+                                    </div>
+                                    <div>
+                                        <div class="truth-stat-label">Observation Horizon</div>
+                                        <div class="truth-stat-value" id="btWindowRangeVal">—</div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.35;">
+                                    Empirically verified against actual held-out citations in years 3-5 after publication.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gemini Scientometric Reasoning & Intelligence Card (Mode G) -->
+                        <div class="gemini-reasoning-panel" id="geminiReasoningCard" style="display: none;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.4rem;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="background: #2563EB; color: #FFF; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">MODE G</span>
+                                    <strong style="font-size: 0.88rem; color: #1E40AF;">Google Gemini Scientometric Intelligence &amp; Reasoning</strong>
+                                </div>
+                                <span style="font-size: 0.74rem; color: var(--text-secondary); font-family: var(--font-mono);" id="geminiConfidenceScore">Confidence: 95%</span>
+                            </div>
+                            <p style="font-size: 0.84rem; color: var(--text-ink); line-height: 1.55; margin-bottom: 0;" id="geminiReasoningText"></p>
+                        </div>
+                    </div>
+
+                    <!-- 2-Hop Network Graph & Node Inspector -->
+                    <div class="editorial-panel span-4" style="padding: 0; overflow: hidden;">
+                        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h3 class="section-title">2-Hop Relational Ego Subgraph</h3>
+                                <p class="section-desc" style="margin-bottom: 0;">Multi-relational message passing structure: Authors, Institutional Affiliations, Publication Venue, and Precursor Works.</p>
+                            </div>
+                            <div style="font-size: 0.76rem; color: var(--text-secondary); display: flex; gap: 0.8rem;">
+                                <span><strong style="color: #0284c7;">●</strong> Seed Paper (Hop 0)</span>
+                                <span><strong style="color: #3B82F6;">●</strong> Author (Hop 1)</span>
+                                <span><strong style="color: #0D9488;">●</strong> Institution (Hop 2)</span>
+                                <span><strong style="color: #D97706;">●</strong> Venue (Hop 1)</span>
+                                <span><strong style="color: #7C3AED;">●</strong> Precursor (Hop 1)</span>
+                            </div>
+                        </div>
+
+                        <div class="graph-workspace">
+                            <div class="graph-toolbar">
+                                <button class="graph-tool-btn" onclick="zoomGraph(1.2)" title="Zoom In">+</button>
+                                <button class="graph-tool-btn" onclick="zoomGraph(0.8)" title="Zoom Out">−</button>
+                                <button class="graph-tool-btn" onclick="fitGraph()" title="Fit View">⛶</button>
+                            </div>
+                            <div id="cy"></div>
+                        </div>
+
+                        <!-- Active Node Inspector -->
+                        <div id="nodeInspector" class="node-inspector-box">
+                            <div class="inspector-badge-row">
+                                <span id="inspHopBadge" class="hop-tag hop-0">HOP 0 (FOCAL SEED)</span>
+                                <strong id="inspType" style="font-size: 0.82rem; color: var(--text-ink); text-transform: uppercase; font-family: var(--font-mono);">Target Paper</strong>
+                            </div>
+                            <div id="inspLabel" style="font-size: 0.98rem; font-weight: 600; color: var(--text-ink); margin-bottom: 0.25rem;">—</div>
+
+                            <div id="inspMetricsGrid" class="metrics-grid-four">
+                                <!-- Populated dynamically -->
+                            </div>
+
+                            <div class="gnn-explainer-banner">
+                                <strong style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--accent-forest); display: block; margin-bottom: 2px;">Scientometric Significance</strong>
+                                <span id="inspDetail">Click any node in the 2-hop graph to inspect its numerical features and relational contribution.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full-Width Citation Accumulation Timeline Bar Chart (Teacher Proof) -->
+                    <div class="editorial-panel span-12" id="predictionTimelinePanel" style="margin-top: 0.4rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.85rem;">
+                            <div>
+                                <h3 class="section-title" style="margin-bottom: 0.2rem;">Annual Citation Accumulation Timeline ($T_{\text{pub}} \dots T_{\text{pub}+5}$)</h3>
+                                <p class="section-desc" style="margin-bottom: 0;">
+                                    Empirical proof of the strict temporal boundary firewall: green bars represent observed citations during inference ($t \le T_{\text{cutoff}}$); dashed amber marker denotes the inference cutoff boundary (t &le; t_pub + 2y); purple bars represent held-out ground truth ($t \in [T+3 \dots T+5]$) strictly sealed during inference.
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 0.85rem; flex-wrap: wrap; font-size: 0.74rem; color: var(--text-secondary); align-items: center;">
+                                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 11px; height: 11px; border-radius: 2px; background: var(--accent-forest);"></span> Observed Pre-Cutoff ($t \le T_{\text{cutoff}}$)</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 11px; height: 11px; border-radius: 2px; background: var(--warning-amber); border: 1px dashed #78350F;"></span> Cutoff Boundary (t_cutoff)</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 11px; height: 11px; border-radius: 2px; background: var(--accent-blue);"></span> Held-Out Window ($T+3 \dots T+5$)</span>
+                            </div>
+                        </div>
+                        <div class="year-chart" id="predTrajectoryChart" style="height: 130px; display: flex; align-items: flex-end; gap: 0.6rem; padding-bottom: 1.8rem; border-bottom: 1px solid var(--border-subtle);"></div>
+                    </div>
+
+                </div>
+
+                <!-- Empty State: Methodological Overview -->
+                <div id="predictionEmptyState" class="editorial-panel span-12">
+                    <h3 class="section-title">Strict Scientometric Prediction Workflow</h3>
+                    <p class="section-desc">SciGraph AI 2.0 adheres strictly to empirical citation dynamics and avoids future data leakage.</p>
+
+                    <div class="step-flow">
+                        <div class="step-card">
+                            <div class="step-number">STEP 01</div>
+                            <div class="step-title">Ingest Metadata</div>
+                            <div class="step-desc">Resolves OpenAlex entities, author collaborations, verified publication venues, and foundational references.</div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">STEP 02</div>
+                            <div class="step-title">Temporal Freeze</div>
+                            <div class="step-desc">All citation graphs and venue indicators are frozen at t &le; t_pub + 2y. Zero future data is visible.</div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">STEP 03</div>
+                            <div class="step-title">2-Hop GNN Encoding</div>
+                            <div class="step-desc">Multi-relational HeteroSAGE aggregates author prestige, institutional ranking, and precursor knowledge domains.</div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">STEP 04</div>
+                            <div class="step-title">Calibrated Forecast</div>
+                            <div class="step-desc">Primary calibrated classifier generates probabilistic predictions against field-specific cohort percentiles.</div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW 2: VERIFICATION LAB                   -->
+            <!-- ========================================== -->

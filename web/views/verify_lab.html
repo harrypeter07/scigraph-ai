@@ -1,0 +1,81 @@
+            <section id="viewVerifyLab" class="view-pane">
+                <div class="bento">
+                <div class="page-header bento-tile span-12">
+                    <h1 class="page-title">Independent Verification Lab</h1>
+                    <p class="page-description">
+                        Double-blind protocol to verify model predictions against held-out ground truth. 
+                        Inspect feature inputs frozen at t_cutoff before revealing actual citations in years 3-5 after publication.
+                    </p>
+                </div>
+
+                <div class="editorial-panel span-6">
+                    <h3 class="section-title">Blind Evaluation Protocol</h3>
+                    <p class="section-desc">Generate prediction strictly from cutoff features, then verify against observed citation outcomes.</p>
+
+                    <div class="search-bar-wrap">
+                        <input type="text" id="blindInput" class="search-input" placeholder="Enter paper identifier from held-out test split (2018–2020)..." value="W2752782242">
+                        <button class="btn-primary" onclick="runBlindTest()">Run Blind Evaluation</button>
+                    </div>
+
+                    <div id="blindResultCard" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div>
+                                <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-ink);" id="blindTitle">—</h4>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);" id="blindMeta">—</div>
+                            </div>
+                            <button class="btn-secondary" id="revealBtn" onclick="revealBlindTest()">Reveal Observed Ground Truth</button>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                            <div class="editorial-panel inset" style="margin-bottom: 0;">
+                                <div style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary);">Blind Model Prediction (t_cutoff Only)</div>
+                                <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-ink); margin-top: 0.3rem;" id="blindPredictedTier">—</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;" id="blindConfidence">—</div>
+                            </div>
+                            <div class="editorial-panel inset" style="margin-bottom: 0;" id="blindTruthPanel">
+                                <div style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary);">Observed Ground Truth (Years 3-5)</div>
+                                <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-tertiary); margin-top: 0.3rem;" id="blindActualTier">[Hidden]</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;" id="blindActualDetails">Click 'Reveal Observed Ground Truth' to audit.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Spotcheck Tool -->
+                <div class="editorial-panel span-6">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div>
+                            <h3 class="section-title">Automated Held-Out Spotcheck</h3>
+                            <p class="section-desc" style="margin-bottom: 0;">Sample random papers from the N = 4,500 held-out test split and run end-to-end audit.</p>
+                        </div>
+                        <button class="btn-secondary" onclick="runSpotcheck()">Run 5-Sample Spotcheck</button>
+                    </div>
+
+                    <div class="data-table-wrap">
+                        <table class="editorial-table">
+                            <thead>
+                                <tr>
+                                    <th>Paper ID</th>
+                                    <th>Title</th>
+                                    <th>Year</th>
+                                    <th>Cutoff Cits</th>
+                                    <th>Actual 5Y Cits</th>
+                                    <th>Predicted Tier</th>
+                                    <th>Actual Tier</th>
+                                    <th>Verdict</th>
+                                </tr>
+                            </thead>
+                            <tbody id="spotcheckBody">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Click 'Run 5-Sample Spotcheck' to execute an automated audit.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW 3: TEMPORAL & LEAKAGE AUDIT           -->
+            <!-- ========================================== -->

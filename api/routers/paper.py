@@ -157,6 +157,38 @@ def get_oa_advantage_metrics():
 
 
 
+@router.get("/debug-predict/{paper_id:path}")
+async def debug_predict(paper_id: str):
+    import time, traceback
+    steps = {}
+    try:
+        t0 = time.time()
+        clean_id = openalex_client.clean_identifier(paper_id)
+        steps["1_clean_id"] = clean_id
+        steps["1_clean_id_time"] = round(time.time() - t0, 4)
+
+        t1 = time.time()
+        raw_work = await openalex_client.get_work(clean_id)
+        steps["2_get_work_title"] = raw_work.get("title")
+        steps["2_counts_len"] = len(raw_work.get("counts_by_year", []))
+        steps["2_get_work_time"] = round(time.time() - t1, 4)
+
+        t2 = time.time()
+        pred_dict = inference_service.predict(raw_work)
+        steps["3_pred_class"] = pred_dict.get("predicted_impact_class")
+        steps["3_predict_time"] = round(time.time() - t2, 4)
+
+        t3 = time.time()
+        resp = PaperPredictionResponse(**pred_dict)
+        steps["4_schema_val_time"] = round(time.time() - t3, 4)
+        steps["status"] = "success"
+        return steps
+    except Exception as e:
+        steps["error"] = str(e)
+        steps["traceback"] = traceback.format_exc()
+        return steps
+
+
 @router.get("/predict/{paper_id:path}", response_model=PaperPredictionResponse)
 async def predict_paper_impact(
     paper_id: str,

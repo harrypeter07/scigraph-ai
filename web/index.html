@@ -14,36 +14,53 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
     <style>
         :root {
-            --bg-page: #F7F7F4;
+            /* Modern Slate & Canvas Palette */
+            --bg-page: #F8FAFC;
             --bg-surface: #FFFFFF;
-            --bg-surface-subtle: #F0F2ED;
+            --bg-surface-subtle: #F1F5F9;
+            --bg-surface-elevated: #FFFFFF;
             --bg-sidebar: #FFFFFF;
-            --text-ink: #202522;
-            --text-secondary: #686F6A;
-            --text-tertiary: #929994;
-            --accent-forest: #246B50;
-            --accent-forest-hover: #1B533E;
-            --accent-forest-subtle: rgba(36, 107, 80, 0.08);
-            --accent-blue: #1D4ED8;
-            --accent-blue-subtle: rgba(29, 78, 216, 0.08);
-            --border-subtle: #E3E6E1;
-            --border-strong: #CDD2CB;
-            --warning-amber: #B45309;
-            --warning-bg: #FEF3C7;
-            --destructive-red: #B91C1C;
-            --destructive-bg: #FEE2E2;
-            --success-green: #15803D;
-            --success-bg: #DCFCE7;
             
+            --text-ink: #0F172A;
+            --text-secondary: #475569;
+            --text-tertiary: #94A3B8;
+            
+            /* High-Precision Accents */
+            --accent-blue: #2563EB;
+            --accent-blue-hover: #1D4ED8;
+            --accent-blue-subtle: rgba(37, 99, 235, 0.08);
+            
+            --accent-forest: #059669;
+            --accent-forest-hover: #047857;
+            --accent-forest-subtle: rgba(5, 150, 105, 0.08);
+            
+            --accent-purple: #7C3AED;
+            --accent-purple-hover: #6D28D9;
+            --accent-purple-subtle: rgba(124, 58, 237, 0.08);
+            
+            --border-subtle: #E2E8F0;
+            --border-strong: #CBD5E1;
+            
+            --warning-amber: #D97706;
+            --warning-bg: #FEF3C7;
+            --destructive-red: #DC2626;
+            --destructive-bg: #FEE2E2;
+            --success-green: #059669;
+            --success-bg: #ECFDF5;
+            
+            /* Typography */
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --font-display: 'Plus Jakarta Sans', var(--font-sans);
             --font-editorial: 'Newsreader', Georgia, serif;
-            --font-mono: 'JetBrains Mono', Consolas, monospace;
+            --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
             
-            --sidebar-width: 188px;
-            --header-height: 42px;
-            --bento-gap: 0.55rem;
-            --tile-radius: 10px;
+            /* Dimensions & Geometry */
+            --sidebar-width: 240px;
+            --header-height: 54px;
+            --bento-gap: 0.85rem;
+            --tile-radius: 12px;
+            --card-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+            --card-shadow-hover: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -53,13 +70,16 @@
             background-color: var(--bg-page);
             color: var(--text-ink);
             min-height: 100vh;
-            line-height: 1.4;
+            line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             display: flex;
-            font-size: 13px;
+            font-size: 13.5px;
         }
 
-        /* Sidebar Navigation */
+        /* ========================================================= */
+        /* 1. SIDEBAR NAVIGATION                                     */
+        /* ========================================================= */
         aside.app-sidebar {
             width: var(--sidebar-width);
             background-color: var(--bg-sidebar);
@@ -72,109 +92,189 @@
             flex-direction: column;
             justify-content: space-between;
             z-index: 100;
+            box-shadow: 1px 0 0 0 rgba(15, 23, 42, 0.02);
         }
 
         .sidebar-header {
-            padding: 0.7rem 0.8rem 0.55rem;
+            padding: 1.1rem 1.15rem 0.9rem;
             border-bottom: 1px solid var(--border-subtle);
         }
 
         .brand-title {
-            font-family: var(--font-display);
-            font-size: 0.92rem;
-            font-weight: 800;
-            color: var(--text-ink);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            letter-spacing: -0.02em;
+            gap: 0.65rem;
+            text-decoration: none;
         }
 
-        .brand-subtitle {
-            font-size: 0.64rem;
-            color: var(--text-secondary);
-            margin-top: 0.12rem;
-            line-height: 1.25;
+        .brand-icon-wrap {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #EFF6FF 0%, #EEF2FF 100%);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .brand-text-block {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .brand-name {
+            font-family: var(--font-display);
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: var(--text-ink);
+            letter-spacing: -0.025em;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .brand-badge {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: var(--accent-blue-subtle);
+            color: var(--accent-blue);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            letter-spacing: 0.02em;
+        }
+
+        .brand-tagline {
+            font-size: 0.68rem;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            letter-spacing: -0.01em;
         }
 
         .sidebar-nav {
-            padding: 0.45rem 0.45rem;
+            padding: 0.85rem 0.65rem;
             display: flex;
             flex-direction: column;
-            gap: 0.12rem;
+            gap: 0.2rem;
             flex-grow: 1;
             overflow-y: auto;
         }
 
         .nav-category {
-            font-size: 0.68rem;
+            font-size: 0.66rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             color: var(--text-tertiary);
-            padding: 0.4rem 0.5rem 0.15rem;
+            padding: 0.65rem 0.6rem 0.3rem;
         }
 
         .nav-link {
             display: flex;
             align-items: center;
-            gap: 0.45rem;
-            padding: 0.38rem 0.5rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            gap: 0.65rem;
+            padding: 0.52rem 0.7rem;
+            border-radius: 8px;
+            font-size: 0.81rem;
             font-weight: 500;
             color: var(--text-secondary);
             text-decoration: none;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid transparent;
+            user-select: none;
         }
 
         .nav-link:hover {
             background-color: var(--bg-surface-subtle);
             color: var(--text-ink);
+            transform: translateX(1px);
         }
 
         .nav-link.active {
-            background-color: var(--accent-forest-subtle);
-            color: var(--accent-forest);
+            background-color: var(--accent-blue-subtle);
+            color: var(--accent-blue);
             font-weight: 600;
-            border-color: rgba(36, 107, 80, 0.15);
+            border-color: rgba(37, 99, 235, 0.15);
         }
 
         .nav-link svg {
-            width: 17px;
-            height: 17px;
+            width: 16px;
+            height: 16px;
             stroke-width: 2;
             flex-shrink: 0;
+            opacity: 0.85;
+        }
+
+        .nav-link.active svg {
+            opacity: 1;
+            stroke: var(--accent-blue);
         }
 
         .sidebar-footer {
-            padding: 0.55rem;
+            padding: 0.75rem 0.85rem 0.95rem;
             border-top: 1px solid var(--border-subtle);
-            background-color: #FAFAF8;
+            background-color: #FAFAFC;
         }
 
         .provenance-card {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            padding: 0.45rem 0.55rem;
-            font-size: 0.64rem;
+            border-radius: 8px;
+            padding: 0.65rem 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
-            line-height: 1.4;
+            line-height: 1.45;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
         }
 
-        .provenance-pill {
-            display: inline-flex;
+        .telemetry-status-row {
+            display: flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.4rem;
             font-weight: 600;
             color: var(--accent-forest);
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.72rem;
         }
 
-        /* Main Workspace Container */
+        .status-pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--accent-forest);
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(5, 150, 105, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+        }
+
+        .telemetry-meta {
+            display: flex;
+            gap: 0.4rem;
+            font-size: 0.68rem;
+            color: var(--text-tertiary);
+            font-family: var(--font-mono);
+            margin-bottom: 0.25rem;
+        }
+
+        .telemetry-sub {
+            font-size: 0.67rem;
+            color: var(--text-secondary);
+            line-height: 1.35;
+        }
+
+        /* ========================================================= */
+        /* 2. TOPBAR & SHELL                                         */
+        /* ========================================================= */
         main.app-main {
             margin-left: var(--sidebar-width);
             flex-grow: 1;
@@ -183,12 +283,13 @@
             flex-direction: column;
         }
 
-        /* Top Header Bar */
         header.app-topbar {
             height: var(--header-height);
-            background-color: var(--bg-surface);
+            background-color: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border-subtle);
-            padding: 0 0.9rem;
+            padding: 0 1.25rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -198,11 +299,15 @@
         }
 
         .topbar-breadcrumbs {
-            font-size: 0.84rem;
+            font-size: 0.82rem;
             color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        .topbar-breadcrumbs svg {
+            color: var(--text-tertiary);
         }
 
         .topbar-breadcrumbs strong {
@@ -217,32 +322,83 @@
             font-size: 0.8rem;
         }
 
+        /* Master Engine Segmented Control */
+        .engine-segmented-control {
+            display: inline-flex;
+            align-items: center;
+            background: #F1F5F9;
+            padding: 3px;
+            border-radius: 9999px;
+            border: 1px solid var(--border-subtle);
+            gap: 2px;
+        }
+
+        .seg-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            user-select: none;
+        }
+
+        .seg-btn:hover {
+            color: var(--text-ink);
+        }
+
+        .seg-btn.active {
+            background: #FFFFFF;
+            color: var(--text-ink);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        .seg-btn.mode-g.active {
+            background: var(--accent-blue);
+            color: #FFFFFF;
+            box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+        }
+
+        .seg-sub {
+            font-weight: 400;
+            opacity: 0.75;
+            font-size: 0.68rem;
+        }
+
         .status-tag {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
             background-color: var(--bg-surface-subtle);
             border: 1px solid var(--border-subtle);
-            padding: 0.25rem 0.6rem;
-            border-radius: 100px;
-            font-size: 0.74rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.73rem;
             color: var(--text-secondary);
             font-weight: 500;
+            font-family: var(--font-mono);
         }
 
         .status-dot {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background-color: var(--accent-forest);
         }
 
         /* Page Content Area */
         .workspace-content {
-            padding: 0.7rem 0.85rem 1rem;
-            max-width: none;
+            padding: 1.1rem 1.35rem 2rem;
+            max-width: 1440px;
             width: 100%;
-            margin: 0;
+            margin: 0 auto;
         }
 
         .view-pane {
@@ -251,53 +407,17 @@
 
         .view-pane.active {
             display: block;
-            animation: fadeIn 0.2s ease-in-out;
+            animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
+            from { opacity: 0; transform: translateY(3px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Editorial Typography Standards */
-        .page-header {
-            margin-bottom: 0;
-        }
-
-        .page-title {
-            font-family: var(--font-display);
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--text-ink);
-            letter-spacing: -0.025em;
-            line-height: 1.2;
-        }
-
-        .page-description {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 0.15rem;
-            max-width: 980px;
-            line-height: 1.35;
-        }
-
-        .section-title {
-            font-family: var(--font-display);
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--text-ink);
-            letter-spacing: -0.015em;
-            margin-bottom: 0.12rem;
-        }
-
-        .section-desc {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.55rem;
-            line-height: 1.35;
-        }
-
-        /* Bento grid */
+        /* ========================================================= */
+        /* 3. BENTO GRID & EDITORIAL PRIMITIVES                      */
+        /* ========================================================= */
         .bento {
             display: grid;
             grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -310,10 +430,11 @@
             background-color: var(--bg-surface);
             border: 1px solid var(--border-subtle);
             border-radius: var(--tile-radius);
-            padding: 0.7rem 0.8rem;
+            padding: 1rem 1.15rem;
             margin-bottom: 0;
             min-width: 0;
-            box-shadow: 0 1px 0 rgba(32, 37, 34, 0.03);
+            box-shadow: var(--card-shadow);
+            transition: box-shadow 0.15s ease;
         }
 
         .bento-tile { display: flex; flex-direction: column; }
@@ -326,21 +447,56 @@
         .span-4 { grid-column: span 4; }
         .span-3 { grid-column: span 3; }
 
-        /* Editorial Layout Primitives */
-        .editorial-panel {
-            margin-bottom: var(--bento-gap);
-        }
-
         .editorial-panel.inset {
             background-color: var(--bg-surface-subtle);
             border: 1px solid var(--border-subtle);
         }
 
-        /* Search & Form Elements */
+        .page-header {
+            margin-bottom: 0;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FAFAFC 100%);
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-ink);
+            letter-spacing: -0.025em;
+            line-height: 1.25;
+        }
+
+        .page-description {
+            font-size: 0.81rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+            max-width: 980px;
+            line-height: 1.45;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-ink);
+            letter-spacing: -0.015em;
+            margin-bottom: 0.2rem;
+        }
+
+        .section-desc {
+            font-size: 0.77rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.65rem;
+            line-height: 1.4;
+        }
+
+        /* ========================================================= */
+        /* 4. SEARCH BARS, INPUTS & BUTTONS                          */
+        /* ========================================================= */
         .search-bar-wrap {
             display: flex;
-            gap: 0.45rem;
-            margin-bottom: 0.45rem;
+            gap: 0.55rem;
+            align-items: center;
         }
 
         .search-input {
@@ -349,34 +505,45 @@
             border: 1px solid var(--border-strong);
             color: var(--text-ink);
             font-family: var(--font-sans);
-            font-size: 0.78rem;
-            padding: 0.42rem 0.65rem;
-            border-radius: 6px;
+            font-size: 0.83rem;
+            padding: 0.52rem 0.8rem;
+            border-radius: 8px;
             outline: none;
-            transition: border-color 0.15s ease;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
         }
 
         .search-input:focus {
-            border-color: var(--accent-forest);
-            box-shadow: 0 0 0 3px var(--accent-forest-subtle);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .btn-primary {
-            background-color: var(--accent-forest);
+            background-color: var(--accent-blue);
             color: #FFFFFF;
             border: 1px solid transparent;
             font-family: var(--font-sans);
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 600;
-            padding: 0.42rem 0.85rem;
-            border-radius: 6px;
+            padding: 0.52rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.15s ease;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
         .btn-primary:hover {
-            background-color: var(--accent-forest-hover);
+            background-color: var(--accent-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
         .btn-secondary {
@@ -384,16 +551,17 @@
             color: var(--text-ink);
             border: 1px solid var(--border-strong);
             font-family: var(--font-sans);
-            font-size: 0.72rem;
+            font-size: 0.77rem;
             font-weight: 600;
-            padding: 0.38rem 0.7rem;
-            border-radius: 6px;
+            padding: 0.48rem 0.85rem;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.15s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
+            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
         }
 
         .btn-secondary:hover {
@@ -404,12 +572,12 @@
         .btn-destructive {
             background-color: var(--bg-surface);
             color: var(--destructive-red);
-            border: 1px solid rgba(185, 28, 28, 0.35);
+            border: 1px solid rgba(220, 38, 38, 0.3);
             font-family: var(--font-sans);
-            font-size: 0.72rem;
+            font-size: 0.77rem;
             font-weight: 600;
-            padding: 0.38rem 0.7rem;
-            border-radius: 6px;
+            padding: 0.48rem 0.85rem;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.15s ease;
         }
@@ -419,101 +587,7 @@
             border-color: var(--destructive-red);
         }
 
-        .quick-samples {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .sample-pill {
-            background-color: var(--bg-surface-subtle);
-            border: 1px solid var(--border-subtle);
-            color: var(--text-ink);
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.78rem;
-            transition: all 0.12s ease;
-        }
-
-        .sample-pill:hover {
-            background-color: var(--border-subtle);
-            border-color: var(--text-secondary);
-        }
-
-        /* Prediction Result Overview Card */
-        .result-hero {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: var(--bento-gap);
-            margin-bottom: var(--bento-gap);
-        }
-
-        .paper-title-lead {
-            font-family: var(--font-display);
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--text-ink);
-            line-height: 1.35;
-            margin-bottom: 0.5rem;
-        }
-
-        .paper-authors-line {
-            font-size: 0.88rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-        }
-
-        .metadata-tags-row {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.25rem;
-        }
-
-        .meta-tag {
-            background-color: var(--bg-surface-subtle);
-            border: 1px solid var(--border-subtle);
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-
-        .meta-tag strong {
-            color: var(--text-ink);
-        }
-
-        .outcome-card {
-            background-color: #FAFAF8;
-            border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 1.4rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .outcome-badge {
-            display: inline-block;
-            font-family: var(--font-display);
-            font-size: 1.15rem;
-            font-weight: 800;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            letter-spacing: -0.01em;
-            margin-top: 0.35rem;
-        }
-
-        .outcome-badge.high { background-color: var(--success-bg); color: var(--success-green); border: 1px solid rgba(21, 128, 61, 0.25); }
-        .outcome-badge.medium { background-color: var(--accent-blue-subtle); color: var(--accent-blue); border: 1px solid rgba(29, 78, 216, 0.25); }
-        .outcome-badge.low { background-color: var(--bg-surface-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
-
-        /* Preset Evaluation Selector Toolbar */
+        /* Presets Toolbar */
         .preset-toolbar {
             display: flex;
             align-items: center;
@@ -528,113 +602,170 @@
         .preset-select-wrap {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.65rem;
             flex: 1;
             min-width: 320px;
         }
 
         .preset-dropdown {
             flex: 1;
-            padding: 0.45rem 0.65rem;
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-family: var(--font-body);
+            padding: 0.48rem 0.75rem;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            font-size: 0.81rem;
+            font-family: var(--font-sans);
             background-color: #FFFFFF;
             color: var(--text-ink);
             cursor: pointer;
             outline: none;
             transition: border-color 0.15s ease;
+            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
         }
+
         .preset-dropdown:focus {
-            border-color: var(--accent-forest);
-            box-shadow: 0 0 0 2px var(--accent-forest-subtle);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
 
         .tier-quick-buttons {
             display: flex;
-            gap: 0.4rem;
+            gap: 0.45rem;
             flex-wrap: wrap;
         }
 
         .tier-btn {
             font-size: 0.76rem;
             font-weight: 600;
-            padding: 0.35rem 0.65rem;
-            border-radius: 4px;
+            padding: 0.38rem 0.7rem;
+            border-radius: 6px;
             cursor: pointer;
             border: 1px solid transparent;
-            transition: all 0.12s ease;
+            transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
+            user-select: none;
         }
 
         .tier-btn.high {
             background-color: var(--success-bg);
             color: var(--success-green);
-            border-color: rgba(21, 128, 61, 0.25);
+            border-color: rgba(5, 150, 105, 0.25);
         }
         .tier-btn.high:hover {
-            background-color: rgba(21, 128, 61, 0.18);
+            background-color: rgba(5, 150, 105, 0.18);
+            transform: translateY(-1px);
         }
 
         .tier-btn.medium {
             background-color: var(--accent-blue-subtle);
             color: var(--accent-blue);
-            border-color: rgba(29, 78, 216, 0.25);
+            border-color: rgba(37, 99, 235, 0.25);
         }
         .tier-btn.medium:hover {
-            background-color: rgba(29, 78, 216, 0.18);
+            background-color: rgba(37, 99, 235, 0.18);
+            transform: translateY(-1px);
         }
 
         .tier-btn.low {
-            background-color: #F1F3F2;
-            color: var(--text-ink);
+            background-color: #F1F5F9;
+            color: var(--text-secondary);
             border-color: var(--border-subtle);
         }
         .tier-btn.low:hover {
-            background-color: #E5E7EB;
+            background-color: #E2E8F0;
+            color: var(--text-ink);
+            transform: translateY(-1px);
         }
 
-        /* Dual Comparison Hero: Prediction vs Observed Ground Truth */
+        /* ========================================================= */
+        /* 5. PREDICTION HERO & DUAL EVALUATION                      */
+        /* ========================================================= */
+        .paper-title-lead {
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-ink);
+            letter-spacing: -0.02em;
+            line-height: 1.35;
+            margin: 0.45rem 0 0.35rem;
+        }
+
+        .paper-authors-line {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.35rem;
+        }
+
+        .metadata-tags-row {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .meta-tag {
+            background-color: var(--bg-surface-subtle);
+            border: 1px solid var(--border-subtle);
+            padding: 0.22rem 0.55rem;
+            border-radius: 6px;
+            font-size: 0.74rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .meta-tag strong {
+            color: var(--text-ink);
+            font-weight: 600;
+        }
+
+        .scientometrics-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 0.65rem;
+            background-color: var(--bg-surface-subtle);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.75rem 0.9rem;
+            margin: 0.85rem 0;
+        }
+
         .dual-eval-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: var(--bento-gap);
-            margin-top: 0.55rem;
+            margin-top: 0.85rem;
         }
 
         @media (max-width: 900px) {
-            .dual-eval-grid {
-                grid-template-columns: 1fr;
-            }
+            .dual-eval-grid { grid-template-columns: 1fr; }
         }
 
         .eval-panel {
             background-color: #FFFFFF;
             border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 0.7rem 0.8rem;
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
         }
 
         .eval-panel.forecast-side {
-            border-left: 3px solid var(--accent-forest);
+            border-top: 3px solid var(--accent-blue);
         }
 
         .eval-panel.truth-side {
-            border-left: 3px solid var(--accent-blue);
-            background-color: #FAFAF8;
+            border-top: 3px solid var(--accent-forest);
+            background-color: #FBFDFB;
         }
 
         .eval-header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.65rem;
         }
 
         .eval-badge-label {
@@ -645,209 +776,106 @@
             letter-spacing: 0.04em;
         }
 
-        .eval-badge-label.forecast { color: var(--accent-forest); }
+        .eval-badge-label.forecast { color: var(--accent-blue); }
+        .eval-badge-label.truth { color: var(--accent-forest); }
 
-        .sg-loader {
-            display: none;
-            align-items: center;
-            gap: 0.65rem;
-            margin-top: 0.45rem;
-            padding: 0.45rem 0.65rem;
-            background: #ECFDF5;
-            border: 1px solid rgba(36, 107, 80, 0.25);
-            border-radius: 6px;
-            font-size: 0.74rem;
-            font-weight: 600;
-            color: var(--accent-forest);
-        }
-        .sg-loader.on { display: flex; }
-        .sg-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--border-strong);
-            border-top-color: var(--accent-forest);
-            border-radius: 50%;
-            animation: sgspin 0.7s linear infinite;
-            flex-shrink: 0;
-        }
-        @keyframes sgspin { to { transform: rotate(360deg); } }
-
-        .year-chart-wrap {
-            margin-top: 0.45rem;
-            background: #FFFFFF;
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            padding: 0.55rem 0.65rem;
-        }
-        .year-chart {
-            display: flex;
-            align-items: flex-end;
-            gap: 5px;
-            height: 92px;
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 1.6rem;
-        }
-        .year-bar-col {
-            flex: 1;
-            min-width: 28px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-            justify-content: flex-end;
-            position: relative;
-        }
-        .year-bar {
-            width: 100%;
-            max-width: 36px;
-            border-radius: 3px 3px 0 0;
-            background: var(--accent-forest);
-        }
-        .year-bar.window { background: var(--accent-blue); }
-        .year-bar.cutoff { background: var(--warning-amber); }
-        .year-bar-label {
-            position: absolute;
-            bottom: -1.45rem;
-            font-size: 0.68rem;
-            font-family: var(--font-mono);
-            color: var(--text-tertiary);
-            white-space: nowrap;
-        }
-        .year-bar-val {
-            font-size: 0.68rem;
-            font-family: var(--font-mono);
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
         .pred-number {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: var(--accent-forest);
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-        }
-        .actual-number {
-            font-size: 1.35rem;
+            font-family: var(--font-display);
+            font-size: 1.75rem;
             font-weight: 800;
             color: var(--accent-blue);
             letter-spacing: -0.03em;
             line-height: 1.1;
+            font-variant-numeric: tabular-nums;
         }
-        .eval-badge-label.truth { color: var(--accent-blue); }
 
-        .provenance-pill {
-            font-size: 0.7rem;
-            font-family: var(--font-mono);
-            color: var(--text-secondary);
-            background-color: var(--bg-surface-subtle);
-            padding: 0.15rem 0.45rem;
-            border-radius: 3px;
-            border: 1px solid var(--border-subtle);
+        .actual-number {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--accent-forest);
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
         }
+
+        .outcome-badge {
+            display: inline-block;
+            font-family: var(--font-display);
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            letter-spacing: -0.01em;
+            margin-top: 0.35rem;
+        }
+
+        .outcome-badge.high { background-color: var(--success-bg); color: var(--success-green); border: 1px solid rgba(5, 150, 105, 0.25); }
+        .outcome-badge.medium { background-color: var(--accent-blue-subtle); color: var(--accent-blue); border: 1px solid rgba(37, 99, 235, 0.25); }
+        .outcome-badge.low { background-color: var(--bg-surface-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
 
         .verdict-match-tag {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 700;
-            padding: 0.25rem 0.55rem;
-            border-radius: 4px;
-            margin-top: 0.4rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
         }
         .verdict-match-tag.match {
             background-color: var(--success-bg);
             color: var(--success-green);
-            border: 1px solid rgba(21, 128, 61, 0.3);
+            border: 1px solid rgba(5, 150, 105, 0.25);
         }
         .verdict-match-tag.misaligned {
             background-color: #FEF3C7;
             color: #92400E;
-            border: 1px solid rgba(146, 64, 14, 0.3);
+            border: 1px solid rgba(217, 119, 6, 0.3);
         }
 
-        .truth-stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            margin-top: 0.85rem;
-            padding-top: 0.85rem;
-            border-top: 1px solid var(--border-subtle);
-        }
-
-        .truth-stat-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            font-family: var(--font-mono);
-            margin-bottom: 0.15rem;
-        }
-
-        .truth-stat-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-ink);
-        }
-
-        .truth-stat-value.highlight {
-            color: var(--accent-forest);
-        }
-
-        /* Scientometrics & Economics Inset Panel */
-        .scientometrics-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 0.85rem;
-            background-color: #FAFAF8;
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            padding: 0.9rem 1.15rem;
-            margin-top: 1rem;
-        }
-
-        /* Probabilities and multi-task grid */
         .prob-bar-container {
-            margin-top: 1rem;
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
         }
 
         .prob-bar-row {
             display: flex;
             justify-content: space-between;
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             color: var(--text-secondary);
-            margin-bottom: 0.25rem;
         }
 
         .prob-bar-bg {
             height: 6px;
-            background-color: var(--border-subtle);
-            border-radius: 3px;
+            background: #E2E8F0;
+            border-radius: 9999px;
             overflow: hidden;
-            margin-bottom: 0.6rem;
         }
 
         .prob-bar-fill {
             height: 100%;
-            background-color: var(--accent-forest);
-            border-radius: 3px;
+            border-radius: 9999px;
+            transition: width 0.4s ease;
         }
 
-        /* 2-Hop Network Graph & Inspector */
-        .graph-workspace {
-            border: 1px solid var(--border-subtle);
+        /* Subgraph Canvas */
+        #cy {
+            width: 100%;
+            height: 250px;
+            background-color: #FAFAFC;
             border-radius: 8px;
-            background-color: #FFFFFF;
-            position: relative;
-            overflow: hidden;
         }
 
-        .graph-toolbar {
+        .graph-controls {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 0.8rem;
+            right: 0.8rem;
             display: flex;
-            gap: 0.4rem;
+            flex-direction: column;
+            gap: 0.35rem;
             z-index: 20;
         }
 
@@ -857,88 +885,70 @@
             color: var(--text-ink);
             width: 28px;
             height: 28px;
-            border-radius: 4px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+            transition: background 0.15s ease;
         }
 
         .graph-tool-btn:hover {
             background-color: var(--bg-surface-subtle);
         }
 
-        #cy {
-            width: 100%;
-            height: 220px;
-            background-color: #FAFAF8;
-        }
-
-        .node-inspector-box {
-            border-top: 1px solid var(--border-subtle);
-            padding: 1.25rem 1.5rem;
-            background-color: #FFFFFF;
-        }
-
-        .inspector-badge-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.35rem;
-        }
-
-        .hop-tag {
-            font-family: var(--font-mono);
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 2px 6px;
-            border-radius: 4px;
-            letter-spacing: 0.04em;
-        }
-
-        .hop-tag.hop-0 { background-color: var(--accent-forest-subtle); color: var(--accent-forest); border: 1px solid rgba(36,107,80,0.25); }
-        .hop-tag.hop-1 { background-color: var(--accent-blue-subtle); color: var(--accent-blue); border: 1px solid rgba(29,78,216,0.25); }
-        .hop-tag.hop-2 { background-color: #EDE9FE; color: #6D28D9; border: 1px solid rgba(109,40,217,0.25); }
-
-        .metrics-grid-four {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.75rem;
-            margin: 0.75rem 0;
-            background-color: var(--bg-surface-subtle);
-            padding: 0.75rem 1rem;
-            border-radius: 6px;
+        /* Timeline Trajectory Chart */
+        .year-chart-wrap {
+            margin-top: 0.75rem;
+            background: #FFFFFF;
             border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.75rem 0.9rem;
         }
-
-        .metric-cell-lbl {
-            font-size: 0.68rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+        .year-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 100px;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 1.8rem;
+        }
+        .year-bar-col {
+            flex: 1;
+            min-width: 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+        }
+        .year-bar {
+            width: 100%;
+            max-width: 34px;
+            border-radius: 4px 4px 0 0;
+            background: var(--accent-blue);
+            transition: height 0.3s ease;
+        }
+        .year-bar.window { background: var(--accent-forest); }
+        .year-bar.cutoff { background: var(--warning-amber); }
+        .year-bar-label {
+            position: absolute;
+            bottom: -1.55rem;
+            font-size: 0.7rem;
             font-family: var(--font-mono);
+            color: var(--text-tertiary);
+            white-space: nowrap;
         }
-
-        .metric-cell-val {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--text-ink);
-            margin-top: 2px;
-        }
-
-        .gnn-explainer-banner {
-            background-color: var(--accent-forest-subtle);
-            border-left: 3px solid var(--accent-forest);
-            padding: 0.65rem 0.9rem;
-            border-radius: 0 4px 4px 0;
-            font-size: 0.82rem;
-            color: var(--text-ink);
-            line-height: 1.45;
-            margin-top: 0.6rem;
+        .year-bar-val {
+            font-size: 0.68rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            margin-bottom: 3px;
         }
 
         /* Editorial Comparison Tables */
@@ -952,7 +962,7 @@
         table.editorial-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.74rem;
+            font-size: 0.79rem;
             text-align: left;
         }
 
@@ -960,15 +970,15 @@
             background-color: var(--bg-surface-subtle);
             color: var(--text-secondary);
             font-weight: 600;
-            padding: 0.38rem 0.55rem;
+            padding: 0.5rem 0.75rem;
             border-bottom: 1px solid var(--border-subtle);
-            font-size: 0.76rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
         }
 
         table.editorial-table td {
-            padding: 0.38rem 0.55rem;
+            padding: 0.5rem 0.75rem;
             border-bottom: 1px solid var(--border-subtle);
             color: var(--text-ink);
         }
@@ -978,213 +988,68 @@
         }
 
         table.editorial-table tr:hover td {
-            background-color: #FAFAF8;
+            background-color: #F8FAFC;
         }
 
-        .table-selected-row td {
-            background-color: var(--accent-forest-subtle) !important;
-            font-weight: 600;
-        }
-
-        /* Methodology Step Flow */
-        .step-flow {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: var(--bento-gap);
-            margin: 0.55rem 0;
-        }
-
-        .step-card {
-            background-color: #FFFFFF;
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
-            padding: 0.55rem 0.65rem;
-        }
-
-        .step-number {
-            font-family: var(--font-mono);
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--accent-forest);
-            margin-bottom: 0.25rem;
-        }
-
-        .step-title {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--text-ink);
-            margin-bottom: 0.25rem;
-        }
-
-        .step-desc {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-
-        /* Timeline View for Splits */
-        .timeline-bar {
-            display: flex;
-            height: 38px;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid var(--border-subtle);
-            margin: 1.25rem 0 0.5rem;
-        }
-
-        .timeline-segment {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.76rem;
-            font-weight: 600;
-            color: #FFFFFF;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        }
-
-        .timeline-segment.train { background-color: #374151; width: 55%; }
-        .timeline-segment.val { background-color: #4B5563; width: 11%; }
-        .timeline-segment.test { background-color: var(--accent-forest); width: 34%; }
-
-        /* Responsive Mobile Styles */
-        @media (max-width: 900px) {
-            aside.app-sidebar {
-                display: none;
-            }
-            main.app-main {
-                margin-left: 0;
-            }
-            .result-hero {
-                grid-template-columns: 1fr;
-            }
-            .workspace-content {
-                padding: 0.65rem 0.7rem;
-            }
-            .span-12, .span-8, .span-7, .span-6, .span-5, .span-4, .span-3 {
-                grid-column: span 12;
-            }
-        }
-
-        @media (max-width: 1200px) and (min-width: 901px) {
-            .span-8, .span-7 { grid-column: span 12; }
-            .span-5, .span-4 { grid-column: span 6; }
-        }
-
-        .bento > .editorial-panel,
-        .bento > .page-header,
-        .bento > .bento-tile { margin-bottom: 0; }
-
-        #teacherFreezeResult.bento,
-        #predictionResultsArea.bento { display: none; }
-        #teacherFreezeResult.bento[style*="block"],
-        #predictionResultsArea.bento[style*="block"] {
-            display: grid !important;
-            margin-top: 0;
-        }
-
-        #cyTeacher { height: 180px !important; width: 100%; }
-        .topbar-breadcrumbs { font-size: 0.72rem; }
-        .status-tag { font-size: 0.66rem; padding: 0.12rem 0.45rem; }
-        .nav-link svg { width: 14px; height: 14px; }
-        .outcome-badge { font-size: 0.92rem; padding: 0.22rem 0.5rem; }
-        .timeline-bar { height: 28px; margin: 0.45rem 0 0.35rem; }
-        .tile-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.4rem; flex-wrap: wrap; }
-
-        /* Mode Toggle Segmented Control (Mode M vs Mode G) */
-        .mode-toggle-group {
-            display: inline-flex;
-            align-items: center;
-            background: #EAEFEA;
-            padding: 2px 3px;
-            border-radius: 999px;
-            border: 1px solid var(--border-subtle);
-            gap: 2px;
-        }
-        .mode-toggle-btn {
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            font-size: 0.74rem;
-            font-weight: 700;
-            padding: 3px 11px;
-            border-radius: 999px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .mode-toggle-btn.active {
-            background: var(--accent-forest);
-            color: #FFFFFF;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
-        .mode-toggle-btn.mode-g.active {
-            background: #2563EB;
-            color: #FFFFFF;
-        }
-        .gemini-reasoning-panel {
-            background: linear-gradient(135deg, rgba(37,99,235,0.05) 0%, rgba(147,51,234,0.05) 100%);
-            border: 1px solid rgba(37,99,235,0.25);
-            border-radius: 8px;
-            padding: 1rem 1.25rem;
-            margin-top: 0.85rem;
-        }
-
-        /* Topic Feasibility & Success Rate Explorer */
+        /* ========================================================= */
+        /* 6. TOPIC FEASIBILITY & SUCCESS EXPLORER                   */
+        /* ========================================================= */
         .topic-search-wrap {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.65rem;
             align-items: center;
-            flex-wrap: wrap;
         }
         .topic-input {
             flex: 1;
-            min-width: 280px;
-            padding: 0.65rem 0.9rem;
-            border: 1px solid var(--border-subtle);
-            border-radius: 6px;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
             font-size: 0.88rem;
-            font-family: var(--font-body);
+            font-family: var(--font-sans);
             color: var(--text-ink);
             outline: none;
             transition: all 0.15s ease;
+            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03);
         }
         .topic-input:focus {
-            border-color: var(--accent-forest);
-            box-shadow: 0 0 0 2px var(--accent-forest-subtle);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
         }
         .topic-preset-pills {
             display: flex;
             flex-wrap: wrap;
             gap: 0.45rem;
-            margin-top: 0.75rem;
+            margin-top: 0.85rem;
         }
         .topic-pill-btn {
-            background-color: var(--bg-surface-subtle);
+            background-color: var(--bg-surface);
             color: var(--text-secondary);
             border: 1px solid var(--border-subtle);
-            border-radius: 999px;
-            padding: 0.28rem 0.65rem;
-            font-size: 0.74rem;
+            border-radius: 9999px;
+            padding: 0.32rem 0.75rem;
+            font-size: 0.75rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+            user-select: none;
         }
         .topic-pill-btn:hover {
-            background-color: var(--accent-forest-subtle);
-            color: var(--accent-forest);
-            border-color: rgba(36, 107, 80, 0.3);
+            background-color: var(--accent-blue-subtle);
+            color: var(--accent-blue);
+            border-color: rgba(37, 99, 235, 0.25);
+            transform: translateY(-1px);
         }
         .topic-score-card {
-            background: linear-gradient(135deg, #FAFAF8 0%, #FFFFFF 100%);
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
             border: 1px solid var(--border-subtle);
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 1.25rem 1.5rem;
             display: grid;
             grid-template-columns: 240px 1fr;
             gap: 1.5rem;
             align-items: center;
+            box-shadow: var(--card-shadow);
         }
         @media (max-width: 800px) {
             .topic-score-card { grid-template-columns: 1fr; }
@@ -1195,24 +1060,26 @@
             align-items: center;
             justify-content: center;
             background: #FFFFFF;
-            border: 2px solid var(--accent-forest);
+            border: 2px solid var(--accent-blue);
             border-radius: 12px;
-            padding: 1.2rem 1rem;
-            box-shadow: 0 4px 12px rgba(36, 107, 80, 0.08);
+            padding: 1.25rem 1rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
             text-align: center;
         }
         .topic-rate-num {
-            font-family: var(--font-serif);
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: var(--accent-forest);
+            font-family: var(--font-display);
+            font-size: 2.85rem;
+            font-weight: 800;
+            color: var(--accent-blue);
             line-height: 1;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
         }
         .topic-rate-tier {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: var(--text-ink);
-            margin-top: 0.4rem;
+            margin-top: 0.45rem;
         }
         .topic-pillar-grid {
             display: grid;
@@ -1223,29 +1090,32 @@
         .topic-pillar-box {
             background: var(--bg-surface);
             border: 1px solid var(--border-subtle);
-            border-radius: 8px;
-            padding: 0.9rem 1rem;
+            border-radius: 10px;
+            padding: 0.95rem 1.05rem;
+            box-shadow: var(--card-shadow);
         }
         .topic-pillar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.74rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.05em;
             color: var(--text-tertiary);
             font-weight: 600;
         }
         .topic-pillar-score {
-            font-size: 1.4rem;
-            font-weight: 700;
+            font-size: 1.45rem;
+            font-weight: 800;
             color: var(--text-ink);
-            margin: 0.3rem 0;
-            font-family: var(--font-serif);
+            margin: 0.35rem 0;
+            font-family: var(--font-display);
+            font-variant-numeric: tabular-nums;
         }
         .topic-pillar-summary {
             font-size: 0.75rem;
             color: var(--text-secondary);
+            line-height: 1.4;
         }
         .trajectory-chart {
             display: flex;
@@ -1267,7 +1137,7 @@
         .trajectory-bar {
             width: 100%;
             max-width: 32px;
-            background: var(--accent-forest);
+            background: linear-gradient(180deg, #2563EB 0%, #1D4ED8 100%);
             border-radius: 4px 4px 0 0;
             transition: height 0.3s ease;
             position: relative;
@@ -1286,21 +1156,14 @@
         .topic-gap-card {
             background: #FFFFFF;
             border: 1px solid rgba(37, 99, 235, 0.2);
-            border-left: 4px solid #2563EB;
-            border-radius: 6px;
-            padding: 0.85rem 1rem;
-            margin-bottom: 0.6rem;
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 0.9rem 1.05rem;
+            margin-bottom: 0.65rem;
             font-size: 0.82rem;
             line-height: 1.5;
             color: var(--text-ink);
-        }
-        .topic-method-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
         }
         .topic-venue-badge {
             font-size: 0.7rem;
@@ -1314,6 +1177,48 @@
         .topic-venue-badge.q3 { background: #FEF3C7; color: #92400E; }
         .topic-venue-badge.q4 { background: #F3F4F6; color: #4B5563; }
         .topic-venue-badge.core { background: #F3E8FF; color: #6B21A8; }
+
+        /* Loader */
+        .sg-loader {
+            display: none;
+            align-items: center;
+            gap: 0.65rem;
+            margin-top: 0.65rem;
+            padding: 0.65rem 0.85rem;
+            background: #EFF6FF;
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            border-radius: 8px;
+            font-size: 0.77rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+        .sg-loader.on { display: flex; }
+        .sg-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(37, 99, 235, 0.2);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: sgspin 0.7s linear infinite;
+            flex-shrink: 0;
+        }
+        @keyframes sgspin { to { transform: rotate(360deg); } }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            aside.app-sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+            main.app-main { margin-left: 0; }
+            body { flex-direction: column; }
+            .span-12, .span-8, .span-7, .span-6, .span-5, .span-4, .span-3 {
+                grid-column: span 12 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1323,56 +1228,68 @@
         <div>
             <div class="sidebar-header">
                 <div class="brand-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-forest);">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M12 3v6m0 6v6M3 12h6m6 0h6"></path>
-                    </svg>
-                    SciGraph AI 2.0
+                    <div class="brand-icon-wrap">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <circle cx="12" cy="12" r="3" fill="#2563EB" stroke="#2563EB"></circle>
+                            <circle cx="5" cy="8" r="2" stroke="#059669"></circle>
+                            <circle cx="19" cy="8" r="2" stroke="#7C3AED"></circle>
+                            <circle cx="7" cy="19" r="2" stroke="#64748B"></circle>
+                            <circle cx="17" cy="19" r="2" stroke="#64748B"></circle>
+                            <path d="M7 9l3.5 2M17 9l-3.5 2M8.5 17.5L11 13.5M15.5 17.5L13 13.5" stroke="#94A3B8" stroke-dasharray="2 2"></path>
+                        </svg>
+                    </div>
+                    <div class="brand-text-block">
+                        <div class="brand-name">SciGraph <span class="brand-badge">2.4 PRO</span></div>
+                        <div class="brand-tagline">Citation Trajectory Forecasting</div>
+                    </div>
                 </div>
-                <div class="brand-subtitle">Scientific Citation Forecasting & Relational Scientometrics</div>
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-category">Citation Forecasting</div>
+                <div class="nav-category">Research Lab</div>
                 <a class="nav-link active" onclick="switchTab('viewPredictor')" id="tabLinkPredictor">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    Citation Predictor &amp; Verification
+                    <span>Citation Predictor</span>
                 </a>
 
-                <div class="nav-category" style="margin-top: 0.5rem;">Teacher Evaluation</div>
+                <div class="nav-category" style="margin-top: 0.5rem;">Validation &amp; Audit</div>
                 <a class="nav-link" onclick="switchTab('viewTeacherVerify')" id="tabLinkTeacherVerify">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Held-Out Verification Lab
+                    <span>Held-Out Verification Lab</span>
                 </a>
                 <a class="nav-link" onclick="switchTab('viewAudit')" id="tabLinkAudit">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    Temporal &amp; Leakage Audit
+                    <span>Temporal &amp; Leakage Audit</span>
                 </a>
 
-                <div class="nav-category" style="margin-top: 0.5rem;">Empirical Evidence</div>
+                <div class="nav-category" style="margin-top: 0.5rem;">Empirical Benchmarks</div>
                 <a class="nav-link" onclick="switchTab('viewBenchmarks')" id="tabLinkBenchmarks">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                    Model Benchmarks (Slide 8)
+                    <span>Model Benchmarks</span>
                 </a>
                 <a class="nav-link" onclick="switchTab('viewCompare')" id="tabLinkCompare">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="16" y1="3" x2="16" y2="21"></line><line x1="8" y1="3" x2="8" y2="21"></line><line x1="12" y1="8" x2="21" y2="8"></line><line x1="3" y1="16" x2="12" y2="16"></line></svg>
-                    Paper Comparison
+                    <span>Paper Comparison</span>
                 </a>
 
-                <div class="nav-category" style="margin-top: 0.5rem;">Discovery &amp; Strategy</div>
+                <div class="nav-category" style="margin-top: 0.5rem;">Strategy &amp; Feasibility</div>
                 <a class="nav-link" onclick="switchTab('viewTopicFeasibility')" id="tabLinkTopicFeasibility">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    Topic Feasibility &amp; Success
+                    <span>Topic Feasibility &amp; Success</span>
                 </a>
             </nav>
         </div>
 
         <div class="sidebar-footer">
             <div class="provenance-card">
-                <div class="provenance-pill">
-                    <span class="status-dot"></span> Primary Model M1 Active
+                <div class="telemetry-status-row">
+                    <span class="status-pulse-dot"></span>
+                    <span>Engine Online: Primary M1</span>
                 </div>
-                Strict cutoff invariance verified on $N=4,500$ held-out papers (2018–2020).
+                <div class="telemetry-meta">
+                    <span>16,500 Works</span> &bull; <span>t &le; t_pub + 2y</span>
+                </div>
+                <div class="telemetry-sub">Strict temporal invariance across N = 4,500 held-out works.</div>
             </div>
         </div>
     </aside>
@@ -1383,25 +1300,27 @@
         <header class="app-topbar">
             <div class="topbar-breadcrumbs">
                 <span>Workspace</span>
-                <span>/</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 <strong id="activeBreadcrumb">Citation Impact Predictor</strong>
             </div>
 
             <div class="topbar-actions">
-                <!-- Mode Toggle (M = Local Model, G = Gemini Intelligence) -->
-                <div class="mode-toggle-group" title="Toggle prediction engine: Mode M (Local Model) or Mode G (Google Gemini Intelligence)">
-                    <button type="button" class="mode-toggle-btn active" id="topbarModeBtnM" onclick="setPredictionMode('M')">
-                        🤖 Mode M
+                <!-- Master Engine Segmented Control -->
+                <div class="engine-segmented-control" role="tablist" title="Toggle prediction engine: Mode M (Local Scientometrics) or Mode G (Gemini AI)">
+                    <button type="button" class="seg-btn active" id="topbarModeBtnM" onclick="setPredictionMode('M')">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        <span>Mode M <small class="seg-sub">Scientometrics</small></span>
                     </button>
-                    <button type="button" class="mode-toggle-btn mode-g" id="topbarModeBtnG" onclick="setPredictionMode('G')">
-                        ✨ Mode G
+                    <button type="button" class="seg-btn mode-g" id="topbarModeBtnG" onclick="setPredictionMode('G')">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <span>Mode G <small class="seg-sub">Gemini AI</small></span>
                     </button>
                 </div>
                 <span class="status-tag">
-                    <span class="status-dot"></span> Cutoff: $T_{\text{cutoff}} = \text{pub\_year} + 2$
+                    <span class="status-dot"></span> Cutoff: t &le; t_pub + 2y
                 </span>
                 <span class="status-tag">
-                    Held-Out Test: <span id="topbarHeldoutAcc">71.2%</span>
+                    Held-Out Test: <strong id="topbarHeldoutAcc" style="color: var(--accent-forest); margin-left: 2px;">71.2% Acc</strong>
                 </span>
             </div>
         </header>
@@ -1763,8 +1682,8 @@
                         <!-- Model Card -->
                         <div style="background: #FFFFFF; border: 2px solid var(--accent-forest); border-radius: 6px; padding: 1.25rem;">
                             <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--accent-forest); letter-spacing: 0.05em;">Our Primary Model</div>
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreModelAcc">--%</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreModelF1">--</strong></div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreModelAcc">55.5%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreModelF1">0.5284</strong></div>
                             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
                                 Outperforms baselines by considering the paper's disciplinary field, open-access status, and author network alongside early citation count.
                             </p>
@@ -1773,8 +1692,8 @@
                         <!-- Majority Guess Card -->
                         <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
                             <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Majority Guess Baseline</div>
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreMajAcc">--%</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreMajF1">--</strong></div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreMajAcc">44.3%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreMajF1">0.2045</strong></div>
                             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
                                 Blindly guessing the most common tier (Low) fails to identify high-impact papers.
                             </p>
@@ -1783,8 +1702,8 @@
                         <!-- Early Citations Only Card -->
                         <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1.25rem;">
                             <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); letter-spacing: 0.05em;">Early Citations Only Baseline</div>
-                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreEarlyAcc">--%</div>
-                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreEarlyF1">--</strong></div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreEarlyAcc">52.8%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreEarlyF1">0.4721</strong></div>
                             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
                                 Using only early citation count without field adjustments struggles with papers from smaller scientific fields.
                             </p>
@@ -1809,7 +1728,7 @@
                     <h1 class="page-title">Citation Impact Predictor</h1>
                     <p class="page-description">
                         Forecasts citations in years 3-5 after publication strictly conditioned on information 
-                        available at the 2-year cutoff boundary ($T_{\text{cutoff}} = \text{pub\_year} + 2$). Zero future citations are accessed during inference.
+                        available at the 2-year cutoff boundary (t &le; t_pub + 2y). Zero future citations are accessed during inference.
                     </p>
                 </div>
 
@@ -1821,10 +1740,10 @@
                         </label>
                         <div class="mode-toggle-group" title="Toggle prediction engine: Mode M (Local Model) or Mode G (Google Gemini Intelligence)">
                             <button type="button" class="mode-toggle-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">
-                                🤖 Mode M (Model)
+                                Mode M
                             </button>
                             <button type="button" class="mode-toggle-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">
-                                ✨ Mode G (Gemini)
+                                Mode G
                             </button>
                         </div>
                     </div>
@@ -1833,21 +1752,21 @@
                         <button class="btn-primary" id="btnRunPrediction" onclick="runPrediction()">Generate Forecast</button>
                     </div>
 
-                    <div class="preset-toolbar">
+                                        <div class="preset-toolbar">
                         <div class="preset-select-wrap">
                             <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap;">Preset Evaluation Papers:</span>
                             <select id="presetPaperSelect" class="preset-dropdown" onchange="onPresetSelect(this.value)">
-                                <option value="W2752782242" selected>🟢 High Impact (≥90th) — W2752782242: Squeeze-and-Excitation Networks (CVPR 2018)</option>
-                                <option value="W2603777577">🔵 Medium Impact (50–90th) — W2603777577: Arbitrary Style Transfer (AdaIN) (ICCV 2017)</option>
-                                <option value="W2580662672">⚪ Low Impact (&lt;50th) — W2580662672: Gate-Variants of GRU Neural Networks (2017)</option>
-                                <option value="W2619383789">🔵 Medium Impact (Survey) — W2619383789: Multimodal Machine Learning (TPAMI 2018)</option>
-                                <option value="W1991691398">⚪ Low Impact (Historical Re-issue) — W1991691398: Psychology of Human-Computer Interaction</option>
+                                <option value="W2752782242" selected>High Impact (&ge;90th) &mdash; Squeeze-and-Excitation Networks (CVPR 2018)</option>
+                                <option value="W2603777577">Medium Impact (50&ndash;90th) &mdash; Arbitrary Style Transfer (AdaIN) (ICCV 2017)</option>
+                                <option value="W2580662672">Low Impact (&lt;50th) &mdash; Gate-Variants of GRU Neural Networks (2017)</option>
+                                <option value="W2619383789">Medium Impact (Survey) &mdash; Multimodal Machine Learning (TPAMI 2018)</option>
+                                <option value="W1991691398">Low Impact (Re-issue) &mdash; Psychology of Human-Computer Interaction</option>
                             </select>
                         </div>
                         <div class="tier-quick-buttons">
-                            <button type="button" class="tier-btn high" onclick="loadSample('W2752782242')">🟢 Test High (≥90th)</button>
-                            <button type="button" class="tier-btn medium" onclick="loadSample('W2603777577')">🔵 Test Medium (50–90th)</button>
-                            <button type="button" class="tier-btn low" onclick="loadSample('W2580662672')">⚪ Test Low (&lt;50th)</button>
+                            <button type="button" class="tier-btn high" onclick="loadSample('W2752782242')">High Impact (&ge;90th)</button>
+                            <button type="button" class="tier-btn medium" onclick="loadSample('W2603777577')">Medium Impact (50&ndash;90th)</button>
+                            <button type="button" class="tier-btn low" onclick="loadSample('W2580662672')">Low Impact (&lt;50th)</button>
                         </div>
                     </div>
                 </div>
@@ -1856,7 +1775,7 @@
                 <div id="predictionLoadingArea" class="editorial-panel span-12" style="display: none; padding: 2.2rem; text-align: center; margin-top: 0.6rem;">
                     <div class="sg-spinner" style="margin: 0 auto 0.8rem; width: 34px; height: 34px; border: 3px solid rgba(36,107,80,0.18); border-top-color: var(--accent-forest); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
                     <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-ink);" id="predictionLoadingTitle">Extracting 2-Hop Citation Graph &amp; Applying Temporal Firewall...</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.35rem;" id="predictionLoadingSubtitle">Conditioned strictly on $T_{\text{cutoff}} = \text{pub\_year} + 2$. Comparing with held-out ground truth.</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.35rem;" id="predictionLoadingSubtitle">Conditioned strictly on t &le; t_pub + 2y. Comparing with held-out ground truth.</div>
                 </div>
 
                 <!-- Live Results Container (Dynamically Populated) -->
@@ -1866,7 +1785,7 @@
                     <div class="editorial-panel span-8">
                         <div class="metadata-tags-row">
                             <span class="meta-tag">Pub Year: <strong id="resPubYear">—</strong></span>
-                            <span class="meta-tag">Cutoff Boundary: <strong id="resCutoffYear">—</strong> ($T_{\text{cutoff}}$)</span>
+                            <span class="meta-tag">Cutoff Boundary: <strong id="resCutoffYear">—</strong> (t_cutoff)</span>
                             <span class="meta-tag">Cutoff Citations: <strong id="resCutoffCits">—</strong></span>
                             <span class="meta-tag">Split: <strong id="resSplitStatus">—</strong></span>
                             <span class="meta-tag"><a id="resOpenAlexLink" href="#" target="_blank" style="color: var(--accent-forest); text-decoration: none; font-weight: 600;">OpenAlex Verified Record ↗</a></span>
@@ -1905,7 +1824,7 @@
                             <div class="eval-panel forecast-side">
                                 <div>
                                     <div class="eval-header-row">
-                                        <span class="eval-badge-label forecast">Model Forecast ($T_{\text{cutoff}}$ Blind Inference)</span>
+                                        <span class="eval-badge-label forecast">Model Forecast (t_cutoff Blind Inference)</span>
                                         <span class="provenance-pill" id="forecastProvenancePill">M1_LogisticRegression</span>
                                     </div>
                                     <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Predicted citations in years 3–5</div>
@@ -1935,7 +1854,7 @@
                                 </div>
 
                                 <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.75rem; line-height: 1.35;">
-                                    Inference strictly isolated to citation graph & metadata as of $T_{\text{cutoff}} = \text{pub\_year} + 2$. Zero future data leakage.
+                                    Inference strictly isolated to citation graph & metadata as of t &le; t_pub + 2y. Zero future data leakage.
                                 </div>
                             </div>
 
@@ -1959,7 +1878,7 @@
 
                                 <div class="truth-stat-grid">
                                     <div>
-                                        <div class="truth-stat-label">Citations at Cutoff ($T_{\text{cutoff}}$)</div>
+                                        <div class="truth-stat-label">Citations at Cutoff (t_cutoff)</div>
                                         <div class="truth-stat-value" id="btCutoffStatVal">—</div>
                                     </div>
                                     <div>
@@ -2049,12 +1968,12 @@
                             <div>
                                 <h3 class="section-title" style="margin-bottom: 0.2rem;">Annual Citation Accumulation Timeline ($T_{\text{pub}} \dots T_{\text{pub}+5}$)</h3>
                                 <p class="section-desc" style="margin-bottom: 0;">
-                                    Empirical proof of the strict temporal boundary firewall: green bars represent observed citations during inference ($t \le T_{\text{cutoff}}$); dashed amber marker denotes the inference cutoff boundary ($T_{\text{cutoff}} = \text{pub\_year} + 2$); purple bars represent held-out ground truth ($t \in [T+3 \dots T+5]$) strictly sealed during inference.
+                                    Empirical proof of the strict temporal boundary firewall: green bars represent observed citations during inference ($t \le T_{\text{cutoff}}$); dashed amber marker denotes the inference cutoff boundary (t &le; t_pub + 2y); purple bars represent held-out ground truth ($t \in [T+3 \dots T+5]$) strictly sealed during inference.
                                 </p>
                             </div>
                             <div style="display: flex; gap: 0.85rem; flex-wrap: wrap; font-size: 0.74rem; color: var(--text-secondary); align-items: center;">
                                 <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 11px; height: 11px; border-radius: 2px; background: var(--accent-forest);"></span> Observed Pre-Cutoff ($t \le T_{\text{cutoff}}$)</span>
-                                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 11px; height: 11px; border-radius: 2px; background: var(--warning-amber); border: 1px dashed #78350F;"></span> Cutoff Boundary ($T_{\text{cutoff}}$)</span>
+                                <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 11px; height: 11px; border-radius: 2px; background: var(--warning-amber); border: 1px dashed #78350F;"></span> Cutoff Boundary (t_cutoff)</span>
                                 <span style="display: inline-flex; align-items: center; gap: 5px;"><span style="width: 11px; height: 11px; border-radius: 2px; background: var(--accent-blue);"></span> Held-Out Window ($T+3 \dots T+5$)</span>
                             </div>
                         </div>
@@ -2077,7 +1996,7 @@
                         <div class="step-card">
                             <div class="step-number">STEP 02</div>
                             <div class="step-title">Temporal Freeze</div>
-                            <div class="step-desc">All citation graphs and venue indicators are frozen at $T_{\text{cutoff}} = \text{pub\_year} + 2$. Zero future data is visible.</div>
+                            <div class="step-desc">All citation graphs and venue indicators are frozen at t &le; t_pub + 2y. Zero future data is visible.</div>
                         </div>
                         <div class="step-card">
                             <div class="step-number">STEP 03</div>
@@ -2103,7 +2022,7 @@
                     <h1 class="page-title">Independent Verification Lab</h1>
                     <p class="page-description">
                         Double-blind protocol to verify model predictions against held-out ground truth. 
-                        Inspect feature inputs frozen at $T_{\text{cutoff}}$ before revealing actual citations in years 3-5 after publication.
+                        Inspect feature inputs frozen at t_cutoff before revealing actual citations in years 3-5 after publication.
                     </p>
                 </div>
 
@@ -2127,7 +2046,7 @@
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
                             <div class="editorial-panel inset" style="margin-bottom: 0;">
-                                <div style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary);">Blind Model Prediction ($T_{\text{cutoff}}$ Only)</div>
+                                <div style="font-size: 0.72rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-secondary);">Blind Model Prediction (t_cutoff Only)</div>
                                 <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-ink); margin-top: 0.3rem;" id="blindPredictedTier">—</div>
                                 <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.2rem;" id="blindConfidence">—</div>
                             </div>
@@ -2145,7 +2064,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <div>
                             <h3 class="section-title">Automated Held-Out Spotcheck</h3>
-                            <p class="section-desc" style="margin-bottom: 0;">Sample random papers from the $N=4,500$ held-out test split and run end-to-end audit.</p>
+                            <p class="section-desc" style="margin-bottom: 0;">Sample random papers from the N = 4,500 held-out test split and run end-to-end audit.</p>
                         </div>
                         <button class="btn-secondary" onclick="runSpotcheck()">Run 5-Sample Spotcheck</button>
                     </div>
@@ -2222,26 +2141,26 @@
                             <tbody>
                                 <tr>
                                     <td><strong>Future Citation Poisoning</strong></td>
-                                    <td>Inject artificial future citations after $T_{\text{cutoff}}$ and measure prediction shift</td>
-                                    <td>$\Delta = 0.000$ (Zero prediction change)</td>
+                                    <td>Inject artificial future citations after t_cutoff and measure prediction shift</td>
+                                    <td>&Delta; = 0.0000 (Strict Invariance) (Zero prediction change)</td>
                                     <td><span style="color: var(--success-green); font-weight: 600;">PASS (Invariance Confirmed)</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Label Shuffle Control</strong></td>
                                     <td>Permute impact classes across training set to break genuine scientometric associations</td>
-                                    <td>Accuracy drops to $33.4\%$ (Random guess: $33.3\%$)</td>
+                                    <td>Accuracy drops to 33.4% (Random guess: 33.3%)</td>
                                     <td><span style="color: var(--success-green); font-weight: 600;">PASS (Zero Spurious Memory)</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Positive Control (Upper Bound)</strong></td>
                                     <td>Intentionally leak actual future citations into features as negative control baseline</td>
-                                    <td>Accuracy reaches $99.8\%$ (Confirms sensitivity)</td>
+                                    <td>Accuracy reaches 99.8% (Confirms sensitivity)</td>
                                     <td><span style="color: var(--success-green); font-weight: 600;">PASS (Sensitivity Verified)</span></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Snapshot Consistency</strong></td>
                                     <td>Re-evaluate frozen test parquet files against upstream OpenAlex live API responses</td>
-                                    <td>$100\%$ SHA-256 manifest match</td>
+                                    <td>100% SHA-256 manifest match</td>
                                     <td><span style="color: var(--success-green); font-weight: 600;">PASS (Data Immutability)</span></td>
                                 </tr>
                             </tbody>
@@ -2255,7 +2174,7 @@
                         <div>
                             <h3 class="section-title" style="color: var(--text-ink);">Live Future-Poison Invariance Test</h3>
                             <p class="section-desc" style="max-width: 720px; margin-bottom: 0.75rem;">
-                                Injects $+5,000$ synthetic future citations occurring strictly after $T_{\text{cutoff}}$. 
+                                Injects $+5,000$ synthetic future citations occurring strictly after t_cutoff. 
                                 If the cutoff firewall functions properly, the model's feature vector and prediction must remain 100% unchanged.
                             </p>
                         </div>
@@ -2279,7 +2198,7 @@
                         <div>
                             <h1 class="page-title">Empirical Model Benchmarks &amp; Architectural Progression</h1>
                             <p class="page-description">
-                                Rigorous out-of-time evaluation across $N = 4,500$ held-out papers (2018–2020) under strict temporal cutoff ($T_{\text{cutoff}} = \text{pub\_year} + 2$). All features strictly sealed at cutoff.
+                                Rigorous out-of-time evaluation across N = 4,500 held-out papers (2018–2020) under strict temporal cutoff (t &le; t_pub + 2y). All features strictly sealed at cutoff.
                             </p>
                         </div>
                         <span class="heldout-badge" style="background:#DCFCE7; color:#15803D; padding:4px 10px; border-radius:999px; font-weight:600; font-size:0.68rem; display:inline-flex; align-items:center; gap:6px; border: 1px solid rgba(21,128,61,0.2); white-space:nowrap;">
@@ -2366,7 +2285,7 @@
                                     <td><strong>[0.6896, 0.7184]</strong></td>
                                     <td><strong style="color: var(--accent-forest);">71.24%</strong></td>
                                     <td><strong>0.0352</strong></td>
-                                    <td>Primary production predictor with post-hoc temperature scaling ($T = 1.315$)</td>
+                                    <td>Primary production predictor with post-hoc temperature scaling (T = 1.315)</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -2379,7 +2298,7 @@
                     <div style="font-size: 1.45rem; font-weight: 800; color: var(--accent-forest); margin-top: 3px;">+15.75 pp</div>
                     <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-ink); margin-top: 1px;">Accuracy Lift ($p &lt; 0.001$)</div>
                     <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">
-                        $\Delta\text{Macro-F1} = +0.1796$ over strongest uncalibrated baseline (55.49% &rarr; 71.24%).
+                        &Delta;Macro-F1 = +0.1796 over strongest uncalibrated baseline (55.49% &rarr; 71.24%).
                     </div>
                 </div>
 
@@ -2406,7 +2325,7 @@
                     <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-ink); margin-top: 3px;">ResNet (2016)</div>
                     <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-ink); margin-top: 1px;">CVPR Landmark Case</div>
                     <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">
-                        13,237 early citations at cutoff ($T=2018$); correctly forecasted into &ge;90th tier (69,790 actual).
+                        13,237 early citations at cutoff (T = 2018); correctly forecasted into &ge;90th tier (69,790 actual).
                     </div>
                 </div>
 
@@ -2419,7 +2338,7 @@
                         <div style="background: var(--bg-surface-subtle); border-left: 3px solid var(--warning-amber); padding: 0.65rem 0.85rem; border-radius: 4px;">
                             <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-ink);">Cold-Start Papers (0 early citations, debut authors)</div>
                             <div style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px;">
-                                Macro-F1 drops to <strong>0.3812</strong>. When relational citation topology is completely unformed at $T_{\text{cutoff}}$, model must fall back purely on venue rank and field cohort priors.
+                                Macro-F1 drops to <strong>0.3812</strong>. When relational citation topology is completely unformed at t_cutoff, model must fall back purely on venue rank and field cohort priors.
                             </div>
                         </div>
 
@@ -2514,8 +2433,8 @@
                         <div class="card-header-flex">
                             <span class="card-kicker">Research Ideation & Topic Validation</span>
                             <div class="mode-toggle-group" title="Engine Mode for Topic Exploration">
-                                <button type="button" class="mode-toggle-btn active" id="topicModeBtnM" onclick="setTopicMode('M')">🤖 Mode M (Scientometrics)</button>
-                                <button type="button" class="mode-toggle-btn mode-g" id="topicModeBtnG" onclick="setTopicMode('G')">✨ Mode G (Gemini AI)</button>
+                                <button type="button" class="mode-toggle-btn active" id="topicModeBtnM" onclick="setTopicMode('M')">Mode M (Scientometrics)</button>
+                                <button type="button" class="mode-toggle-btn mode-g" id="topicModeBtnG" onclick="setTopicMode('G')">Mode G (Gemini AI)</button>
                             </div>
                         </div>
 
@@ -2529,14 +2448,14 @@
                         <!-- Preset Quick Suggestions -->
                         <div style="margin-top: 0.85rem;">
                             <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); font-weight: 700;">Popular Emerging Topics:</span>
-                            <div class="topic-preset-pills" id="topicPresetsList">
-                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Graph Neural Networks for Drug Discovery')">💊 GNN for Drug Discovery</button>
-                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Multimodal Large Language Models')">🤖 Multimodal LLMs</button>
-                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Federated Learning in Healthcare')">🏥 Federated Learning in Healthcare</button>
-                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Quantum Error Correction')">⚛️ Quantum Error Correction</button>
-                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Zero-Knowledge Cryptography')">🔐 Zero-Knowledge Cryptography</button>
-                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Perovskite Solar Cells Degradation')">☀️ Perovskite Solar Cells</button>
-                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Reinforcement Learning from Human Feedback')">🎯 RLHF Alignment</button>
+                                                        <div class="topic-preset-pills" id="topicPresetsList">
+                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Graph Neural Networks for Drug Discovery')">GNN Drug Discovery</button>
+                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Multimodal Large Language Models')">Multimodal LLMs</button>
+                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Federated Learning in Healthcare')">Federated Learning (Healthcare)</button>
+                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Quantum Error Correction')">Quantum Error Correction</button>
+                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Zero-Knowledge Cryptography')">Zero-Knowledge Cryptography</button>
+                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Perovskite Solar Cells Degradation')">Perovskite Solar Cells</button>
+                                <button type="button" class="topic-pill-btn" onclick="selectTopicPreset('Reinforcement Learning from Human Feedback')">RLHF Alignment</button>
                             </div>
                         </div>
                     </div>
@@ -3398,7 +3317,7 @@
             // Update pill if results are visible
             const pill = document.getElementById('topicAnalysisModePill');
             if (pill) {
-                pill.textContent = mode === 'G' ? '✨ Mode G (Gemini Intelligence)' : '🤖 Mode M (Scientometrics)';
+                pill.textContent = mode === 'G' ? 'Mode G (Gemini Intelligence)' : 'Mode M (Scientometrics)';
                 pill.style.background = mode === 'G' ? '#DBEAFE' : '#E5E7EB';
                 pill.style.color = mode === 'G' ? '#1E40AF' : '#374151';
             }
@@ -3581,7 +3500,7 @@
             const modePill = document.getElementById('topicAnalysisModePill');
 
             if (modePill) {
-                modePill.textContent = ga.mode === 'G' ? '✨ Mode G (Gemini Intelligence)' : '🤖 Mode M (Scientometrics)';
+                modePill.textContent = ga.mode === 'G' ? 'Mode G (Gemini Intelligence)' : 'Mode M (Scientometrics)';
             }
             if (execText) execText.textContent = ga.executive_summary || '';
 

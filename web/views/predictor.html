@@ -128,9 +128,9 @@
                     </div>
 
                     <!-- UPPER ROW: PREDICTED IMPACT & CALIBRATED PROBABILITIES (HIGH / MEDIUM / LOW TIERS SHOWN UPPER) -->
-                    <div class="bento span-12" style="margin-bottom: var(--bento-gap);">
+                    <div class="upper-decision-grid span-12">
                         <!-- Upper Left: Vibrant Illuminated Insight Card -->
-                        <div class="luminous-insight-card span-4">
+                        <div class="luminous-insight-card">
                             <div>
                                 <div class="luminous-insight-badge">
                                     <span>✦</span>
@@ -147,68 +147,71 @@
                             </div>
                         </div>
 
-                        <!-- Upper Center: Calibrated Probabilities Donut Card (Low, Med, High Tiers) -->
-                        <div class="editorial-panel span-4 donut-widget-tile">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                                <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Calibrated Probabilities</h3>
-                                <span style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">Softmax</span>
-                            </div>
-                            <div class="donut-inner-flex">
-                                <div style="position: relative; width: 110px; height: 110px;">
-                                    <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
-                                        <circle cx="18" cy="18" r="15.915" fill="none" stroke="#161D2B" stroke-width="3.8"></circle>
-                                        <circle id="donutCircleHigh" cx="18" cy="18" r="15.915" fill="none" stroke="#10B981" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
-                                        <circle id="donutCircleMed" cx="18" cy="18" r="15.915" fill="none" stroke="#8B5CF6" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
-                                        <circle id="donutCircleLow" cx="18" cy="18" r="15.915" fill="none" stroke="#64748B" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
-                                    </svg>
-                                    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                        <span style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #FFFFFF;" id="donutCenterPct">—</span>
-                                        <span style="font-size: 0.62rem; color: var(--text-secondary); text-transform: uppercase;" id="donutCenterTier">—</span>
+                        <!-- Upper Duo Row: Donut Tile and Speedometer Arc -->
+                        <div class="upper-duo-grid">
+                            <!-- Upper Center: Calibrated Probabilities Donut Card (Low, Med, High Tiers) -->
+                            <div class="editorial-panel donut-widget-tile">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Calibrated Probabilities</h3>
+                                    <span style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">Softmax</span>
+                                </div>
+                                <div class="donut-inner-flex">
+                                    <div class="donut-svg-wrap" style="position: relative; width: 105px; height: 105px; flex-shrink: 0; margin: 0 auto;">
+                                        <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                                            <circle cx="18" cy="18" r="15.915" fill="none" stroke="#161D2B" stroke-width="3.8"></circle>
+                                            <circle id="donutCircleHigh" cx="18" cy="18" r="15.915" fill="none" stroke="#10B981" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                                            <circle id="donutCircleMed" cx="18" cy="18" r="15.915" fill="none" stroke="#8B5CF6" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                                            <circle id="donutCircleLow" cx="18" cy="18" r="15.915" fill="none" stroke="#64748B" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                                        </svg>
+                                        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                            <span style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #FFFFFF;" id="donutCenterPct">—</span>
+                                            <span style="font-size: 0.62rem; color: var(--text-secondary); text-transform: uppercase;" id="donutCenterTier">—</span>
+                                        </div>
+                                    </div>
+                                    <div class="donut-legend-list">
+                                        <div class="donut-legend-item">
+                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #10B981;"></span><span style="color: var(--text-secondary);">High (≥90th)</span></div>
+                                            <strong style="color: #FFFFFF;" id="probHighVal">—</strong>
+                                        </div>
+                                        <div class="donut-legend-item">
+                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #8B5CF6;"></span><span style="color: var(--text-secondary);">Medium (50–90th)</span></div>
+                                            <strong style="color: #FFFFFF;" id="probMedVal">—</strong>
+                                        </div>
+                                        <div class="donut-legend-item">
+                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #64748B;"></span><span style="color: var(--text-secondary);">Low (&lt;50th)</span></div>
+                                            <strong style="color: #FFFFFF;" id="probLowVal">—</strong>
+                                        </div>
+                                        <div style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 2px;">Calibrated (T = 1.11)</div>
                                     </div>
                                 </div>
-                                <div class="donut-legend-list">
-                                    <div class="donut-legend-item">
-                                        <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #10B981;"></span><span style="color: var(--text-secondary);">High (≥90th)</span></div>
-                                        <strong style="color: #FFFFFF;" id="probHighVal">—</strong>
-                                    </div>
-                                    <div class="donut-legend-item">
-                                        <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #8B5CF6;"></span><span style="color: var(--text-secondary);">Medium (50–90th)</span></div>
-                                        <strong style="color: #FFFFFF;" id="probMedVal">—</strong>
-                                    </div>
-                                    <div class="donut-legend-item">
-                                        <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #64748B;"></span><span style="color: var(--text-secondary);">Low (&lt;50th)</span></div>
-                                        <strong style="color: #FFFFFF;" id="probLowVal">—</strong>
-                                    </div>
-                                    <div style="font-size: 0.68rem; color: var(--text-tertiary); margin-top: 4px;">Temperature calibrated (T = 1.11)</div>
-                                </div>
                             </div>
-                        </div>
 
-                        <!-- Upper Right: Radial Speedometer Arc Gauge -->
-                        <div class="editorial-panel span-4 speedometer-widget-tile">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                                <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Discipline Percentile Score</h3>
-                                <div class="dash-kpi-arrow-btn">↗</div>
-                            </div>
-                            <div class="speedometer-container">
-                                <svg viewBox="0 0 200 110" style="width: 170px; height: 95px;">
-                                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#161D2B" stroke-width="14" stroke-linecap="round"></path>
-                                    <path id="speedoArcFill" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#speedoGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"></path>
-                                    <defs>
-                                        <linearGradient id="speedoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                                            <stop offset="0%" stop-color="#3B82F6"></stop>
-                                            <stop offset="60%" stop-color="#8B5CF6"></stop>
-                                            <stop offset="100%" stop-color="#10B981"></stop>
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
-                                <div class="speedometer-center-val">
-                                    <div class="speedometer-number" id="speedometerVal">—</div>
-                                    <div class="speedometer-sub">Discipline Velocity Rank</div>
+                            <!-- Upper Right: Radial Speedometer Arc Gauge -->
+                            <div class="editorial-panel speedometer-widget-tile">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                    <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Discipline Percentile Score</h3>
+                                    <div class="dash-kpi-arrow-btn">↗</div>
                                 </div>
-                            </div>
-                            <div style="font-size: 0.72rem; color: var(--text-secondary); text-align: center;">
-                                Relative to empirical cohort distribution ($N = 16,500$ works)
+                                <div class="speedometer-container">
+                                    <svg viewBox="0 0 200 110" style="width: 150px; height: 85px;">
+                                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#161D2B" stroke-width="14" stroke-linecap="round"></path>
+                                        <path id="speedoArcFill" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#speedoGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"></path>
+                                        <defs>
+                                            <linearGradient id="speedoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stop-color="#3B82F6"></stop>
+                                                <stop offset="60%" stop-color="#8B5CF6"></stop>
+                                                <stop offset="100%" stop-color="#10B981"></stop>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                    <div class="speedometer-center-val">
+                                        <div class="speedometer-number" id="speedometerVal">—</div>
+                                        <div class="speedometer-sub">Discipline Velocity Rank</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">
+                                    Relative to empirical cohort distribution ($N = 16,500$ works)
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -492,6 +492,10 @@
                 display: flex;
             }
 
+            .topbar-center-pills {
+                display: none !important;
+            }
+
             aside.app-sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -515,7 +519,7 @@
             }
 
             .workspace-content {
-                padding: 0.85rem 0.65rem 2.5rem;
+                padding: 0.75rem 0.6rem 2rem;
             }
         }
 
@@ -529,16 +533,25 @@
                 display: none;
             }
 
-            .status-tag {
+            .status-tag, .seg-btn .seg-sub {
                 display: none;
             }
 
-            .seg-btn .seg-sub {
-                display: none;
+            .workspace-content {
+                padding: 0.5rem 0.45rem 1.8rem;
+            }
+
+            .page-header {
+                padding: 0.65rem 0.75rem !important;
             }
 
             .page-title {
-                font-size: 1.1rem;
+                font-size: 1.05rem;
+            }
+
+            .page-description {
+                font-size: 0.72rem;
+                line-height: 1.35;
             }
         }
 

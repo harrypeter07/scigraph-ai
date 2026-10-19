@@ -93,23 +93,9 @@
     border-radius: 9999px;
 }
 
-.dash-kpi-badge.positive {
-    background: rgba(16, 185, 129, 0.18);
-    color: #10B981;
-    border: 1px solid rgba(16, 185, 129, 0.35);
-}
-
-.dash-kpi-badge.negative {
-    background: rgba(244, 63, 94, 0.18);
-    color: #F43F5E;
-    border: 1px solid rgba(244, 63, 94, 0.35);
-}
-
-.dash-kpi-badge.purple {
-    background: rgba(139, 92, 246, 0.2);
-    color: #A78BFA;
-    border: 1px solid rgba(139, 92, 246, 0.35);
-}
+.dash-kpi-badge.positive { background: rgba(16, 185, 129, 0.18); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.35); }
+.dash-kpi-badge.negative { background: rgba(244, 63, 94, 0.18); color: #F43F5E; border: 1px solid rgba(244, 63, 94, 0.35); }
+.dash-kpi-badge.purple { background: rgba(139, 92, 246, 0.2); color: #A78BFA; border: 1px solid rgba(139, 92, 246, 0.35); }
 
 /* 2. SPLINE CITATION TRAJECTORY CHART (Glowing Wave) */
 .spline-chart-tile {
@@ -123,27 +109,8 @@
     position: relative;
     margin-top: 0.75rem;
 }
+}
 
-#predTrajectoryChart .year-bar {
-    background: linear-gradient(180deg, #3B82F6, #1E3A8A);
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-    border-radius: 4px 4px 0 0;
-}
-#predTrajectoryChart .year-bar.cutoff {
-    background: linear-gradient(180deg, #F59E0B, #B45309);
-    box-shadow: 0 0 12px rgba(245, 158, 11, 0.45);
-}
-#predTrajectoryChart .year-bar.window {
-    background: linear-gradient(180deg, #8B5CF6, #6D28D9);
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.45);
-}
-#predTrajectoryChart .year-bar-val {
-    color: #F8FAFC;
-    font-weight: 600;
-}
-#predTrajectoryChart .year-bar-label {
-    color: #94A3B8;
-}
 
 /* 3. SEGMENTED GAUGE COMPARISON (Green vs Red/Amber Levels) */
 .segmented-comparison-tile {
@@ -186,24 +153,10 @@
     transition: all 0.2s ease;
 }
 
-.segmented-bar-pill.green-lit {
-    background: #10B981;
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
-}
-
-.segmented-bar-pill.coral-lit {
-    background: #F43F5E;
-    box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
-}
-
-.segmented-bar-pill.amber-lit {
-    background: #F59E0B;
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
-}
-
-.segmented-bar-pill.dim {
-    background: #1B2232;
-}
+.segmented-bar-pill.green-lit { background: #10B981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+.segmented-bar-pill.coral-lit { background: #F43F5E; box-shadow: 0 0 8px rgba(244, 63, 94, 0.4); }
+.segmented-bar-pill.amber-lit { background: #F59E0B; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+.segmented-bar-pill.dim { background: #1B2232; }
 
 /* 4. CITATION VELOCITY HEATMAP MATRIX */
 .heatmap-tile {
@@ -532,39 +485,103 @@
     transform: translateY(-1px);
 }
 
-.graph-collapse-toggle {
-    width: 100%;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--tile-radius);
-    padding: 0.75rem 1.15rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    color: #FFFFFF;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: all 0.15s ease;
+/* Upper Decision Grid Layout */
+.upper-decision-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1.75fr;
+    gap: var(--bento-gap);
     margin-bottom: var(--bento-gap);
 }
 
-.graph-collapse-toggle:hover {
-    border-color: var(--border-strong);
-    background: #141A27;
+.upper-duo-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: var(--bento-gap);
 }
 
-.graph-collapse-panel {
-    display: none;
-    margin-bottom: var(--bento-gap);
-}
-
-.graph-collapse-panel.open {
-    display: block;
-}
-
-@media (max-width: 900px) {
-    .dash-kpi-grid {
+@media (max-width: 960px) {
+    .upper-decision-grid {
         grid-template-columns: 1fr;
+        gap: 0.65rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dash-kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.45rem !important;
+        margin-bottom: 0.65rem !important;
+    }
+    .dash-kpi-card {
+        padding: 0.55rem 0.5rem !important;
+        min-height: 70px !important;
+        border-radius: 8px !important;
+    }
+    .dash-kpi-top { margin-bottom: 0.25rem !important; }
+    .dash-kpi-title {
+        font-size: 0.64rem !important;
+        gap: 3px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .dash-kpi-title svg { width: 11px !important; height: 11px !important; }
+    .dash-kpi-arrow-btn { display: none !important; }
+    .dash-kpi-value { font-size: 1.15rem !important; line-height: 1 !important; }
+    #kpiVenueQuartile { font-size: 1.02rem !important; }
+    .dash-kpi-badge { font-size: 0.58rem !important; padding: 1px 4px !important; }
+    .upper-duo-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.45rem !important;
+    }
+    .donut-widget-tile, .speedometer-widget-tile {
+        padding: 0.65rem 0.55rem !important;
+        min-height: 125px !important;
+    }
+    .donut-inner-flex {
+        flex-direction: column !important;
+        gap: 0.35rem !important;
+        margin-top: 0.35rem !important;
+    }
+    .donut-svg-wrap { width: 72px !important; height: 72px !important; }
+    #donutCenterPct { font-size: 0.95rem !important; }
+    .donut-legend-list { width: 100% !important; gap: 3px !important; }
+    .donut-legend-item { font-size: 0.64rem !important; }
+    .speedometer-container svg { width: 105px !important; height: 60px !important; }
+    .speedometer-number { font-size: 1.35rem !important; }
+    .speedometer-sub { font-size: 0.6rem !important; }
+    .speedometer-center-val { bottom: 6px !important; }
+    .luminous-insight-card {
+        padding: 0.75rem 0.85rem !important;
+        min-height: auto !important;
+        margin-bottom: 0.5rem !important;
+    }
+    .luminous-insight-text {
+        font-size: 0.88rem !important;
+        margin: 0.4rem 0 !important;
+        line-height: 1.35 !important;
+    }
+    .graph-workspace { height: 215px !important; }
+    .node-inspector-box { padding: 0.6rem 0.75rem !important; }
+    #inspLabel { font-size: 0.82rem !important; }
+    .connected-impact-table th, .connected-impact-table td {
+        padding: 4px 6px !important;
+        font-size: 0.67rem !important;
+    }
+    .tier-quick-buttons {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        width: 100% !important;
+        gap: 0.35rem !important;
+        padding-bottom: 3px !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+    .tier-quick-btn {
+        flex-shrink: 0 !important;
+        font-size: 0.7rem !important;
+        padding: 4px 8px !important;
+        white-space: nowrap !important;
     }
 }

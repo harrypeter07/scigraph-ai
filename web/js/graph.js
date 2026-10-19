@@ -401,51 +401,53 @@ function renderSubgraph(data, containerId) {
                 selector: 'node',
                 style: {
                     'label': 'data(label)',
-                    'color': '#0F172A',
+                    'color': '#F1F5F9',
                     'font-size': '10px',
                     'font-weight': '600',
                     'font-family': 'Inter, sans-serif',
                     'text-valign': 'bottom',
-                    'text-margin-y': 4,
-                    'background-color': '#059669',
+                    'text-margin-y': 5,
+                    'text-outline-color': '#080B11',
+                    'text-outline-width': 2,
+                    'background-color': '#10B981',
                     'width': 28,
                     'height': 28,
-                    'border-width': 1.5,
-                    'border-color': '#FFFFFF'
+                    'border-width': 2,
+                    'border-color': '#34D399'
                 }
             },
-            { selector: 'node[type = "paper"]', style: { 'background-color': '#2563EB', 'width': 44, 'height': 44, 'border-width': 3, 'border-color': '#1D4ED8' } },
-            { selector: 'node[type = "author"]', style: { 'background-color': '#3B82F6', 'width': 26, 'height': 26 } },
-            { selector: 'node[type = "institution"]', style: { 'background-color': '#0D9488', 'width': 20, 'height': 20 } },
-            { selector: 'node[type = "venue"]', style: { 'background-color': '#D97706', 'width': 30, 'height': 30 } },
-            { selector: 'node[type = "topic"]', style: { 'background-color': '#16A34A', 'width': 28, 'height': 28 } },
-            { selector: 'node[type = "precursor"]', style: { 'background-color': '#7C3AED', 'width': 24, 'height': 24 } },
+            { selector: 'node[type = "paper"]', style: { 'background-color': '#3B82F6', 'width': 42, 'height': 42, 'border-width': 3, 'border-color': '#93C5FD' } },
+            { selector: 'node[type = "author"]', style: { 'background-color': '#6366F1', 'width': 26, 'height': 26, 'border-color': '#A5B4FC' } },
+            { selector: 'node[type = "institution"]', style: { 'background-color': '#0D9488', 'width': 22, 'height': 22, 'border-color': '#5EEAD4' } },
+            { selector: 'node[type = "venue"]', style: { 'background-color': '#F59E0B', 'width': 30, 'height': 30, 'border-color': '#FDE68A' } },
+            { selector: 'node[type = "topic"]', style: { 'background-color': '#10B981', 'width': 28, 'height': 28, 'border-color': '#6EE7B7' } },
+            { selector: 'node[type = "precursor"]', style: { 'background-color': '#8B5CF6', 'width': 24, 'height': 24, 'border-color': '#C4B5FD' } },
             {
                 selector: 'node:selected',
                 style: {
                     'border-width': 4,
-                    'border-color': '#F59E0B',
-                    'shadow-blur': 12,
-                    'shadow-color': 'rgba(245, 158, 11, 0.45)',
-                    'shadow-opacity': 0.8
+                    'border-color': '#38BDF8',
+                    'shadow-blur': 16,
+                    'shadow-color': 'rgba(56, 189, 248, 0.7)',
+                    'shadow-opacity': 0.9
                 }
             },
             {
                 selector: 'edge',
                 style: {
-                    'width': 1.5,
-                    'line-color': '#CBD5E1',
-                    'target-arrow-color': '#94A3B8',
+                    'width': 1.6,
+                    'line-color': '#2A364F',
+                    'target-arrow-color': '#475569',
                     'target-arrow-shape': 'triangle',
                     'curve-style': 'bezier',
-                    'arrow-scale': 0.8
+                    'arrow-scale': 0.85
                 }
             },
-            { selector: 'edge[label = "authored"]', style: { 'line-color': '#93C5FD', 'target-arrow-color': '#60A5FA' } },
-            { selector: 'edge[label = "affiliated_with"]', style: { 'line-color': '#99F6E4', 'line-style': 'dotted' } },
-            { selector: 'edge[label = "published_in"]', style: { 'line-color': '#FDE68A', 'target-arrow-color': '#F59E0B' } },
-            { selector: 'edge[label = "has_topic"]', style: { 'line-color': '#BBF7D0', 'line-style': 'dashed' } },
-            { selector: 'edge[label = "cites"]', style: { 'line-color': '#DDD6FE', 'target-arrow-color': '#8B5CF6' } }
+            { selector: 'edge[label = "authored"]', style: { 'line-color': '#3B82F6', 'target-arrow-color': '#60A5FA', 'opacity': 0.75 } },
+            { selector: 'edge[label = "affiliated_with"]', style: { 'line-color': '#14B8A6', 'line-style': 'dotted', 'opacity': 0.65 } },
+            { selector: 'edge[label = "published_in"]', style: { 'line-color': '#F59E0B', 'target-arrow-color': '#FBBF24', 'opacity': 0.75 } },
+            { selector: 'edge[label = "has_topic"]', style: { 'line-color': '#10B981', 'line-style': 'dashed', 'opacity': 0.65 } },
+            { selector: 'edge[label = "cites"]', style: { 'line-color': '#8B5CF6', 'target-arrow-color': '#A78BFA', 'opacity': 0.75 } }
         ],
         layout: {
             name: 'cose',

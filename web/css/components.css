@@ -122,7 +122,7 @@
             border-radius: 8px;
             font-size: 0.81rem;
             font-family: var(--font-sans);
-            background-color: #FFFFFF;
+            background-color: var(--bg-surface-subtle);
             color: var(--text-ink);
             cursor: pointer;
             outline: none;

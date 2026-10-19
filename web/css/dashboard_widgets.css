@@ -1,0 +1,387 @@
+/* SciGraph 2.4 PRO - Executive Dark Dashboard Widgets (Matching Reference Aesthetic) */
+
+/* 1. TOP KPI STAT CARDS */
+.dash-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--bento-gap);
+    margin-bottom: var(--bento-gap);
+}
+
+.dash-kpi-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--tile-radius);
+    padding: 1.15rem 1.25rem;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.dash-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--border-strong);
+}
+
+.dash-kpi-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.dash-kpi-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dash-kpi-arrow-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-surface-subtle);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    transition: all 0.15s ease;
+}
+
+.dash-kpi-card:hover .dash-kpi-arrow-btn {
+    background: var(--accent-purple);
+    color: #FFFFFF;
+    border-color: var(--accent-purple);
+}
+
+.dash-kpi-body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.dash-kpi-value {
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.dash-kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+}
+
+.dash-kpi-badge.positive {
+    background: rgba(16, 185, 129, 0.18);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.dash-kpi-badge.negative {
+    background: rgba(244, 63, 94, 0.18);
+    color: #F43F5E;
+    border: 1px solid rgba(244, 63, 94, 0.35);
+}
+
+.dash-kpi-badge.purple {
+    background: rgba(139, 92, 246, 0.2);
+    color: #A78BFA;
+    border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+/* 2. SPLINE CITATION TRAJECTORY CHART (Glowing Wave) */
+.spline-chart-tile {
+    position: relative;
+    padding: 1.15rem 1.25rem 1rem;
+}
+
+.spline-svg-container {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    margin-top: 0.75rem;
+}
+
+#predTrajectoryChart .year-bar {
+    background: linear-gradient(180deg, #3B82F6, #1E3A8A);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    border-radius: 4px 4px 0 0;
+}
+#predTrajectoryChart .year-bar.cutoff {
+    background: linear-gradient(180deg, #F59E0B, #B45309);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.45);
+}
+#predTrajectoryChart .year-bar.window {
+    background: linear-gradient(180deg, #8B5CF6, #6D28D9);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.45);
+}
+#predTrajectoryChart .year-bar-val {
+    color: #F8FAFC;
+    font-weight: 600;
+}
+#predTrajectoryChart .year-bar-label {
+    color: #94A3B8;
+}
+
+/* 3. SEGMENTED GAUGE COMPARISON (Green vs Red/Amber Levels) */
+.segmented-comparison-tile {
+    padding: 1.15rem 1.25rem;
+}
+
+.segmented-gauges-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.85rem;
+    align-items: flex-end;
+}
+
+.segmented-gauge-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.segmented-gauge-val {
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1;
+    margin-bottom: 2px;
+}
+
+.segmented-gauge-label {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.segmented-bar-pill {
+    height: 7px;
+    border-radius: 4px;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.segmented-bar-pill.green-lit {
+    background: #10B981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.segmented-bar-pill.coral-lit {
+    background: #F43F5E;
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+}
+
+.segmented-bar-pill.amber-lit {
+    background: #F59E0B;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.segmented-bar-pill.dim {
+    background: #1B2232;
+}
+
+/* 4. CITATION VELOCITY HEATMAP MATRIX */
+.heatmap-tile {
+    padding: 1.15rem 1.25rem;
+}
+
+.heatmap-matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin: 0.75rem 0;
+}
+
+.heatmap-tile-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.heatmap-tile-cell:hover {
+    transform: scale(1.15);
+    filter: brightness(1.25);
+    z-index: 5;
+}
+
+.heat-level-0 { background-color: #161D2B; }
+.heat-level-1 { background-color: #312E81; }
+.heat-level-2 { background-color: #4338CA; }
+.heat-level-3 { background-color: #6366F1; }
+.heat-level-4 { background-color: #8B5CF6; box-shadow: 0 0 6px rgba(139, 92, 246, 0.5); }
+
+/* 5. VIBRANT ILLUMINATED INSIGHT CARD (Bottom Left) */
+.luminous-insight-card {
+    background: linear-gradient(135deg, #7C3AED 0%, #6366F1 50%, #4F46E5 100%);
+    border-radius: var(--tile-radius);
+    padding: 1.35rem 1.45rem;
+    box-shadow: 0 10px 30px -4px rgba(124, 58, 237, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 230px;
+}
+
+.luminous-insight-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
+    pointer-events: none;
+}
+
+.luminous-insight-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9999px;
+    padding: 4px 10px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    width: fit-content;
+}
+
+.luminous-insight-text {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: #FFFFFF;
+    margin: 0.85rem 0;
+}
+
+.luminous-insight-pills {
+    display: flex;
+    gap: 5px;
+    margin-top: auto;
+}
+
+.luminous-dot-pill {
+    height: 5px;
+    border-radius: 9999px;
+    transition: all 0.2s ease;
+}
+
+.luminous-dot-pill.active {
+    background: #FFFFFF;
+    width: 22px;
+}
+
+.luminous-dot-pill.inactive {
+    background: rgba(255, 255, 255, 0.35);
+    width: 12px;
+}
+
+/* 6. DONUT BREAKDOWN (Bottom Center) */
+.donut-widget-tile {
+    padding: 1.15rem 1.25rem;
+}
+
+.donut-inner-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 1.25rem;
+    margin-top: 0.65rem;
+}
+
+.donut-legend-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.donut-legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.74rem;
+}
+
+.donut-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+/* 7. RADIAL SPEEDOMETER ARC GAUGE (Bottom Right) */
+.speedometer-widget-tile {
+    padding: 1.15rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.speedometer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 0.5rem 0;
+}
+
+.speedometer-center-val {
+    position: absolute;
+    bottom: 12px;
+    text-align: center;
+}
+
+.speedometer-number {
+    font-family: var(--font-display);
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1;
+}
+
+.speedometer-sub {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+    .dash-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}

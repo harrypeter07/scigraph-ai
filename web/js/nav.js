@@ -26,6 +26,19 @@ let currentPredictionMode = 'M';
                 safeSetText('activeBreadcrumb', idMap[viewId].title);
             }
 
+            // Sync Topbar Center Pills
+            document.querySelectorAll('.topbar-pill-btn').forEach(p => p.classList.remove('active'));
+            const pillMap = {
+                'viewPredictor': 'pillPredictor',
+                'viewTeacherVerify': 'pillTeacher',
+                'viewAudit': 'pillAudit',
+                'viewTopicFeasibility': 'pillTopic'
+            };
+            if (pillMap[viewId]) {
+                const pEl = document.getElementById(pillMap[viewId]);
+                if (pEl) pEl.classList.add('active');
+            }
+
             // Close mobile menu drawer on selection
             if (typeof closeMobileMenu === 'function') {
                 closeMobileMenu();

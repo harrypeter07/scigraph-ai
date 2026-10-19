@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="/css/layout.css">
     <link rel="stylesheet" href="/css/components.css">
     <link rel="stylesheet" href="/css/predictor.css">
+    <link rel="stylesheet" href="/css/dashboard_widgets.css">
     <link rel="stylesheet" href="/css/topic.css">
 </head>
 <body>
@@ -26,18 +27,18 @@
         <div>
             <div class="sidebar-header">
                 <div class="brand-title">
-                    <div class="brand-icon-wrap">
+                    <div class="brand-icon-wrap" style="background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                            <circle cx="12" cy="12" r="3" fill="#2563EB" stroke="#2563EB"></circle>
-                            <circle cx="5" cy="8" r="2" stroke="#059669"></circle>
-                            <circle cx="19" cy="8" r="2" stroke="#7C3AED"></circle>
+                            <circle cx="12" cy="12" r="3" fill="#8B5CF6" stroke="#8B5CF6"></circle>
+                            <circle cx="5" cy="8" r="2" stroke="#10B981"></circle>
+                            <circle cx="19" cy="8" r="2" stroke="#A78BFA"></circle>
                             <circle cx="7" cy="19" r="2" stroke="#64748B"></circle>
                             <circle cx="17" cy="19" r="2" stroke="#64748B"></circle>
                             <path d="M7 9l3.5 2M17 9l-3.5 2M8.5 17.5L11 13.5M15.5 17.5L13 13.5" stroke="#94A3B8" stroke-dasharray="2 2"></path>
                         </svg>
                     </div>
                     <div class="brand-text-block">
-                        <div class="brand-name">SciGraph <span class="brand-badge">2.4 PRO</span></div>
+                        <div class="brand-name">SciGraph <span class="brand-badge" style="background: rgba(139,92,246,0.2); color: #A78BFA; border-color: rgba(139,92,246,0.3);">2.4 PRO</span></div>
                         <div class="brand-tagline">Citation Trajectory Forecasting</div>
                     </div>
                 </div>
@@ -81,7 +82,7 @@
         <div class="sidebar-footer">
             <div class="provenance-card">
                 <div class="telemetry-status-row">
-                    <span class="status-pulse-dot"></span>
+                    <span class="status-pulse-dot" style="background: #10B981; box-shadow: 0 0 8px #10B981;"></span>
                     <span>Engine Online: Primary M1</span>
                 </div>
                 <div class="telemetry-meta">
@@ -107,6 +108,26 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     <strong id="activeBreadcrumb">Citation Impact Predictor</strong>
                 </div>
+            </div>
+
+            <!-- Center Pill Navigation Tabs (Matching Reference Dashboard) -->
+            <div class="topbar-center-pills">
+                <button type="button" class="topbar-pill-btn active" id="pillPredictor" onclick="switchTab('viewPredictor')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span>Overview</span>
+                </button>
+                <button type="button" class="topbar-pill-btn" id="pillTeacher" onclick="switchTab('viewTeacherVerify')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <span>Verification</span>
+                </button>
+                <button type="button" class="topbar-pill-btn" id="pillAudit" onclick="switchTab('viewAudit')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Audit</span>
+                </button>
+                <button type="button" class="topbar-pill-btn" id="pillTopic" onclick="switchTab('viewTopicFeasibility')">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <span>Topics</span>
+                </button>
             </div>
 
             <div class="topbar-actions">

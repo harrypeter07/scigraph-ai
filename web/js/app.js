@@ -47,10 +47,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     // 1. Asynchronously load all modular view templates into the workspace container
     await loadViewTemplates();
     
-    // 2. Initialize the default active view (Predictor)
-    if (typeof runPrediction === 'function') {
-        runPrediction();
-    }
+    // 2. Standby on initial view (do not load data prior to user action)
+    // User initiates analysis via 'Generate Forecast' or preset selection
     
     // 3. Preload background corpus and audit scoreboard
     if (typeof loadTeacherCorpus === 'function') {

@@ -1,48 +1,77 @@
             <section id="viewPredictor" class="view-pane active">
                 <div class="bento">
-                <div class="page-header bento-tile span-12">
-                    <h1 class="page-title">Citation Impact &amp; Scientometric Intelligence Overview</h1>
-                    <p class="page-description">
-                        Deep learning and multi-relational graph forecasting conditioned strictly at the 2-year cutoff boundary ($t \le t_{\text{pub}} + 2\text{y}$). Verified against SCImago journal prestige, DOAJ publishing economics, and OpenAlex citation dynamics.
-                    </p>
-                </div>
-
-                <!-- Input Workspace Panel with Mode G Toggle & Presets -->
-                <div class="editorial-panel span-12">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
-                        <label for="paperInput" style="font-size: 0.84rem; font-weight: 600; color: var(--text-ink); margin-bottom: 0;">
-                            Paper Identifier (OpenAlex Work ID, DOI, or Canonical Title)
-                        </label>
+                
+                <!-- 1. Sleek Executive Header Row -->
+                <div class="dash-title-row span-12">
+                    <div>
+                        <h1 class="dash-title-main">Citation Impact &amp; Scientometric AI Overview</h1>
+                        <div class="dash-title-sub">HeteroSAGE GNN &bull; Temporal freeze at $t \le t_{\text{pub}} + 2\text{y}$ &bull; SCImago &bull; DOAJ</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <div class="engine-segmented-control" role="tablist">
                             <button type="button" class="seg-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">
-                                <span>Mode M (Scientometrics)</span>
+                                <span>Mode M <small class="seg-sub">(Scientometrics)</small></span>
                             </button>
                             <button type="button" class="seg-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">
-                                <span>Mode G (Gemini AI)</span>
+                                <span>Mode G <small class="seg-sub">(Gemini AI)</small></span>
                             </button>
                         </div>
                     </div>
-                    <div class="search-bar-wrap">
-                        <input type="text" id="paperInput" class="search-input" placeholder="e.g. W2752782242, W4393188496, 10.1109/cvpr.2018.00745, or Squeeze-and-Excitation Networks" value="W4393188496">
+                </div>
+
+                <!-- 2. Compact Search & Presets Toolbar -->
+                <div class="dash-search-toolbar span-12">
+                    <div class="search-bar-wrap" style="flex: 1; min-width: 280px;">
+                        <input type="text" id="paperInput" class="search-input" placeholder="Search OpenAlex Work ID (e.g. W4393188496), DOI, or title..." value="">
                         <button class="btn-primary" id="btnRunPrediction" onclick="runPrediction()">Generate Forecast</button>
                     </div>
+                    <div class="tier-quick-buttons" style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
+                        <span style="font-size: 0.72rem; color: var(--text-tertiary); font-family: var(--font-mono); margin-right: 2px;">Presets:</span>
+                        <button type="button" class="tier-btn" style="background: rgba(139,92,246,0.18); color: #A78BFA; border-color: rgba(139,92,246,0.35);" onclick="loadSample('W4393188496')">AI Future (2024)</button>
+                        <button type="button" class="tier-btn high" onclick="loadSample('W2752782242')">High (≥90th)</button>
+                        <button type="button" class="tier-btn medium" onclick="loadSample('W2603777577')">Medium (50–90th)</button>
+                        <button type="button" class="tier-btn low" onclick="loadSample('W2580662672')">Low (&lt;50th)</button>
+                    </div>
+                    <select id="presetPaperSelect" class="preset-dropdown" style="display: none;" onchange="onPresetSelect(this.value)">
+                        <option value="W4393188496">AI: the future of humanity (2024, Soha Rawas)</option>
+                        <option value="W2752782242">High Impact (≥90th) — Squeeze-and-Excitation Networks (CVPR 2018)</option>
+                        <option value="W4386693657">Recent High Velocity (2023) — Generative AI (BISE Q1)</option>
+                        <option value="W2603777577">Medium Impact (50–90th) — Arbitrary Style Transfer (AdaIN) (ICCV 2017)</option>
+                        <option value="W2580662672">Low Impact (&lt;50th) — Gate-Variants of GRU Neural Networks (2017)</option>
+                    </select>
+                </div>
 
-                    <div class="preset-toolbar">
-                        <div class="preset-select-wrap">
-                            <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap;">Preset Evaluation Papers:</span>
-                            <select id="presetPaperSelect" class="preset-dropdown" onchange="onPresetSelect(this.value)">
-                                <option value="W4393188496" selected>AI: the future of humanity (2024, Soha Rawas)</option>
-                                <option value="W2752782242">High Impact (≥90th) — Squeeze-and-Excitation Networks (CVPR 2018)</option>
-                                <option value="W4386693657">Recent High Velocity (2023) — Generative AI (BISE Q1)</option>
-                                <option value="W2603777577">Medium Impact (50–90th) — Arbitrary Style Transfer (AdaIN) (ICCV 2017)</option>
-                                <option value="W2580662672">Low Impact (&lt;50th) — Gate-Variants of GRU Neural Networks (2017)</option>
-                            </select>
-                        </div>
-                        <div class="tier-quick-buttons">
-                            <button type="button" class="tier-btn" style="background: rgba(139,92,246,0.18); color: #A78BFA; border-color: rgba(139,92,246,0.35);" onclick="loadSample('W4393188496')">User Paper (2024)</button>
-                            <button type="button" class="tier-btn high" onclick="loadSample('W2752782242')">High (≥90th)</button>
-                            <button type="button" class="tier-btn medium" onclick="loadSample('W2603777577')">Medium (50–90th)</button>
-                            <button type="button" class="tier-btn low" onclick="loadSample('W2580662672')">Low (&lt;50th)</button>
+                <!-- 3. Clean Standby State (Shown on Initial Load - Zero Fake Numbers) -->
+                <div id="predictionEmptyState" class="dash-empty-standby span-12">
+                    <div class="empty-standby-card">
+                        <div class="empty-standby-icon">✦</div>
+                        <h3 class="empty-standby-title">Ready to Forecast Citation Dynamics</h3>
+                        <p class="empty-standby-desc">Enter any scientific paper identifier above or click an evaluation preset to compute multi-relational citation trajectory, journal prestige, and calibrated 5-year impact.</p>
+                        <div class="empty-quick-pills">
+                            <button type="button" class="empty-quick-pill" onclick="loadSample('W4393188496')">
+                                <span style="color: #A78BFA; font-size: 1rem;">✦</span>
+                                <div>
+                                    <strong style="color: #FFFFFF; display: block;">AI: the future of humanity</strong>
+                                    <span style="color: var(--text-secondary); font-size: 0.72rem;">2024 &bull; Soha Rawas &bull; Discover Artificial Intelligence</span>
+                                </div>
+                                <span style="margin-left: auto; color: #A78BFA; font-size: 0.75rem; font-weight: 600;">Evaluate ↗</span>
+                            </button>
+                            <button type="button" class="empty-quick-pill" onclick="loadSample('W2752782242')">
+                                <span style="color: #10B981; font-size: 1rem;">✦</span>
+                                <div>
+                                    <strong style="color: #FFFFFF; display: block;">Squeeze-and-Excitation Networks</strong>
+                                    <span style="color: var(--text-secondary); font-size: 0.72rem;">CVPR 2018 &bull; High Tier Citation Outlier</span>
+                                </div>
+                                <span style="margin-left: auto; color: #10B981; font-size: 0.75rem; font-weight: 600;">Evaluate ↗</span>
+                            </button>
+                            <button type="button" class="empty-quick-pill" onclick="loadSample('W4386693657')">
+                                <span style="color: #3B82F6; font-size: 1rem;">✦</span>
+                                <div>
+                                    <strong style="color: #FFFFFF; display: block;">Generative AI in BISE</strong>
+                                    <span style="color: var(--text-secondary); font-size: 0.72rem;">2023 &bull; Q1 Journal &bull; Rapid Early Velocity</span>
+                                </div>
+                                <span style="margin-left: auto; color: #3B82F6; font-size: 0.75rem; font-weight: 600;">Evaluate ↗</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -59,65 +88,46 @@
                     <div class="skeleton-shimmer skeleton-line" style="width: 35%;"></div>
                 </div>
 
-                <!-- Async Loader Area (Fallback Message) -->
-                <div id="predictionLoadingArea" class="editorial-panel span-12" style="display: none; padding: 2.2rem; text-align: center; margin-top: 0.6rem;">
-                    <div class="sg-spinner" style="margin: 0 auto 0.8rem; width: 34px; height: 34px; border: 3px solid rgba(139,92,246,0.2); border-top-color: var(--accent-purple); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-ink);" id="predictionLoadingTitle">Extracting 2-Hop Citation Graph &amp; Applying Temporal Cutoff...</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.35rem;" id="predictionLoadingSubtitle">Conditioned strictly on t &le; t_pub + 2y. Verified via SCImago &amp; DOAJ.</div>
+                <!-- Async Loader Area -->
+                <div id="predictionLoadingArea" class="editorial-panel span-12" style="display: none; padding: 1.8rem; text-align: center;">
+                    <div class="sg-spinner" style="margin: 0 auto 0.8rem; width: 32px; height: 32px; border: 3px solid rgba(139,92,246,0.2); border-top-color: var(--accent-purple); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-ink);" id="predictionLoadingTitle">Extracting 2-Hop Citation Graph &amp; Applying Temporal Cutoff...</div>
+                    <div style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 0.25rem;" id="predictionLoadingSubtitle">Conditioned strictly on t &le; t_pub + 2y. Verified via SCImago &amp; DOAJ.</div>
                 </div>
 
-                <!-- Live Results Container (Executive Dark Dashboard) -->
+                <!-- 4. Live Results Container (Executive Dark Dashboard) -->
                 <div id="predictionResultsArea" class="span-12" style="display: none;">
                     
-                    <!-- Lead Metadata Bar -->
-                    <div class="editorial-panel span-12" style="margin-bottom: var(--bento-gap);">
-                        <div class="metadata-tags-row">
-                            <span class="meta-tag">Pub Year: <strong id="resPubYear">—</strong></span>
-                            <span class="meta-tag">Cutoff Boundary: <strong id="resCutoffYear">—</strong> (t_cutoff)</span>
-                            <span class="meta-tag">Cutoff Citations: <strong id="resCutoffCits">—</strong></span>
-                            <span class="meta-tag">Split: <strong id="resSplitStatus">—</strong></span>
-                            <span class="meta-tag"><a id="resOpenAlexLink" href="#" target="_blank" style="color: var(--accent-forest); text-decoration: none; font-weight: 600;">OpenAlex Verified Record ↗</a></span>
+                    <!-- Compact Active Paper Lead Strip -->
+                    <div class="active-paper-strip span-12">
+                        <div class="paper-strip-left">
+                            <span class="paper-strip-badge" id="resSplitStatus">Blind Test</span>
+                            <h2 class="paper-strip-title" id="resPaperTitle">—</h2>
+                            <span style="color: var(--text-tertiary); font-size: 0.78rem;">(<span id="resPubYear">—</span>)</span>
                         </div>
-                        <h2 class="paper-title-lead" id="resPaperTitle" style="color: #FFFFFF; font-size: 1.25rem; font-weight: 700; margin: 0.3rem 0 0.2rem;">—</h2>
-                        <div class="paper-authors-line" id="resAuthorsLine" style="color: var(--text-secondary); font-size: 0.82rem;">—</div>
-                        <div style="font-size: 0.82rem; color: var(--text-tertiary);" id="resVenueLine">—</div>
-
-                        <!-- Scientometrics & Access Economics Strip -->
-                        <div class="scientometrics-bar" id="scientometricsBar" style="background: var(--bg-surface-subtle); border-radius: 8px; padding: 0.65rem 0.85rem; margin-top: 0.65rem; border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
-                            <div>
-                                <div style="font-size: 0.68rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-tertiary);">Publication Venue Prestige</div>
-                                <div style="font-size: 0.86rem; font-weight: 700; color: var(--text-ink);" id="econVenuePrestige">—</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.68rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-tertiary);">Publishing Access Model</div>
-                                <div style="font-size: 0.86rem; font-weight: 700; color: var(--text-ink);" id="econModelVal">—</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.68rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-tertiary);">Author Processing Charge (APC)</div>
-                                <div style="font-size: 0.86rem; font-weight: 600; color: var(--text-ink);" id="econApcVal">—</div>
-                            </div>
-                            <div id="econAdvCol" style="display: none;">
-                                <div style="font-size: 0.68rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-tertiary);">Empirical OA Advantage</div>
-                                <div style="font-size: 0.86rem; font-weight: 700; color: var(--accent-forest);" id="econAdvVal">—</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.68rem; text-transform: uppercase; font-family: var(--font-mono); color: var(--text-tertiary);">CD Disruption Index</div>
-                                <div style="font-size: 0.86rem; font-weight: 600; color: var(--text-ink);" id="econDisruptionVal">—</div>
-                            </div>
-                        </div>
-
-                        <!-- Gemini Mode G Reasoning Box (if active) -->
-                        <div class="gemini-reasoning-panel" id="geminiReasoningCard" style="display: none; margin-top: 0.75rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 8px; padding: 0.75rem 0.95rem;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
-                                <span style="background: #2563EB; color: #FFF; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700;">MODE G</span>
-                                <strong style="font-size: 0.86rem; color: #60A5FA;">Gemini Scientometric Reasoning</strong>
-                                <span style="font-size: 0.72rem; color: var(--text-secondary); font-family: var(--font-mono);" id="geminiConfidenceScore">Confidence: 95%</span>
-                            </div>
-                            <p style="font-size: 0.82rem; color: var(--text-ink); line-height: 1.5; margin-bottom: 0;" id="geminiReasoningText"></p>
+                        <div class="paper-strip-right">
+                            <span id="resAuthorsLine">—</span>
+                            <span style="color: var(--border-strong);">|</span>
+                            <span id="resVenueLine">—</span>
+                            <a id="resOpenAlexLink" href="#" target="_blank" class="paper-strip-link">OpenAlex ↗</a>
                         </div>
                     </div>
 
-                    <!-- ROW 1: THREE TOP EXECUTIVE KPI CARDS (Matching Reference Header Row) -->
+                    <!-- Hidden Elements for Background State Preservation -->
+                    <div style="display: none;">
+                        <span id="resCutoffYear">—</span>
+                        <span id="resCutoffCits">—</span>
+                        <span id="econVenuePrestige">—</span>
+                        <span id="econModelVal">—</span>
+                        <span id="econApcVal">—</span>
+                        <div id="econAdvCol"><span id="econAdvVal">—</span></div>
+                        <span id="econDisruptionVal">—</span>
+                        <div id="geminiReasoningCard"><div id="geminiConfidenceScore"></div><p id="geminiReasoningText"></p></div>
+                        <div id="sideBySideTruthPanel"></div>
+                        <div id="activeHorizonTruthPanel"></div>
+                    </div>
+
+                    <!-- ROW 1: THREE TOP EXECUTIVE KPI CARDS -->
                     <div class="dash-kpi-grid">
                         <!-- KPI Card 1: Cutoff Citations -->
                         <div class="dash-kpi-card">
@@ -129,8 +139,8 @@
                                 <div class="dash-kpi-arrow-btn">↗</div>
                             </div>
                             <div class="dash-kpi-body">
-                                <div class="dash-kpi-value" id="kpiCutoffCitsVal">118</div>
-                                <span class="dash-kpi-badge positive" id="kpiCutoffTrend">+19.7% Velocity</span>
+                                <div class="dash-kpi-value" id="kpiCutoffCitsVal">—</div>
+                                <span class="dash-kpi-badge positive" id="kpiCutoffTrend">—</span>
                             </div>
                         </div>
 
@@ -144,8 +154,8 @@
                                 <div class="dash-kpi-arrow-btn">↗</div>
                             </div>
                             <div class="dash-kpi-body">
-                                <div class="dash-kpi-value" id="resPredWindowCits">484.7</div>
-                                <span class="dash-kpi-badge purple" id="resImpactBadge">Low Impact (&lt;50th)</span>
+                                <div class="dash-kpi-value" id="resPredWindowCits">—</div>
+                                <span class="dash-kpi-badge purple" id="resImpactBadge">—</span>
                             </div>
                         </div>
 
@@ -159,8 +169,8 @@
                                 <div class="dash-kpi-arrow-btn">↗</div>
                             </div>
                             <div class="dash-kpi-body">
-                                <div class="dash-kpi-value" id="kpiVenueQuartile" style="font-size: 1.55rem;">Q4 Verified</div>
-                                <span class="dash-kpi-badge positive" id="kpiDoajBadge">Diamond OA</span>
+                                <div class="dash-kpi-value" id="kpiVenueQuartile" style="font-size: 1.55rem;">—</div>
+                                <span class="dash-kpi-badge positive" id="kpiDoajBadge">—</span>
                             </div>
                         </div>
                     </div>
@@ -169,7 +179,7 @@
                     <div class="bento span-12" style="margin-bottom: var(--bento-gap);">
                         <!-- Left Tile: Spline Trajectory Curve & Level Gauges (Span 8) -->
                         <div class="editorial-panel span-8 spline-chart-tile">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
                                 <div>
                                     <h3 class="section-title" style="margin-bottom: 0.15rem; color: #FFFFFF;">Active Citations Trajectory &amp; Level Dynamics</h3>
                                     <p class="section-desc" style="margin-bottom: 0;">Multi-year citation curve up to the 5-year observation horizon.</p>
@@ -180,27 +190,27 @@
                                 </div>
                             </div>
 
-                            <!-- Spline Wave Area -->
-                            <div id="predTrajectoryChart" style="height: 140px; margin-top: 0.5rem; display: flex; align-items: flex-end; gap: 0.6rem;"></div>
+                            <!-- Continuous SVG Spline Wave Area -->
+                            <div id="predTrajectoryChart" style="height: 140px; margin-top: 0.4rem; position: relative; width: 100%;"></div>
 
-                            <!-- Segmented Comparison Level Bars (Matching Reference 82 vs 41) -->
-                            <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem;">
-                                <div style="flex: 1;">
-                                    <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 4px;">Early Velocity vs Outlier Threshold</div>
+                            <!-- Segmented Comparison Level Bars -->
+                            <div style="margin-top: 0.85rem; padding-top: 0.75rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 220px;">
+                                    <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 4px;">Early Velocity vs Outlier Threshold</div>
                                     <div class="segmented-gauges-row">
                                         <div class="segmented-gauge-col">
-                                            <div class="segmented-gauge-val" style="color: #10B981;" id="gaugeValCutoff">118</div>
+                                            <div class="segmented-gauge-val" style="color: #10B981;" id="gaugeValCutoff">—</div>
                                             <div class="segmented-gauge-label">Cutoff Citations</div>
                                             <div style="display: flex; flex-direction: column; gap: 3px;" id="gaugeBarsCutoff">
-                                                <div class="segmented-bar-pill green-lit"></div>
-                                                <div class="segmented-bar-pill green-lit"></div>
-                                                <div class="segmented-bar-pill green-lit"></div>
+                                                <div class="segmented-bar-pill dim"></div>
+                                                <div class="segmented-bar-pill dim"></div>
+                                                <div class="segmented-bar-pill dim"></div>
                                                 <div class="segmented-bar-pill dim"></div>
                                                 <div class="segmented-bar-pill dim"></div>
                                             </div>
                                         </div>
                                         <div class="segmented-gauge-col">
-                                            <div class="segmented-gauge-val" style="color: #F43F5E;" id="gaugeValP90">1,264</div>
+                                            <div class="segmented-gauge-val" style="color: #F43F5E;" id="gaugeValP90">—</div>
                                             <div class="segmented-gauge-label">Discipline P90</div>
                                             <div style="display: flex; flex-direction: column; gap: 3px;" id="gaugeBarsP90">
                                                 <div class="segmented-bar-pill coral-lit"></div>
@@ -212,7 +222,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div style="flex: 1; font-size: 0.74rem; color: var(--text-secondary); line-height: 1.45; background: var(--bg-surface-subtle); padding: 0.75rem 0.85rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
+                                <div style="flex: 1; min-width: 220px; font-size: 0.74rem; color: var(--text-secondary); line-height: 1.45; background: var(--bg-surface-subtle); padding: 0.65rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
                                     <strong style="color: #FFFFFF; display: block; margin-bottom: 2px;">Scientometric Warning &amp; Balance:</strong>
                                     Accumulated early velocity is active, but requires sustained momentum to bridge the discipline cohort P90 threshold for elite outlier classification.
                                 </div>
@@ -221,16 +231,14 @@
 
                         <!-- Right Tile: Discipline Citation Velocity Heatmap (Span 4) -->
                         <div class="editorial-panel span-4 heatmap-tile">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
                                 <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Discipline Citation Matrix</h3>
                                 <span style="font-size: 0.7rem; color: var(--text-tertiary); font-family: var(--font-mono);">OpenAlex • SCImago</span>
                             </div>
-                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Empirical cohort density distribution across temporal windows</div>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.45rem;">Empirical cohort density distribution across temporal windows</div>
 
                             <!-- Heatmap 7x6 Matrix -->
-                            <div class="heatmap-matrix-grid" id="citationHeatmapGrid">
-                                <!-- 42 cells populated dynamically -->
-                            </div>
+                            <div class="heatmap-matrix-grid" id="citationHeatmapGrid"></div>
 
                             <div style="display: flex; justify-content: space-between; margin-top: 0.65rem; padding-top: 0.65rem; border-top: 1px solid var(--border-subtle); font-size: 0.75rem;">
                                 <div>
@@ -247,14 +255,14 @@
                                 </div>
                             </div>
 
-                            <div style="margin-top: 0.75rem; font-size: 0.72rem; color: var(--text-secondary); line-height: 1.4; display: flex; align-items: center; gap: 6px;">
+                            <div style="margin-top: 0.65rem; font-size: 0.72rem; color: var(--text-secondary); line-height: 1.4; display: flex; align-items: center; gap: 6px;">
                                 <span style="color: #A78BFA;">✦</span>
                                 <span id="citationHeatmapNote">Scientometric forecast: Based on multi-source lineage, early citation growth rate indicates stable middle-tier adoption.</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ROW 3: THREE SPECIALIZED BOTTOM WIDGETS (Span 4 Each - Matching Reference Bottom Row) -->
+                    <!-- ROW 3: THREE SPECIALIZED BOTTOM WIDGETS (Span 4 Each) -->
                     <div class="bento span-12" style="margin-bottom: var(--bento-gap);">
                         <!-- Bottom Left: Vibrant Illuminated Insight Card -->
                         <div class="luminous-insight-card span-4">
@@ -263,12 +271,8 @@
                                     <span>✦</span>
                                     <span>Scientometric Decision Logic</span>
                                 </div>
-                                <div class="luminous-insight-text" id="luminousInsightHeadline">
-                                    Early citation velocity establishes authentic foundation, calibrating 52.9% confidence in standard growth.
-                                </div>
-                                <p style="font-size: 0.78rem; color: rgba(255, 255, 255, 0.85); line-height: 1.45;" id="luminousInsightBody">
-                                    Conditioned strictly on $t \le t_{\text{pub}} + 2\text{y}$, multi-source analysis confirms publication in a Q4 journal with 118 cutoff citations in Computer Science.
-                                </p>
+                                <div class="luminous-insight-text" id="luminousInsightHeadline">—</div>
+                                <p style="font-size: 0.78rem; color: rgba(255, 255, 255, 0.85); line-height: 1.45; margin-bottom: 0;" id="luminousInsightBody">—</p>
                             </div>
                             <div class="luminous-insight-pills">
                                 <div class="luminous-dot-pill active"></div>
@@ -288,27 +292,27 @@
                                 <div style="position: relative; width: 110px; height: 110px;">
                                     <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
                                         <circle cx="18" cy="18" r="15.915" fill="none" stroke="#161D2B" stroke-width="3.8"></circle>
-                                        <circle id="donutCircleHigh" cx="18" cy="18" r="15.915" fill="none" stroke="#10B981" stroke-width="4.2" stroke-dasharray="4.5 95.5" stroke-dashoffset="0"></circle>
-                                        <circle id="donutCircleMed" cx="18" cy="18" r="15.915" fill="none" stroke="#8B5CF6" stroke-width="4.2" stroke-dasharray="42.6 57.4" stroke-dashoffset="-4.5"></circle>
-                                        <circle id="donutCircleLow" cx="18" cy="18" r="15.915" fill="none" stroke="#64748B" stroke-width="4.2" stroke-dasharray="52.9 47.1" stroke-dashoffset="-47.1"></circle>
+                                        <circle id="donutCircleHigh" cx="18" cy="18" r="15.915" fill="none" stroke="#10B981" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                                        <circle id="donutCircleMed" cx="18" cy="18" r="15.915" fill="none" stroke="#8B5CF6" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
+                                        <circle id="donutCircleLow" cx="18" cy="18" r="15.915" fill="none" stroke="#64748B" stroke-width="4.2" stroke-dasharray="0 100" stroke-dashoffset="0"></circle>
                                     </svg>
                                     <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                        <span style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #FFFFFF;" id="donutCenterPct">52.9%</span>
-                                        <span style="font-size: 0.62rem; color: var(--text-secondary); text-transform: uppercase;" id="donutCenterTier">Low Tier</span>
+                                        <span style="font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: #FFFFFF;" id="donutCenterPct">—</span>
+                                        <span style="font-size: 0.62rem; color: var(--text-secondary); text-transform: uppercase;" id="donutCenterTier">—</span>
                                     </div>
                                 </div>
                                 <div class="donut-legend-list">
                                     <div class="donut-legend-item">
                                         <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #10B981;"></span><span style="color: var(--text-secondary);">High (≥90th)</span></div>
-                                        <strong style="color: #FFFFFF;" id="probHighVal">4.5%</strong>
+                                        <strong style="color: #FFFFFF;" id="probHighVal">—</strong>
                                     </div>
                                     <div class="donut-legend-item">
                                         <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #8B5CF6;"></span><span style="color: var(--text-secondary);">Medium (50–90th)</span></div>
-                                        <strong style="color: #FFFFFF;" id="probMedVal">42.6%</strong>
+                                        <strong style="color: #FFFFFF;" id="probMedVal">—</strong>
                                     </div>
                                     <div class="donut-legend-item">
                                         <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #64748B;"></span><span style="color: var(--text-secondary);">Low (&lt;50th)</span></div>
-                                        <strong style="color: #FFFFFF;" id="probLowVal">52.9%</strong>
+                                        <strong style="color: #FFFFFF;" id="probLowVal">—</strong>
                                     </div>
                                     <div style="font-size: 0.68rem; color: var(--text-tertiary); margin-top: 4px;">Temperature calibrated (T = 1.11)</div>
                                 </div>
@@ -324,7 +328,7 @@
                             <div class="speedometer-container">
                                 <svg viewBox="0 0 200 110" style="width: 170px; height: 95px;">
                                     <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#161D2B" stroke-width="14" stroke-linecap="round"></path>
-                                    <path id="speedoArcFill" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#speedoGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="140"></path>
+                                    <path id="speedoArcFill" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#speedoGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2"></path>
                                     <defs>
                                         <linearGradient id="speedoGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                                             <stop offset="0%" stop-color="#3B82F6"></stop>
@@ -334,7 +338,7 @@
                                     </defs>
                                 </svg>
                                 <div class="speedometer-center-val">
-                                    <div class="speedometer-number" id="speedometerVal">42%</div>
+                                    <div class="speedometer-number" id="speedometerVal">—</div>
                                     <div class="speedometer-sub">Discipline Velocity Rank</div>
                                 </div>
                             </div>
@@ -344,120 +348,81 @@
                         </div>
                     </div>
 
-                    <!-- ROW 4: 2-HOP KNOWLEDGE SUBGRAPH & ACTIVE NODE INSPECTOR (Span 12) -->
-                    <div class="editorial-panel span-12" style="padding: 0; overflow: hidden; margin-bottom: var(--bento-gap);">
-                        <div style="padding: 1.15rem 1.35rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                            <div>
-                                <h3 class="section-title" style="margin-bottom: 0.15rem; color: #FFFFFF;">2-Hop Relational Knowledge Subgraph &amp; Connected Influences</h3>
-                                <p class="section-desc" style="margin-bottom: 0;">Multi-relational message passing structure (Authors, Institutions, Venue, Precursors).</p>
-                            </div>
-                            <div class="graph-toolbar">
-                                <button class="graph-tool-btn" onclick="zoomGraph(1.2)" title="Zoom In">+</button>
-                                <button class="graph-tool-btn" onclick="zoomGraph(0.8)" title="Zoom Out">−</button>
-                                <button class="graph-tool-btn" onclick="fitGraph()" title="Fit View">⛶</button>
-                            </div>
-                        </div>
+                    <!-- ROW 4: COLLAPSIBLE 2-HOP KNOWLEDGE GRAPH & DETAILED ATTRIBUTION (Clean Toggle) -->
+                    <div class="span-12">
+                        <button type="button" class="graph-collapse-toggle" id="btnToggleGraph" onclick="toggleGraphSection()">
+                            <span style="display: flex; align-items: center; gap: 8px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                <span>2-Hop Relational Knowledge Subgraph &amp; Connected Influences</span>
+                            </span>
+                            <span id="graphToggleIcon" style="font-size: 0.8rem; color: var(--text-secondary); font-family: var(--font-mono);">▾ View Graph &amp; Node Attribution</span>
+                        </button>
 
-                        <div class="bento" style="padding: 1.15rem 1.35rem;">
-                            <!-- Cytoscape Graph Canvas (Span 7) -->
-                            <div class="span-7">
-                                <div class="graph-workspace" style="height: 320px; background: #080B11; border: 1px solid var(--border-subtle); border-radius: 8px;">
-                                    <div id="cy" style="width: 100%; height: 100%;"></div>
-                                </div>
-                            </div>
-
-                            <!-- Active Node Inspector (Span 5) -->
-                            <div class="span-5">
-                                <div id="nodeInspector" class="node-inspector-box" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1rem 1.15rem;">
-                                    <div class="inspector-badge-row">
-                                        <span id="inspHopBadge" class="hop-tag hop-0">HOP 0 (FOCAL SEED)</span>
-                                        <strong id="inspType" style="font-size: 0.78rem; color: var(--text-ink); text-transform: uppercase; font-family: var(--font-mono);">Target Paper</strong>
-                                    </div>
-                                    <div id="inspLabel" style="font-size: 0.95rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.35rem;">—</div>
-
-                                    <!-- Live Model Attribution & Direction Banner -->
-                                    <div id="inspAttributionBanner" class="insp-attribution-banner" style="background: #141A27; border: 1px solid var(--border-subtle);">
-                                        <span style="font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 5px;">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                            <span>Attribution: <strong id="inspAttributionName" style="color: #FFFFFF;">Citation Momentum</strong></span>
-                                        </span>
-                                        <span id="inspImpactBadge" class="insp-impact-badge positive">+19.7% Impact Delta</span>
-                                    </div>
-
-                                    <div id="inspMetricsGrid" class="metrics-grid-four">
-                                        <!-- Populated dynamically -->
-                                    </div>
-
-                                    <!-- Dynamically Synthesized Scientometric Decision Logic -->
-                                    <div id="inspInsightBox" class="node-insight-box" style="background: #141A27; border: 1px solid var(--border-subtle); border-left: 3px solid var(--accent-purple);">
-                                        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #A78BFA; letter-spacing: 0.05em; margin-bottom: 3px; display: flex; align-items: center; gap: 4px;">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                                            <span>Scientometric Decision Logic</span>
+                        <div id="graphCollapsiblePanel" class="graph-collapse-panel">
+                            <div class="editorial-panel" style="padding: 0; overflow: hidden;">
+                                <div class="bento" style="padding: 1rem 1.25rem;">
+                                    <!-- Cytoscape Graph Canvas (Span 7) -->
+                                    <div class="span-7">
+                                        <div class="graph-workspace" style="height: 300px; background: #080B11; border: 1px solid var(--border-subtle); border-radius: 8px; position: relative;">
+                                            <div id="cy" style="width: 100%; height: 100%;"></div>
+                                            <div class="graph-toolbar">
+                                                <button class="graph-tool-btn" onclick="zoomGraph(1.2)" title="Zoom In">+</button>
+                                                <button class="graph-tool-btn" onclick="zoomGraph(0.8)" title="Zoom Out">−</button>
+                                                <button class="graph-tool-btn" onclick="fitGraph()" title="Fit View">⛶</button>
+                                            </div>
                                         </div>
-                                        <div id="inspInsightText" style="line-height: 1.45; color: var(--text-secondary);">Click any entity in the network to inspect its message-passing attribution and exact decision influence.</div>
+                                    </div>
+
+                                    <!-- Active Node Inspector (Span 5) -->
+                                    <div class="span-5">
+                                        <div id="nodeInspector" class="node-inspector-box" style="background: var(--bg-surface-subtle); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 0.85rem 1rem;">
+                                            <div class="inspector-badge-row">
+                                                <span id="inspHopBadge" class="hop-tag hop-0">HOP 0</span>
+                                                <strong id="inspType" style="font-size: 0.75rem; color: var(--text-ink); text-transform: uppercase; font-family: var(--font-mono);">Target Paper</strong>
+                                            </div>
+                                            <div id="inspLabel" style="font-size: 0.9rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.35rem;">—</div>
+
+                                            <div id="inspAttributionBanner" class="insp-attribution-banner" style="background: #141A27; border: 1px solid var(--border-subtle); margin-bottom: 0.4rem;">
+                                                <span style="font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 5px;">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                                    <span>Attribution: <strong id="inspAttributionName" style="color: #FFFFFF;">—</strong></span>
+                                                </span>
+                                                <span id="inspImpactBadge" class="insp-impact-badge positive">—</span>
+                                            </div>
+
+                                            <div id="inspMetricsGrid" class="metrics-grid-four"></div>
+
+                                            <div id="inspInsightBox" class="node-insight-box" style="background: #141A27; border: 1px solid var(--border-subtle); border-left: 3px solid var(--accent-purple); margin-top: 0.4rem;">
+                                                <div id="inspInsightText" style="line-height: 1.45; color: var(--text-secondary); font-size: 0.76rem;">Click any entity in the network to inspect its message-passing attribution and exact decision influence.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Connected Neighbors Influence Breakdown Table -->
+                                <div style="padding: 0.75rem 1.25rem 1rem; border-top: 1px solid var(--border-subtle); background: var(--bg-surface-subtle);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                        <span style="font-size: 0.72rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.04em;">Connected Neighbors Influence Breakdown</span>
+                                        <span style="font-size: 0.68rem; color: var(--text-tertiary); font-family: var(--font-mono);">Click row to focus node</span>
+                                    </div>
+                                    <div style="max-height: 160px; overflow-y: auto;">
+                                        <table class="connected-impact-table" id="connectedImpactTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Connected Entity</th>
+                                                    <th>Type</th>
+                                                    <th>Scientometric Signal</th>
+                                                    <th>Model Impact</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="connectedImpactTableBody"></tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Connected Neighbors Influence Breakdown Table -->
-                        <div style="padding: 0.85rem 1.35rem 1.15rem; border-top: 1px solid var(--border-subtle); background: var(--bg-surface-subtle);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                                <span style="font-size: 0.75rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.04em;">Connected Neighbors Influence Breakdown</span>
-                                <span style="font-size: 0.7rem; color: var(--text-tertiary); font-family: var(--font-mono);">Click row to focus node</span>
-                            </div>
-                            <div style="max-height: 180px; overflow-y: auto;">
-                                <table class="connected-impact-table" id="connectedImpactTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Connected Entity</th>
-                                            <th>Type</th>
-                                            <th>Scientometric Signal</th>
-                                            <th>Model Impact</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="connectedImpactTableBody">
-                                        <!-- Populated dynamically -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- Hidden Verification Panels for Backend Ground Truth State Preservation -->
-                    <div id="sideBySideTruthPanel" style="display: none;"></div>
-                    <div id="activeHorizonTruthPanel" style="display: none;"></div>
-                    <div id="horizonPaceBox" style="display: none;"></div>
-
-                </div>
-
-                <!-- Empty State: Methodological Overview & Quick Previews -->
-                <div id="predictionEmptyState" class="editorial-panel span-12">
-                    <h3 class="section-title" style="color: #FFFFFF;">Strict Scientometric Prediction Workflow</h3>
-                    <p class="section-desc">SciGraph AI 2.0 adheres strictly to empirical citation dynamics and avoids future data leakage.</p>
-
-                    <div class="step-flow">
-                        <div class="step-card">
-                            <div class="step-number">STEP 01</div>
-                            <div class="step-title">Ingest Metadata</div>
-                            <div class="step-desc">Resolves OpenAlex entities, author collaborations, verified publication venues, and foundational references.</div>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-number">STEP 02</div>
-                            <div class="step-title">Temporal Freeze</div>
-                            <div class="step-desc">All citation graphs and venue indicators are frozen at t &le; t_pub + 2y. Zero future data is visible.</div>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-number">STEP 03</div>
-                            <div class="step-title">2-Hop GNN Encoding</div>
-                            <div class="step-desc">Multi-relational HeteroSAGE aggregates author prestige, institutional ranking, and precursor knowledge domains.</div>
-                        </div>
-                        <div class="step-card">
-                            <div class="step-number">STEP 04</div>
-                            <div class="step-title">Calibrated Forecast</div>
-                            <div class="step-desc">Temperature-calibrated impact tier distribution verified live against SCImago and DOAJ indexes.</div>
-                        </div>
-                    </div>
                 </div>
 
                 </div>

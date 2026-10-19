@@ -65,46 +65,108 @@ async function runPrediction() {
     }
 }
 
-function renderTrajectoryBars(points, cutoffYear, pubYear) {
+function renderSplineWave(points, cutoffYear, pubYear) {
     const host = document.getElementById('predTrajectoryChart');
     if (!host) return;
     host.innerHTML = '';
     if (!points || !Array.isArray(points) || points.length === 0) {
-        host.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-secondary); padding: 1rem;">No yearly citation trajectory cataloged for this work.</div>';
+        host.innerHTML = '<div style="font-size: 0.78rem; color: var(--text-secondary); padding: 1.5rem; text-align: center;">No yearly citation trajectory recorded for this work.</div>';
         return;
     }
+
     const sorted = [...points].sort((a, b) => a.year - b.year);
-    const maxV = Math.max(1, ...sorted.map(p => Number(p.cited_by_count || 0)));
-    sorted.forEach(p => {
-        const count = Number(p.cited_by_count || 0);
-        const yr = Number(p.year);
-        const isCutoff = p.is_cutoff || (cutoffYear && yr === Number(cutoffYear));
-        const isFuture = p.is_future_horizon || (cutoffYear && yr > Number(cutoffYear));
+    const maxVal = Math.max(1, ...sorted.map(p => Number(p.cited_by_count || 0)));
+    const W = 580;
+    const H = 135;
+    const padL = 35;
+    const padR = 35;
+    const padT = 24;
+    const padB = 24;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
 
-        const col = document.createElement('div');
-        col.className = 'year-bar-col';
-        col.title = `Year ${yr}: ${count.toLocaleString()} citations ${isCutoff ? '(T_cutoff Boundary)' : (isFuture ? '(Post-Cutoff Horizon)' : '(Pre-Cutoff Ingested)')}`;
-
-        const val = document.createElement('div');
-        val.className = 'year-bar-val';
-        val.textContent = count > 9999 ? (count / 1000).toFixed(1) + 'k' : String(count);
-
-        const bar = document.createElement('div');
-        let cls = 'year-bar';
-        if (isCutoff) cls += ' cutoff';
-        else if (isFuture) cls += ' window';
-        bar.className = cls;
-        bar.style.height = Math.max(6, Math.round((count / maxV) * 90)) + 'px';
-
-        const lab = document.createElement('div');
-        lab.className = 'year-bar-label';
-        lab.textContent = yr === Number(cutoffYear) ? `${yr} ★` : String(yr);
-
-        col.appendChild(val);
-        col.appendChild(bar);
-        col.appendChild(lab);
-        host.appendChild(col);
+    const coords = sorted.map((p, i) => {
+        const x = padL + (sorted.length > 1 ? (i / (sorted.length - 1)) * innerW : innerW / 2);
+        const y = padT + (1 - (Number(p.cited_by_count || 0) / maxVal)) * innerH;
+        return { x, y, count: Number(p.cited_by_count || 0), year: Number(p.year) };
     });
+
+    let curvePath = `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`;
+    for (let i = 0; i < coords.length - 1; i++) {
+        const p0 = coords[i === 0 ? 0 : i - 1];
+        const p1 = coords[i];
+        const p2 = coords[i + 1];
+        const p3 = coords[i + 2 < coords.length ? i + 2 : i + 1];
+        const cp1x = p1.x + (p2.x - p0.x) / 5.5;
+        const cp1y = p1.y + (p2.y - p0.y) / 5.5;
+        const cp2x = p2.x - (p3.x - p1.x) / 5.5;
+        const cp2y = p2.y - (p3.y - p1.y) / 5.5;
+        curvePath += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
+    const last = coords[coords.length - 1];
+    const first = coords[0];
+    const areaPath = `${curvePath} L ${last.x.toFixed(1)} ${(H - 12).toFixed(1)} L ${first.x.toFixed(1)} ${(H - 12).toFixed(1)} Z`;
+
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNs, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+
+    svg.innerHTML = `
+        <defs>
+            <linearGradient id="splineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.38"/>
+                <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0"/>
+            </linearGradient>
+            <filter id="neonSplineGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="#8B5CF6" flood-opacity="0.6"/>
+            </filter>
+        </defs>
+        <line x1="${padL}" y1="${padT + innerH * 0.25}" x2="${W - padR}" y2="${padT + innerH * 0.25}" stroke="#1F293D" stroke-width="1" stroke-dasharray="3 3"/>
+        <line x1="${padL}" y1="${padT + innerH * 0.65}" x2="${W - padR}" y2="${padT + innerH * 0.65}" stroke="#1F293D" stroke-width="1" stroke-dasharray="3 3"/>
+        <line x1="${padL}" y1="${H - 12}" x2="${W - padR}" y2="${H - 12}" stroke="#1F293D" stroke-width="1"/>
+        <path d="${areaPath}" fill="url(#splineAreaGrad)"/>
+        <path d="${curvePath}" fill="none" stroke="#A78BFA" stroke-width="2.6" stroke-linecap="round" filter="url(#neonSplineGlow)"/>
+    `;
+
+    coords.forEach(pt => {
+        const isCutoff = cutoffYear && pt.year === Number(cutoffYear);
+        const circle = document.createElementNS(svgNs, 'circle');
+        circle.setAttribute('cx', pt.x.toFixed(1));
+        circle.setAttribute('cy', pt.y.toFixed(1));
+        circle.setAttribute('r', isCutoff ? '5.5' : '4');
+        circle.setAttribute('fill', isCutoff ? '#F59E0B' : '#10B981');
+        circle.setAttribute('stroke', '#090D14');
+        circle.setAttribute('stroke-width', '2');
+        svg.appendChild(circle);
+
+        const valText = document.createElementNS(svgNs, 'text');
+        valText.setAttribute('x', pt.x.toFixed(1));
+        valText.setAttribute('y', (pt.y - 8).toFixed(1));
+        valText.setAttribute('text-anchor', 'middle');
+        valText.setAttribute('fill', isCutoff ? '#FDE68A' : '#F8FAFC');
+        valText.setAttribute('font-size', '10');
+        valText.setAttribute('font-weight', '700');
+        valText.setAttribute('font-family', 'var(--font-mono)');
+        valText.textContent = pt.count > 9999 ? (pt.count / 1000).toFixed(1) + 'k' : String(pt.count);
+        svg.appendChild(valText);
+
+        const yrText = document.createElementNS(svgNs, 'text');
+        yrText.setAttribute('x', pt.x.toFixed(1));
+        yrText.setAttribute('y', String(H - 1));
+        yrText.setAttribute('text-anchor', 'middle');
+        yrText.setAttribute('fill', isCutoff ? '#F59E0B' : '#94A3B8');
+        yrText.setAttribute('font-size', '9.5');
+        yrText.setAttribute('font-weight', isCutoff ? '700' : '500');
+        yrText.setAttribute('font-family', 'var(--font-mono)');
+        yrText.textContent = isCutoff ? `${pt.year} ★` : String(pt.year);
+        svg.appendChild(yrText);
+    });
+
+    host.appendChild(svg);
 }
 
 function renderPrediction(data) {
@@ -225,106 +287,15 @@ function renderPrediction(data) {
     const predWindow = data.predicted_future_citations_5y != null ? data.predicted_future_citations_5y : data.citations_in_window;
     safeSetText('resPredWindowCits', fmtNum(predWindow));
 
-    // Column 2: Dual Verification Engine (Historical Ground Truth vs Active Horizon Multi-Source Engine)
+    // Dual Verification Engine state preservation
     const bt = data.backtest || {};
     const historicalPanel = document.getElementById('sideBySideTruthPanel');
     const activeHorizonPanel = document.getElementById('activeHorizonTruthPanel');
+    if (historicalPanel) historicalPanel.style.display = bt.has_ground_truth ? 'flex' : 'none';
+    if (activeHorizonPanel) activeHorizonPanel.style.display = bt.has_ground_truth ? 'none' : 'flex';
 
-    if (bt && bt.has_ground_truth) {
-        if (historicalPanel) historicalPanel.style.display = 'flex';
-        if (activeHorizonPanel) activeHorizonPanel.style.display = 'none';
-
-        const actualCls = bt.actual_impact_class;
-        const actualBadge = document.getElementById('btActualBadge');
-        if (actualBadge) {
-            actualBadge.className = 'outcome-badge';
-            if (actualCls === 2) {
-                actualBadge.classList.add('high');
-                actualBadge.textContent = 'High Impact (≥90th)';
-            } else if (actualCls === 1) {
-                actualBadge.classList.add('medium');
-                actualBadge.textContent = 'Medium Impact (50–90th)';
-            } else {
-                actualBadge.classList.add('low');
-                actualBadge.textContent = 'Low Impact (<50th)';
-            }
-        }
-
-        const matchBadge = document.getElementById('btMatchBadge');
-        if (matchBadge) {
-            if (bt.is_correct_class) {
-                matchBadge.className = 'verdict-match-tag match';
-                matchBadge.innerHTML = '✓ Prediction Verified Correct';
-            } else {
-                matchBadge.className = 'verdict-match-tag misaligned';
-                matchBadge.innerHTML = 'Class Misaligned';
-            }
-        }
-
-        safeSetText('btCutoffStatVal', fmtNum(cutoffCount(data)));
-        safeSetText('btActualCitsVal', fmtNum(bt.actual_future_citations_5y != null ? bt.actual_future_citations_5y : bt.actual_window));
-        safeSetText('btPredCitsVal', fmtNum(data.predicted_future_citations_5y));
-        
-        const pctVal = bt.cohort_percentile != null ? Number(bt.cohort_percentile).toFixed(1) : null;
-        safeSetText('btCohortPctVal', pctVal != null ? `${pctVal}th percentile` : 'Evaluated against cohort');
-        
-        const startY = (data.publication_year || 0) + 3;
-        const endY = (data.publication_year || 0) + 5;
-        safeSetText('btWindowRangeVal', `${startY}–${endY} (5Y Closed)`);
-        safeSetText('btProvenanceTag', bt.provenance || 'OpenAlex (works.parquet)');
-    } else {
-        // Active Multi-Source Scientometric Reality Engine (SCImago • DOAJ • OpenAlex)
-        if (historicalPanel) historicalPanel.style.display = 'none';
-        if (activeHorizonPanel) activeHorizonPanel.style.display = 'flex';
-
-        // 1. SCImago Verification
-        const qBadge = document.getElementById('scimagoQuartileBadge');
-        const quartile = v.quartile || v.core_rank || 'Q1';
-        if (qBadge) {
-            qBadge.textContent = `${quartile} Verified`;
-            qBadge.className = `source-badge-tag scimago-${quartile.toLowerCase()}`;
-        }
-        safeSetText('scimagoSjrVal', v.sjr ? `SJR: ${Number(v.sjr).toFixed(2)}` : 'SJR: Verified High');
-        safeSetText('scimagoHIndexVal', v.h_index ? `H-Index: ${Math.round(v.h_index)}` : 'Journal H-Index: Indexed');
-
-        // 2. DOAJ Verification
-        const doajBadge = document.getElementById('doajAccessBadge');
-        if (doajBadge) {
-            doajBadge.textContent = econ.is_oa ? `${(econ.oa_status || 'OA').toUpperCase()} OA` : 'Subscription';
-        }
-        safeSetText('doajApcVal', econ.apc_paid_usd ? `$${Math.round(econ.apc_paid_usd).toLocaleString()} USD` : (econ.is_oa ? 'Institutional / Diamond' : 'No Author APC'));
-        safeSetText('doajAdvVal', econ.empirical_cohort_oa_advantage_pct ? `+${Number(econ.empirical_cohort_oa_advantage_pct).toFixed(1)}% Citation Boost` : 'Discipline Cohort Baseline');
-
-        // 3. OpenAlex Lineage
-        const inflowCits = lineage.inflow_count != null ? lineage.inflow_count : cutoffCount(data);
-        const outflowRefs = lineage.outflow_count != null ? lineage.outflow_count : 0;
-        const ratio = lineage.inflow_outflow_ratio != null ? Number(lineage.inflow_outflow_ratio).toFixed(1) : (outflowRefs > 0 ? (inflowCits / outflowRefs).toFixed(1) : '—');
-        
-        const ratioBadge = document.getElementById('openalexRatioBadge');
-        if (ratioBadge) ratioBadge.textContent = `${ratio}x Ratio`;
-        safeSetText('openalexInflowVal', `${fmtNum(inflowCits)} Inflow Cits`);
-        safeSetText('openalexOutflowVal', `${fmtNum(outflowRefs)} Referenced Works`);
-
-        // 4. Cohort Thresholds
-        const p90 = bt.threshold_provenance?.p90 != null ? Math.round(bt.threshold_provenance.p90) : 1264;
-        const p50 = bt.threshold_provenance?.p50 != null ? Math.round(bt.threshold_provenance.p50) : 445;
-        safeSetText('cohortThresholdVal', `P90: ${fmtNum(p90)} cits`);
-        safeSetText('cohortP50Val', `P50: ${fmtNum(p50)} cits`);
-
-        // 5. Active Horizon Pace
-        const statusBadge = document.getElementById('horizonStatusBadge');
-        if (statusBadge) {
-            statusBadge.textContent = predCls === 2 ? 'Tracking at High Tier Velocity (≥90th)' : (predCls === 1 ? 'Tracking at Medium Tier Velocity' : 'Tracking at Low Tier');
-        }
-        const paceDesc = document.getElementById('horizonPaceDesc');
-        if (paceDesc) {
-            const pubY = data.publication_year || 2023;
-            paceDesc.textContent = `Accumulated ${fmtNum(inflowCits)} citations to date (Pub Year ${pubY}). Scientometric lineage and venue prestige align with model predicted ${predCls === 2 ? 'High Impact' : (predCls === 1 ? 'Medium Impact' : 'Standard')} trajectory.`;
-        }
-    }
-
-    // Timeline bar chart (Teacher Proof)
-    renderTrajectoryBars(data.trajectory, data.cutoff_year, data.publication_year);
+    // Glowing continuous spline wave curve
+    renderSplineWave(data.trajectory, data.cutoff_year, data.publication_year);
 
     // Update Provenance Pill for Mode M vs Mode G
     const provPill = document.getElementById('forecastProvenancePill');
@@ -494,4 +465,25 @@ function renderDashboardWidgets(data) {
         speedoFill.style.strokeDashoffset = String(Math.max(0, Math.min(totalArc, offset)));
     }
 }
+
+function toggleGraphSection() {
+    const panel = document.getElementById('graphCollapsiblePanel');
+    const icon = document.getElementById('graphToggleIcon');
+    if (!panel) return;
+    const isOpen = panel.classList.contains('open');
+    if (isOpen) {
+        panel.classList.remove('open');
+        if (icon) icon.textContent = '▾ View Graph & Node Attribution';
+    } else {
+        panel.classList.add('open');
+        if (icon) icon.textContent = '▴ Hide Graph & Node Attribution';
+        if (typeof cy !== 'undefined' && cy) {
+            setTimeout(() => {
+                cy.resize();
+                cy.fit(30);
+            }, 120);
+        }
+    }
+}
+
 

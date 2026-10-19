@@ -411,3 +411,99 @@
             line-height: 1.4;
         }
 
+        /* ========================================================= */
+        /* 4. MOBILE RESPONSIVENESS & OFF-CANVAS DRAWER             */
+        /* ========================================================= */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 5px;
+            cursor: pointer;
+            color: var(--text-ink);
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: var(--bg-surface-subtle);
+        }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 95;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+        }
+
+        .mobile-nav-overlay.open {
+            display: block;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 900px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            aside.app-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+            }
+
+            aside.app-sidebar.open {
+                transform: translateX(0);
+            }
+
+            main.app-main {
+                margin-left: 0;
+            }
+
+            .bento {
+                grid-template-columns: 1fr;
+            }
+
+            .span-12, .span-8, .span-7, .span-6, .span-5, .span-4, .span-3 {
+                grid-column: 1 / -1 !important;
+            }
+
+            .workspace-content {
+                padding: 0.85rem 0.65rem 2.5rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header.app-topbar {
+                padding: 0 0.75rem;
+            }
+
+            .topbar-breadcrumbs span,
+            .topbar-breadcrumbs svg {
+                display: none;
+            }
+
+            .status-tag {
+                display: none;
+            }
+
+            .seg-btn .seg-sub {
+                display: none;
+            }
+
+            .page-title {
+                font-size: 1.1rem;
+            }
+        }
+

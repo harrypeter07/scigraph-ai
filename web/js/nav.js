@@ -26,6 +26,11 @@ let currentPredictionMode = 'M';
                 safeSetText('activeBreadcrumb', idMap[viewId].title);
             }
 
+            // Close mobile menu drawer on selection
+            if (typeof closeMobileMenu === 'function') {
+                closeMobileMenu();
+            }
+
             // Lazy load data for tabs when selected
             if (viewId === 'viewTeacherVerify') {
                 if (typeof teacherCorpusSamples !== 'undefined' && teacherCorpusSamples.length === 0) loadTeacherCorpus();
@@ -104,5 +109,19 @@ let currentPredictionMode = 'M';
                     teacherPredictAndCompare();
                 }
             }
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('aside.app-sidebar');
+            const overlay = document.getElementById('mobileNavOverlay');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('open');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.querySelector('aside.app-sidebar');
+            const overlay = document.getElementById('mobileNavOverlay');
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('open');
         }
 

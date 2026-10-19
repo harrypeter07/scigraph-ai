@@ -34,7 +34,7 @@ class GeminiService:
         self._lock = threading.Lock()
         self._keys: List[str] = []
         self._current_key_idx = 0
-        self._model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
+        self._model_name = os.getenv("GEMINI_MODEL", "gemini-3.5-flash").strip()
         self._load_keys()
 
     def _load_keys(self):

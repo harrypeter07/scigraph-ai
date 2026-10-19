@@ -1,0 +1,122 @@
+{
+  "metadata": {
+    "evaluation_timestamp": "2026-10-19T18:09:02Z",
+    "held_out_test_corpus_size": 4500,
+    "split_isolation_verified": true,
+    "future_poison_invariance_verified": true,
+    "max_future_poison_delta": 0.0
+  },
+  "mode_m_1000_benchmark": {
+    "n_papers": 1000,
+    "accuracy": 0.455,
+    "balanced_accuracy": 0.5208,
+    "macro_f1": 0.4497,
+    "weighted_f1": 0.4203,
+    "expected_calibration_error": 0.1121,
+    "mean_latency_ms": 340.29,
+    "p95_latency_ms": 404.35,
+    "confusion_matrix": [
+      [
+        115,
+        377,
+        38
+      ],
+      [
+        41,
+        279,
+        45
+      ],
+      [
+        1,
+        43,
+        61
+      ]
+    ],
+    "per_class": {
+      "0_low": {
+        "precision": 0.7325,
+        "recall": 0.217,
+        "f1": 0.3348
+      },
+      "1_medium": {
+        "precision": 0.3991,
+        "recall": 0.7644,
+        "f1": 0.5244
+      },
+      "2_high": {
+        "precision": 0.4236,
+        "recall": 0.581,
+        "f1": 0.49
+      }
+    }
+  },
+  "mode_g_100_benchmark": {
+    "n_papers": 100,
+    "gemini_accuracy": 0.45,
+    "gemini_macro_f1": 0.3877,
+    "mode_m_baseline_accuracy_100": 0.44,
+    "mode_m_baseline_macro_f1_100": 0.3736,
+    "agreement_rate": 0.98,
+    "mean_latency_ms": 3981.57,
+    "confusion_matrix": [
+      [
+        12,
+        43,
+        4
+      ],
+      [
+        2,
+        31,
+        2
+      ],
+      [
+        0,
+        4,
+        2
+      ]
+    ],
+    "disagreements": {
+      "total": 2,
+      "gemini_wins": 1,
+      "mode_m_wins": 0
+    }
+  },
+  "sample_disagreements": [
+    {
+      "idx": 0,
+      "work_id": "W3105550380",
+      "title": "Ultrastrong coupling between light and matter",
+      "pub_year": 2019,
+      "true_class": 0,
+      "mode_m_class": 2,
+      "mode_g_class": 1,
+      "gemini_probabilities": {
+        "Low": 0.05,
+        "Medium": 0.85,
+        "High": 0.1
+      },
+      "gemini_reasoning": "The paper accumulated 394 early citations by 2021, significantly exceeding the 50th percentile threshold of 254.0 for its field and year cohort. While this strong early velocity suggests potential, the unranked publication venue implies a decelerating citation trajectory, making it challenging to reach the top 10%. The local statistical model projects 352.1 citations for the 2022-2024 window, firmly placing it within the Medium tier (50-90th percentile).",
+      "citations_at_cutoff": 394,
+      "future_citations_5y": 47,
+      "latency_ms": 19057.72
+    },
+    {
+      "idx": 2,
+      "work_id": "W2800912249",
+      "title": "Single-cell reconstruction of developmental trajectories during zebrafish embryogenesis",
+      "pub_year": 2018,
+      "true_class": 0,
+      "mode_m_class": 1,
+      "mode_g_class": 0,
+      "gemini_probabilities": {
+        "Low": 0.85,
+        "Medium": 0.1,
+        "High": 0.05
+      },
+      "gemini_reasoning": "The paper accumulated 235 early citations by 2020, which is significantly below the field's 50th percentile threshold of 536.0 citations for the evaluation window. The local statistical model projects 410.2 citations for the 2021-2023 window, a projection consistent with the lower end of the citation velocity multiplier heuristic given the unranked publication venue. Consequently, the projected citations fall well below the median, placing the paper firmly in the Low impact tier.",
+      "citations_at_cutoff": 235,
+      "future_citations_5y": 308,
+      "latency_ms": 20445.19
+    }
+  ]
+}

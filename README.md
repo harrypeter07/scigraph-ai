@@ -167,3 +167,5 @@ scigraph/
 ```
 
 Historical replay: each analysis now separates the frozen input years from the outcome window, labels train/validation/test membership, and lets users reveal verified stored outcomes. Unverified outcomes receive no correctness verdict. The JSON export preserves model, probabilities, dates, provenance, and limitations. Random replay samples are drawn uniformly from the eligible 2020 evaluation corpus without sending outcomes in the sample response. Run UI contract checks with `node --test tests/test_replay_ui.cjs`.
+
+Measured contributions: the analysis view shows actual selected-model feature sensitivities (training-median replacement, percentage points), and optional experimental GNN per-message removal sensitivities for up to 12 eligible citation neighbors. These effects explain model behavior, are not causal, and are not additive. Author identities, venue names, and affiliations remain descriptive metadata. Adding those predictive inputs requires cutoff-valid historical data and validation; no accuracy improvement is claimed by this UI/explanation change.

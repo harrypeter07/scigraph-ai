@@ -147,7 +147,15 @@ def test_graph_serving_matches_training_forward(tmp_path):
     expected = softmax(np.log(.75*probabilities(tabular, [record])+.25*graph_p)/1.3, axis=1)
     runtime = CitationPredictor(graph, tabular)
     np.testing.assert_allclose(expected, runtime.predict([record]), atol=1e-7)
-    assert len(runtime.evidence(record)["neighbors"]) == 2
+    evidence = runtime.evidence(record)
+    assert len(evidence["neighbors"]) == 2
+    experimental = runtime._graph_probabilities([record])[0]
+    cls = int(experimental.argmax())
+    for neighbor in evidence["neighbors"]:
+        relation = 0 if neighbor["relation"] == "cited_by" else 1
+        removed = runtime._graph_probabilities([record], removed_neighbor=(relation, 0))[0]
+        assert neighbor["explained_experimental_class"] == cls
+        np.testing.assert_allclose(neighbor["experimental_node_delta_percentage_points"], (experimental[cls]-removed[cls])*100, atol=1e-5)
     graph["graph_weight"] = 0
     graph["temperature"] = 3
     np.testing.assert_array_equal(probabilities(tabular, [record]), runtime.predict([record]))

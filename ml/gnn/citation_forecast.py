@@ -84,7 +84,7 @@ class CitationPredictor:
             model.eval()
             self.models.append(model)
 
-    def _graph_probabilities(self, records, removed_relation=None):
+    def _graph_probabilities(self, records, removed_relation=None, removed_neighbor=None):
         import torch
         features = self.tabular["features"].transform(records)
         roots = self.graph["root_scaler"].transform(features).astype(np.float32)
@@ -97,6 +97,9 @@ class CitationPredictor:
             mask[:] = 0
         elif removed_relation is not None:
             mask[:, int(removed_relation)] = 0
+        if removed_neighbor is not None:
+            relation, slot = removed_neighbor
+            mask[:, relation, slot] = 0
         neighbors = self.graph["neighbor_scaler"].transform(neighbors.reshape(-1, 8)).reshape(neighbors.shape).astype(np.float32)
         with torch.no_grad():
             p = np.mean([torch.softmax(model(torch.from_numpy(roots), torch.from_numpy(neighbors), torch.from_numpy(mask)), dim=1).numpy()
@@ -132,7 +135,20 @@ class CitationPredictor:
         experimental = self._graph_probabilities([record])[0]
         experimental_removed = self._graph_probabilities([record], removed_relation="all")[0]
         experimental_class = int(experimental.argmax())
-        return dict(neighbors=self.graph["neighborhoods"].build(record)[2],
+        neighbors = self.graph["neighborhoods"].build(record)[2]
+        slots = {0: 0, 1: 0}
+        for index, neighbor in enumerate(neighbors):
+            relation = 0 if neighbor["relation"] == "cited_by" else 1
+            slot = slots[relation]
+            slots[relation] += 1
+            # Bound interactive work; unmeasured remaining nodes stay explicit.
+            if index >= 12:
+                continue
+            removed = self._graph_probabilities([record], removed_neighbor=(relation, slot))[0]
+            neighbor["experimental_node_delta_percentage_points"] = float((experimental[experimental_class]-removed[experimental_class])*100)
+            neighbor["explained_experimental_class"] = experimental_class
+            neighbor["measurement"] = "experimental_gnn_single_message_removal; sensitivity_not_causality"
+        return dict(neighbors=neighbors,
                     uncalibrated_experimental_gnn_probabilities=experimental.tolist(),
                     experimental_gnn_message_delta_percentage_points=float((experimental[experimental_class]-experimental_removed[experimental_class])*100),
                     attributions=attributions, without_graph_probabilities=without_graph.tolist(),

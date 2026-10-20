@@ -97,6 +97,15 @@
                         <button type="button" onclick="analyzeRandomReplay(this)">Analyze a random held-out 2020 paper</button>
                         <p id="randomReplayStatus" aria-live="polite"></p>
                     </section>
+                    <section class="replay-panel span-12" aria-labelledby="contributionsHeading">
+                        <div class="eyebrow">Measured model behavior</div>
+                        <h2 id="contributionsHeading">What does the model actually use?</h2>
+                        <p id="contributionsSummary"></p>
+                        <table class="evidence-table"><thead><tr><th>Input feature</th><th>Probability change</th></tr></thead><tbody id="measuredFeatureRows"></tbody></table>
+                        <p class="replay-note">Each feature is replaced with its training median while other inputs stay fixed. Changes are percentage points for the predicted tier; positive values support it. Related features overlap, so changes cannot be added. This measures model sensitivity, not real-world causality.</p>
+                        <p id="gnnMeasurementSummary"></p>
+                        <table class="evidence-table"><thead><tr><th>Actual sampled citation neighbor</th><th>Experimental GNN change</th></tr></thead><tbody id="measuredNodeRows"></tbody></table>
+                    </section>
                     <!-- UPPER ROW: PREDICTED IMPACT & CALIBRATED PROBABILITIES (HIGH / MEDIUM / LOW TIERS SHOWN UPPER) -->
                     <div class="upper-decision-grid span-12">
                         <!-- Upper Left: Vibrant Illuminated Insight Card -->

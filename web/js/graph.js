@@ -59,7 +59,7 @@ function updateNodeInspector(d) {
             const delta = d.attribution_delta || '0.0%';
             const dir = d.attribution_dir || 'neutral';
             aBadge.className = `insp-impact-badge ${dir}`;
-            aBadge.textContent = `${delta} (${dir === 'positive' ? 'Supports predicted tier' : (dir === 'negative' ? 'Opposes predicted tier' : 'No measured effect')})`;
+            aBadge.textContent = delta === 'Not measured' ? 'Context only · individual contribution not evaluated' : `${delta} (${dir === 'positive' ? 'Supports predicted tier' : (dir === 'negative' ? 'Opposes predicted tier' : 'Zero measured change')})`;
         } else {
             bBanner.style.display = 'none';
         }
@@ -87,17 +87,51 @@ function updateNodeInspector(d) {
     }
 }
 
+function renderMeasuredContributions(data) {
+    safeSetText('contributionsSummary', 'The selected forecast uses measured paper features below. Author identities, affiliations, and venue names in the relationship graph are descriptive context; they are not individual predictive inputs in this model.');
+    const body = document.getElementById('measuredFeatureRows');
+    if (body) {
+        body.replaceChildren();
+        const features = (data.attributions || []).filter(a => /training_median_occlusion|training_mean_occlusion/.test(a.provenance || '')).slice(0, 10);
+        for (const feature of features) {
+            const row = document.createElement('tr');
+            const labels = {log_early_citations:'Early citation total (log scale)',log_y0:'Publication-year citations (log scale)',log_y1:'Year +1 citations (log scale)',log_y2:'Year +2 citations (log scale)',field_early_percentile:'Early citation rank among field/year peers',field_early_zscore:'Early citations relative to peer average',log_references:'Reference count (log scale)',last_year_share:'Share of early citations received in year +2',acceleration:'Change in yearly citation growth',velocity:'Yearly citation growth',growth_ratio:'Early citation growth ratio',log_title_words:'Title length (log scale)',author_count:'Author count (when training coverage permits)'};
+            const name = document.createElement('td'); name.textContent = labels[feature.feature_name] || feature.feature_name.replaceAll('_', ' ');
+            const value = document.createElement('td');
+            const signed = (feature.direction === 'negative' ? -1 : 1) * Number(feature.delta_percentage_points);
+            value.textContent = `${signed >= 0 ? '+' : ''}${signed.toFixed(3)} pp`;
+            row.append(name, value); body.appendChild(row);
+        }
+        if (!features.length) { const row = document.createElement('tr'); const cell = document.createElement('td'); cell.colSpan = 2; cell.textContent = 'Feature sensitivities unavailable for this serving model.'; row.appendChild(cell); body.appendChild(row); }
+    }
+    const graph = data.graph_evidence;
+    safeSetText('gnnMeasurementSummary', graph ? `Experimental citation GNN: ${(graph.neighbors || []).length} sampled neighbors. Removing all messages changes its own predicted-tier probability by ${Number(graph.experimental_gnn_message_delta_percentage_points || 0).toFixed(3)} pp. ${data.model_evidence?.gnn_used_for_tier ? 'Graph messages contribute to the selected forecast.' : 'Validation did not select the GNN for the served tier; these measurements explain the experimental model only.'} Individual removal is measured for up to 12 neighbors, for the experimental GNN’s predicted tier. Effects are not additive or causal.` : 'Experimental GNN measurements unavailable: the optional citation checkpoint is not loaded. The relationship graph below remains descriptive.');
+    const nodes = document.getElementById('measuredNodeRows');
+    if (nodes) {
+        nodes.replaceChildren();
+        for (const neighbor of graph?.neighbors || []) {
+            const row = document.createElement('tr');
+            const name = document.createElement('td'); name.textContent = `${neighbor.relation === 'cited_by' ? 'Early citing work' : 'Reference'}: ${neighbor.title || neighbor.work_id}`;
+            const value = document.createElement('td'); const delta = neighbor.experimental_node_delta_percentage_points;
+            value.textContent = Number.isFinite(delta) ? `${delta >= 0 ? '+' : ''}${delta.toFixed(3)} pp` : 'Not evaluated for this node';
+            row.append(name,value); nodes.appendChild(row);
+        }
+        if (!graph?.neighbors?.length) { const row = document.createElement('tr'); const cell = document.createElement('td'); cell.colSpan = 2; cell.textContent = graph ? 'No eligible citation neighbors available for this paper.' : 'No experimental graph measurements available.'; row.appendChild(cell); nodes.appendChild(row); }
+    }
+}
+
 function renderSubgraph(data, containerId) {
     const container = document.getElementById(containerId || 'cy');
     if (!container || !data) return;
     const elements = [];
+    renderMeasuredContributions(data);
 
     // Extract authentic model attributions
     const attributions = Array.isArray(data.attributions) ? data.attributions : [];
     // Feature occlusion is not an individual author's/venue node's influence.
     const findAttr = () => null;
 
-    const citationAttr = findAttr('citation') || findAttr('momentum');
+    const citationAttr = attributions.find(a => /log_early_citations|citation_count_at_cutoff/.test(a.feature_name));
     const authorAttr = findAttr('author');
     const venueAttr = findAttr('venue');
     const lineageAttr = findAttr('lineage') || findAttr('disruption');
@@ -115,7 +149,7 @@ function renderSubgraph(data, containerId) {
     const fieldName = data.primary_field || 'Unknown';
 
     // 1. Target Paper (Hop 0)
-    const cDelta = citationAttr ? `${citationAttr.direction === 'positive' ? '+' : '-'}${Math.abs(citationAttr.delta_percentage_points)}%` : 'Not measured';
+    const cDelta = citationAttr ? `${citationAttr.direction === 'positive' ? '+' : '-'}${Math.abs(citationAttr.delta_percentage_points).toFixed(3)} pp` : 'Not measured';
     const cDir = citationAttr ? citationAttr.direction : 'neutral';
 
     let targetInsight = '';
@@ -136,7 +170,7 @@ function renderSubgraph(data, containerId) {
             hop: 0,
             hop_badge: 'HOP 0 (FOCAL SEED)',
             role_desc: 'Target Focal Paper (Predictive Root)',
-            attribution_name: 'Citation Momentum & Early Growth',
+            attribution_name: 'Early citation count feature sensitivity (not node causality)',
             attribution_delta: cDelta,
             attribution_dir: cDir,
             metrics: [
@@ -177,7 +211,7 @@ function renderSubgraph(data, containerId) {
                 hop: 1,
                 hop_badge: 'HOP 1 (AUTHOR)',
                 role_desc: `Collaborating Author (${posLabel})`,
-                attribution_name: 'Author Track Record & Centrality',
+                attribution_name: 'Recorded authorship',
                 attribution_delta: aDelta,
                 attribution_dir: aDir,
                 metrics: [
@@ -207,7 +241,7 @@ function renderSubgraph(data, containerId) {
                     hop: 2,
                     hop_badge: 'HOP 2 (INSTITUTION)',
                     role_desc: 'Academic Institution (Hop 2)',
-                    attribution_name: 'Institutional Ranking & Endowment',
+                    attribution_name: 'Recorded affiliation',
                     attribution_delta: sDelta,
                     attribution_dir: sDir,
                     metrics: [
@@ -245,7 +279,7 @@ function renderSubgraph(data, containerId) {
                 hop: 1,
                 hop_badge: 'HOP 1 (VENUE)',
                 role_desc: `Publication Venue (${vTier})`,
-                attribution_name: 'Venue Prestige (SCImago & CORE)',
+                attribution_name: 'Recorded venue',
                 attribution_delta: vDelta,
                 attribution_dir: vDir,
                 metrics: [
@@ -308,7 +342,7 @@ function renderSubgraph(data, containerId) {
                 hop: 1,
                 hop_badge: 'HOP 1 (PRECURSOR REF)',
                 role_desc: 'Recorded reference',
-                attribution_name: 'Lineage & Disruption (CD Index)',
+                attribution_name: 'Recorded reference relationship',
                 attribution_delta: lDelta,
                 attribution_dir: lDir,
                 metrics: [
@@ -334,11 +368,11 @@ function renderSubgraph(data, containerId) {
                 { label: 'OpenAlex ID', val: neighbor.work_id },
                 { label: 'Publication year', val: neighbor.publication_year },
                 { label: 'Features observed through', val: neighbor.feature_cutoff },
-                { label: 'Individual node effect', val: 'Not measured' }
+                { label: 'Experimental GNN sensitivity', val: Number.isFinite(neighbor.experimental_node_delta_percentage_points) ? `${neighbor.experimental_node_delta_percentage_points.toFixed(3)} pp (message removal)` : 'Not evaluated for this node' }
             ],
             insight: data.model_evidence?.gnn_used_for_tier
-                ? 'This paper supplies a sampled citation message. Relation-removal sensitivities describe complete relation groups, not individual node effects.'
-                : 'This is observed citation context. Validation did not select graph messages for this forecast; an individual node effect is not claimed.'
+                ? 'This paper supplies a sampled citation message. The experimental sensitivity above removes this individual message; it is not a causal effect.'
+                : 'This is a sampled experimental citation message. Its removal sensitivity explains the experimental GNN only. Validation did not select graph messages for the served forecast.'
         }});
         elements.push({ data: {
             source: neighbor.relation === 'cited_by' ? id : 'target',

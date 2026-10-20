@@ -1,13 +1,9 @@
-"""Authentic Model Inference Service for SciGraph AI.
+"""Citation-impact serving with a versioned training/inference feature contract.
 
-Features:
-- Loads trained PyG AuthenticHeteroSAGE from ml/gnn/checkpoints/hetero_graphsage.pt
-- Loud failure on startup if checkpoint is missing or corrupted (Rule R2)
-- Zero fabricated features, zero random fallbacks, zero hash() (Rule R1)
-- Strict temporal cutoff (T_cutoff = pub_year + 2) (Rule R3)
-- Calibrated class probabilities via learned temperature parameter
-- Ground-truth backtest comparison for papers published <= 2020
-- Transparent feature attribution with explicit provenance
+V3 optionally loads a validation-selected citation GraphSAGE ensemble. Legacy
+checkpoints remain supported. API evidence identifies the classifier actually
+used; absent regression estimates remain null. Temporal citation features use
+publication year through year+2, not an exact rolling 24-month window.
 """
 
 import os
@@ -46,6 +42,10 @@ class ModelInferenceService:
         self.df_works: Optional[pd.DataFrame] = None
         self.df_counts: Optional[pd.DataFrame] = None
         self.cohort_reference: Dict[str, Any] = {}
+        self.forecast_bundle = None
+        self.forecast_bundle_sha256 = None
+        self.graph_predictor = None
+        self.annual_histories = {}
         self.node_in_channels = {
             "paper": TOTAL_FEATURE_DIM,
             "author": 8,
@@ -76,6 +76,23 @@ class ModelInferenceService:
         self.primary_model = self.primary_payload["model"]
         self.primary_scaler = self.primary_payload["scaler"]
         self.primary_temperature = float(self.primary_payload.get("temperature", 1.0))
+        forecast_path = settings.CHECKPOINTS_DIR / "forecast_v3.joblib"
+        if forecast_path.exists():
+            import hashlib
+            import io
+            forecast_bytes = forecast_path.read_bytes()
+            self.forecast_bundle = joblib.load(io.BytesIO(forecast_bytes))
+            self.forecast_bundle_sha256 = hashlib.sha256(forecast_bytes).hexdigest()
+            if self.forecast_bundle.get("schema_version") != 3:
+                raise RuntimeError("Incompatible forecast feature bundle")
+        graph_forecast_path = settings.CHECKPOINTS_DIR / "citation_forecast.joblib"
+        if graph_forecast_path.exists():
+            import hashlib
+            from ml.gnn.citation_forecast import CitationPredictor
+            graph_bundle = joblib.load(graph_forecast_path)
+            if self.forecast_bundle is None or graph_bundle["tabular_sha256"] != hashlib.sha256(forecast_path.read_bytes()).hexdigest():
+                raise RuntimeError("Graph checkpoint does not match the tabular feature bundle")
+            self.graph_predictor = CitationPredictor(graph_bundle, self.forecast_bundle)
         logger.info(f"Successfully loaded primary model (M1_LogisticRegression) with T={self.primary_temperature:.4f}")
 
         # 1. Optionally load HeteroSAGE architecture (for graph relational comparative analysis)
@@ -106,6 +123,9 @@ class ModelInferenceService:
         # 2. Load Model Card
         with open(card_path, "r", encoding="utf-8") as f:
             self.model_card = json.load(f)
+        forecast_card = settings.CHECKPOINTS_DIR / "FORECAST_CARD.json"
+        if self.forecast_bundle is not None and forecast_card.exists():
+            self.model_card = json.loads(forecast_card.read_text())
 
         # 3. Load persistent text encoder (strictly fitted on TRAIN titles only)
         if not DEFAULT_TEXT_ENCODER_PATH.exists():
@@ -130,6 +150,8 @@ class ModelInferenceService:
                 "venue_name", "oa_status"
             ]
         )
+        if self.forecast_bundle is not None and self.forecast_bundle.get("evaluation_reference"):
+            self.df_works = pd.DataFrame(self.forecast_bundle["evaluation_reference"])
         logger.info(f"Loaded {len(self.df_works):,} reference works for corpus lookups.")
 
         # Compute empirical cohort percentiles (50th, 90th) by pub_year for backtesting
@@ -144,6 +166,13 @@ class ModelInferenceService:
         if not counts_path.exists():
             raise RuntimeError(f"CRITICAL: Reference yearly citation records missing at '{counts_path}'.")
         self.df_counts = None
+        if self.forecast_bundle is not None:
+            from ml.features.forecast import clean_id
+            annual = pd.read_parquet(counts_path)
+            for item in annual.to_dict("records"):
+                self.annual_histories.setdefault(clean_id(item["work_id"]), []).append(
+                    {"year": int(item["year"]), "cited_by_count": int(item["cited_by_count"])})
+            self.annual_histories.update(self.forecast_bundle.get("early_history_reference", {}))
         logger.info("Verified citation yearly records table exists on disk.")
 
         # 5. Load empirical cohort thresholds reference (single source of truth: label_thresholds.json)
@@ -154,6 +183,16 @@ class ModelInferenceService:
             logger.info("Successfully loaded empirical cohort reference thresholds.")
         else:
             self.cohort_reference = {}
+        if self.forecast_bundle is not None and self.forecast_bundle.get("evaluation_reference"):
+            # Backtest cohort cutpoints must describe the model's own sampled
+            # population. They are never supplied to the forecast features.
+            self.cohort_reference = {"by_field_year": {}}
+            for (field_name, year), group in self.df_works.groupby(["primary_field_name", "publication_year"]):
+                vals = group["future_citations_5y"].dropna().to_numpy()
+                self.cohort_reference["by_field_year"][f"{field_name}::{year}"] = {
+                    "p50": float(np.percentile(vals, 50)), "p90": float(np.percentile(vals, 90)),
+                    "cohort_level": "model_sample_field_year"
+                }
 
     def get_cohort_threshold(self, field_name: Optional[str], pub_year: int) -> Dict[str, Any]:
         """Reads empirical p50/p90 from cohort reference with strict hierarchical fallback."""
@@ -286,6 +325,27 @@ class ModelInferenceService:
         scaled_logits = logits / max(self.primary_temperature, 1e-4)
         exp_z = np.exp(scaled_logits - np.max(scaled_logits, axis=1, keepdims=True))
         probs = (exp_z / np.sum(exp_z, axis=1, keepdims=True))[0]
+        forecast_record = dict(raw_work)
+        model_insights = {}
+        if self.forecast_bundle is not None:
+            from ml.features.forecast import annual_counts, probabilities
+            if annual_counts(forecast_record) is None and work_id in self.annual_histories:
+                forecast_record["counts_by_year"] = self.annual_histories[work_id]
+            probs = probabilities(self.forecast_bundle, [forecast_record])[0]
+            observed = annual_counts(forecast_record)
+            if observed is not None:
+                cits_at_cutoff = sum(observed)
+            feature_values = self.forecast_bundle["features"].transform([forecast_record])[0]
+            model_insights = {
+                "early_citation_percentile": float(feature_values[10] * 100),
+                "annual_citations": observed,
+                "annual_history_missing": bool(feature_values[8]),
+                "cohort_reference_missing": bool(feature_values[12]),
+                "cohort_reference": "field/publication-year early-count peers; training-field fallback if unavailable",
+                "trajectory": "unavailable" if observed is None else ("accelerating" if observed[2]-2*observed[1]+observed[0] > 0 else "steady_or_decelerating")
+            }
+            if self.graph_predictor is not None:
+                probs = self.graph_predictor.predict([forecast_record])[0]
         pred_cls = int(np.argmax(probs))
 
         label_map = {0: "Low (<50th)", 1: "Medium (50-90th)", 2: "High (>=90th)"}
@@ -302,7 +362,7 @@ class ModelInferenceService:
         pred_future_cits = None
         graph_context = None
 
-        if self.model is not None:
+        if self.model is not None and self.forecast_bundle is None:
             try:
                 import torch
                 from ml.gnn.ego_graph import ego_graph_builder
@@ -318,18 +378,8 @@ class ModelInferenceService:
                 logger.debug(f"GNN forward pass fallback: {e}")
                 self.model = None
 
-        if pred_future_cits is None:
-            t_info = self.get_cohort_threshold(primary_field, pub_year)
-            p50_val = float(t_info["p50"])
-            p90_val = float(t_info["p90"])
-            # Expected window count from live class probabilities and empirical cohort cutpoints
-            low_center = max(0.0, p50_val * 0.5)
-            med_center = (p50_val + p90_val) / 2.0
-            high_center = p90_val * 1.25
-            pred_future_cits = float(
-                probs[0] * low_center + probs[1] * med_center + probs[2] * high_center
-            )
-            pred_log_cits = float(np.log1p(max(0.0, pred_future_cits)))
+        # Classification cutpoints do not identify an expected citation count.
+        # Leave the numeric forecast unavailable without a fitted regressor.
 
         if not isinstance(graph_context, dict) or "nodes" not in graph_context:
             graph_nodes = [{"data": {"id": work_id, "label": title[:30], "type": "paper"}}]
@@ -364,32 +414,31 @@ class ModelInferenceService:
 
         # 9. Authentic Feature Attributions (Local Occlusion or Linear Model Attribution)
         attributions = []
-        if self.model is not None:
-            try:
-                from ml.explain.attribution import compute_local_occlusion_attributions
-                attributions = compute_local_occlusion_attributions(
-                    model=self.model,
-                    x_dict=x_dict,
-                    edge_index_dict=edge_index_dict,
-                    pred_cls=pred_cls,
-                    original_prob=float(probs[pred_cls]),
-                    raw_work=raw_work
-                )
-            except Exception as e:
-                logger.debug(f"GNN attribution fallback: {e}")
-                self.model = None
-
+        # Explain the classifier that actually produced the served tier.
+        graph_evidence = None
+        if self.graph_predictor is not None:
+            graph_evidence = self.graph_predictor.evidence(forecast_record)
+            if self.graph_predictor.graph["graph_weight"] > 0:
+                attributions = graph_evidence["attributions"]
+            else:
+                from ml.features.forecast import explain
+                attributions = explain(self.forecast_bundle, forecast_record)
+        elif self.forecast_bundle is not None:
+            from ml.features.forecast import explain
+            attributions = explain(self.forecast_bundle, forecast_record)
         if not attributions and self.primary_model is not None and self.primary_scaler is not None:
             from ml.features.builder import FEATURE_GROUPS
             from ml.explain.attribution import FEATURE_DISPLAY_NAMES
             feats_scaled = self.primary_scaler.transform(feats.reshape(1, -1))
-            coefs = self.primary_model.coef_[pred_cls]
-            contribs = feats_scaled[0] * coefs
             group_deltas = []
             group_names = []
             directions = []
             for grp_name, sl in FEATURE_GROUPS.items():
-                grp_val = float(np.sum(contribs[sl]))
+                occluded = feats_scaled.copy()
+                occluded[0, sl] = 0.0  # Standardized training mean.
+                occ_logits = self.primary_model.decision_function(occluded) / max(self.primary_temperature, 1e-4)
+                from scipy.special import softmax
+                grp_val = float(probs[pred_cls] - softmax(occ_logits, axis=1)[0, pred_cls])
                 group_deltas.append(abs(grp_val))
                 directions.append("positive" if grp_val >= 0 else "negative")
                 group_names.append(grp_name)
@@ -403,7 +452,8 @@ class ModelInferenceService:
                     "delta_probability": round(float(dl), 4),
                     "delta_percentage_points": round(float(dl * 100.0), 2),
                     "direction": direct,
-                    "provenance": "model | linear_attribution"
+                    "provenance": "served_model | training_mean_occlusion",
+                    "explained_class": pred_cls
                 })
             attributions.sort(key=lambda a: a["importance_score"], reverse=True)
 
@@ -413,6 +463,9 @@ class ModelInferenceService:
         current_year = datetime.now(timezone.utc).year
         complete_through = current_year - 1
         has_gt = (window_end <= complete_through)
+        if self.forecast_bundle is not None and self.forecast_bundle.get("evaluation_reference"):
+            known_outcome = bool(self.df_works["work_id"].astype(str).str.endswith(work_id).any())
+            has_gt = has_gt and known_outcome
 
         threshold_info = self.get_cohort_threshold(primary_field, pub_year)
         p50 = threshold_info["p50"]
@@ -425,9 +478,9 @@ class ModelInferenceService:
                 if isinstance(c, dict) and window_start <= c.get("year", 0) <= window_end
             )
             actual_log = float(np.log1p(actual_window))
-            pred_log = float(pred_log_cits)
-            err_abs = float(abs(pred_future_cits - actual_window))
-            err_log = float(abs(pred_log - actual_log))
+            pred_log = float(pred_log_cits) if pred_log_cits is not None else None
+            err_abs = float(abs(pred_future_cits - actual_window)) if pred_future_cits is not None else None
+            err_log = float(abs(pred_log - actual_log)) if pred_log is not None else None
 
             clean_wid = str(work_id).split("/")[-1]
             stored_rows = self.df_works[self.df_works["work_id"].astype(str).str.endswith(clean_wid)] if self.df_works is not None else None
@@ -435,6 +488,11 @@ class ModelInferenceService:
                 actual_cls = int(stored_rows.iloc[0]["impact_class"])
                 actual_lbl = label_map[actual_cls]
                 provenance_str = "ground truth from corpus (works.parquet)"
+                if pd.notnull(stored_rows.iloc[0].get("future_citations_5y")):
+                    actual_window = int(stored_rows.iloc[0]["future_citations_5y"])
+                    actual_log = float(np.log1p(actual_window))
+                    err_abs = abs(pred_future_cits-actual_window) if pred_future_cits is not None else None
+                    err_log = abs(pred_log-actual_log) if pred_log is not None else None
                 if not counts_by_year and "future_citations_5y" in stored_rows.columns and pd.notnull(stored_rows.iloc[0]["future_citations_5y"]):
                     actual_window = int(stored_rows.iloc[0]["future_citations_5y"])
                     actual_log = float(np.log1p(actual_window))
@@ -478,10 +536,10 @@ class ModelInferenceService:
                 "predicted_label": pred_label,
                 "is_correct_class": is_correct,
                 "actual_log_citations": round(actual_log, 4),
-                "predicted_log_citations": round(pred_log, 4),
-                "error_abs": round(err_abs, 2),
-                "error_log": round(err_log, 4),
-                "absolute_error_log_citations": round(err_log, 4),
+                "predicted_log_citations": round(pred_log, 4) if pred_log is not None else None,
+                "error_abs": round(err_abs, 2) if err_abs is not None else None,
+                "error_log": round(err_log, 4) if err_log is not None else None,
+                "absolute_error_log_citations": round(err_log, 4) if err_log is not None else None,
                 "warning": None,
                 "threshold_provenance": threshold_info,
                 "cohort_percentile": round(pct, 1),
@@ -491,7 +549,7 @@ class ModelInferenceService:
         else:
             backtest = {
                 "has_ground_truth": False,
-                "window_complete": False,
+                "window_complete": bool(window_end <= complete_through),
                 "window_start": window_start,
                 "window_end": window_end,
                 "actual_window": None,
@@ -503,11 +561,11 @@ class ModelInferenceService:
                 "predicted_label": pred_label,
                 "is_correct_class": None,
                 "actual_log_citations": None,
-                "predicted_log_citations": round(float(pred_log_cits), 4),
+                "predicted_log_citations": round(float(pred_log_cits), 4) if pred_log_cits is not None else None,
                 "error_abs": None,
                 "error_log": None,
                 "absolute_error_log_citations": None,
-                "warning": f"Evaluation window ({window_start}..{window_end}) has not closed yet (complete through {complete_through})",
+                "warning": "No verified cohort outcome in the model's evaluation corpus" if window_end <= complete_through else f"Evaluation window ({window_start}..{window_end}) has not closed yet (complete through {complete_through})",
                 "threshold_provenance": threshold_info,
                 "cohort_percentile": None,
                 "provenance": "openalex | model | computed",
@@ -537,13 +595,14 @@ class ModelInferenceService:
             doi_val = None
 
         # Temporal split and training set membership
-        if pub_year <= 2016:
+        known_member = bool(work_id and self.df_works is not None and self.df_works["work_id"].astype(str).str.endswith(work_id).any())
+        if known_member and 2012 <= pub_year <= 2016:
             split_name = "train"
             in_train = True
-        elif pub_year == 2017:
+        elif known_member and pub_year == 2017:
             split_name = "val"
             in_train = False
-        elif pub_year >= 2018:
+        elif known_member and 2018 <= pub_year <= 2020:
             split_name = "test"
             in_train = False
         else:
@@ -562,6 +621,19 @@ class ModelInferenceService:
                     "institutions": inst_list
                 })
 
+        reliability_reasons = []
+        if cutoff_year >= current_year:
+            reliability_reasons.append("early_observation_window_incomplete")
+        if self.forecast_bundle and cutoff_year < self.forecast_bundle.get("label_availability_year", 2022):
+            reliability_reasons.append("retrospective_only_model_labels_matured_after_paper_cutoff")
+        if model_insights.get("annual_history_missing"):
+            reliability_reasons.append("annual_citation_history_unavailable")
+        if model_insights.get("cohort_reference_missing"):
+            reliability_reasons.append("matching_field_year_reference_unavailable")
+        if graph_evidence is not None and not graph_evidence["neighbors"]:
+            reliability_reasons.append("citation_neighborhood_unavailable")
+        if float(np.max(probs)) < .8:
+            reliability_reasons.append("uncertain_classification")
         result_payload = {
             "paper_id": work_id,
             "doi": doi_val,
@@ -578,9 +650,9 @@ class ModelInferenceService:
             "predicted_impact_label": pred_label,
             "predicted_label": pred_label,
             "calibrated_probabilities": calibrated_probs,
-            "predicted_future_citations_5y": round(pred_future_cits, 1),
-            "citations_in_window": round(pred_future_cits, 1),
-            "citations_window": round(pred_future_cits, 1),
+            "predicted_future_citations_5y": round(pred_future_cits, 1) if pred_future_cits is not None else None,
+            "citations_in_window": round(pred_future_cits, 1) if pred_future_cits is not None else None,
+            "citations_window": round(pred_future_cits, 1) if pred_future_cits is not None else None,
             "split": split_name,
             "in_training_data": in_train,
             "in_train_split": in_train,
@@ -591,7 +663,22 @@ class ModelInferenceService:
             "backtest": backtest,
             "attributions": attributions,
             "graph_context": graph_context,
-            "model_version": "M1_LogisticRegression",
+            "model_version": "CitationSAGE_validation_selected_fusion" if self.graph_predictor is not None and self.graph_predictor.graph["graph_weight"] > 0 else (self.forecast_bundle["model_name"] if self.forecast_bundle else "M1_LogisticRegression"),
+            "model_evidence": {
+                "tier_source": "citation_graph_fusion" if self.graph_predictor and self.graph_predictor.graph["graph_weight"] > 0 else "tabular_classifier",
+                "gnn_used_for_tier": bool(self.graph_predictor and self.graph_predictor.graph["graph_weight"] > 0 and graph_evidence and graph_evidence["neighbors"]),
+                "graph_predictive_lift": self.graph_predictor.graph["report"].get("accuracy_lift_over_tabular") if self.graph_predictor else None,
+                "graph_status": ("experimental_measured_messages" if self.graph_predictor.graph["graph_weight"] > 0 else "evaluated_not_selected") if self.graph_predictor else "descriptive_context_only",
+                "citation_estimate_method": "experimental_gnn" if pred_future_cits is not None else "unavailable_no_validated_regressor",
+                "evaluation_status": "development_benchmark; fresh temporal holdout required"
+            },
+            "model_insights": model_insights,
+            "graph_evidence": graph_evidence,
+            "prediction_reliability": {
+                "status": "limited_evidence" if reliability_reasons else "higher_model_confidence",
+                "reasons": reliability_reasons,
+                "notice": "Model confidence is not a guarantee of correctness or scientific validity"
+            },
             "provenance": "openalex | scimago | core | model | computed"
         }
 

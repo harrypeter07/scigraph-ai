@@ -17,9 +17,9 @@ async function loadViewTemplates() {
     try {
         const responses = await Promise.all(
             viewList.map(async (v) => {
-                let res = await fetch(`/views/${v}`);
+                let res = await fetch(`/views/${v}?v=20261020-evidence1`);
                 if (!res.ok) {
-                    res = await fetch(`/static/views/${v}`);
+                    res = await fetch(`/static/views/${v}?v=20261020-evidence1`);
                 }
                 if (!res.ok) throw new Error(`HTTP ${res.status} fetching view ${v}`);
                 return res.text();
@@ -46,6 +46,8 @@ async function loadViewTemplates() {
 window.addEventListener('DOMContentLoaded', async () => {
     // 1. Asynchronously load all modular view templates into the workspace container
     await loadViewTemplates();
+    if (typeof loadForecastEvidence === 'function') loadForecastEvidence();
+    document.getElementById('paperInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') runPrediction(); });
     
     // 2. Standby on initial view (do not load data prior to user action)
     // User initiates analysis via 'Generate Forecast' or preset selection

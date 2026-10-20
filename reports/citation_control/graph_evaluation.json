@@ -1,0 +1,280 @@
+{
+  "status": "development benchmark; not fresh confirmation",
+  "seeds": [
+    {
+      "seed": 42,
+      "selection_accuracy": 0.7613333333333333,
+      "epoch": 17
+    },
+    {
+      "seed": 43,
+      "selection_accuracy": 0.7733333333333333,
+      "epoch": 26
+    },
+    {
+      "seed": 44,
+      "selection_accuracy": 0.764,
+      "epoch": 18
+    }
+  ],
+  "without_edges_control": true,
+  "accuracy_lift_over_tabular": 0.0,
+  "paired_bootstrap_lift_ci95": [
+    0.0,
+    0.0
+  ],
+  "selection_weights": [
+    [
+      0.7666666666666667,
+      0.0
+    ],
+    [
+      0.7626666666666667,
+      0.1
+    ],
+    [
+      0.7613333333333333,
+      0.25
+    ],
+    [
+      0.76,
+      0.5
+    ],
+    [
+      0.7613333333333333,
+      0.75
+    ],
+    [
+      0.7613333333333333,
+      1.0
+    ]
+  ],
+  "selected_graph_weight": 0.0,
+  "development_tabular": {
+    "accuracy": 0.7137777777777777,
+    "macro_f1": 0.7108220617520006,
+    "log_loss": 0.6544899469081011,
+    "confusion_matrix": [
+      [
+        1793,
+        436,
+        10
+      ],
+      [
+        606,
+        1088,
+        103
+      ],
+      [
+        13,
+        120,
+        331
+      ]
+    ],
+    "per_class": {
+      "0": {
+        "precision": 0.7433665008291874,
+        "recall": 0.8008039303260384,
+        "f1-score": 0.7710169855944958,
+        "support": 2239.0
+      },
+      "1": {
+        "precision": 0.6618004866180048,
+        "recall": 0.6054535336672231,
+        "f1-score": 0.6323743097936646,
+        "support": 1797.0
+      },
+      "2": {
+        "precision": 0.7454954954954955,
+        "recall": 0.7133620689655172,
+        "f1-score": 0.7290748898678414,
+        "support": 464.0
+      },
+      "accuracy": 0.7137777777777777,
+      "macro avg": {
+        "precision": 0.7168874943142294,
+        "recall": 0.7065398443195928,
+        "f1-score": 0.7108220617520006,
+        "support": 4500.0
+      },
+      "weighted avg": {
+        "precision": 0.7110139954931145,
+        "recall": 0.7137777777777777,
+        "f1-score": 0.7113276476319934,
+        "support": 4500.0
+      }
+    }
+  },
+  "development_gnn": {
+    "accuracy": 0.7155555555555555,
+    "macro_f1": 0.71630235035903,
+    "log_loss": 0.652321646715543,
+    "confusion_matrix": [
+      [
+        1744,
+        482,
+        13
+      ],
+      [
+        540,
+        1105,
+        152
+      ],
+      [
+        10,
+        83,
+        371
+      ]
+    ],
+    "per_class": {
+      "0": {
+        "precision": 0.7602441150828247,
+        "recall": 0.7789191603394372,
+        "f1-score": 0.7694683432605338,
+        "support": 2239.0
+      },
+      "1": {
+        "precision": 0.6616766467065869,
+        "recall": 0.6149137451307735,
+        "f1-score": 0.6374387078165561,
+        "support": 1797.0
+      },
+      "2": {
+        "precision": 0.6921641791044776,
+        "recall": 0.7995689655172413,
+        "f1-score": 0.742,
+        "support": 464.0
+      },
+      "accuracy": 0.7155555555555555,
+      "macro avg": {
+        "precision": 0.7046949802979631,
+        "recall": 0.7311339569958172,
+        "f1-score": 0.71630235035903,
+        "support": 4500.0
+      },
+      "weighted avg": {
+        "precision": 0.7138630415348132,
+        "recall": 0.7155555555555555,
+        "f1-score": 0.7139122174459304,
+        "support": 4500.0
+      }
+    }
+  },
+  "development_fusion": {
+    "accuracy": 0.7137777777777777,
+    "macro_f1": 0.7108220617520006,
+    "log_loss": 0.6544898509124912,
+    "confusion_matrix": [
+      [
+        1793,
+        436,
+        10
+      ],
+      [
+        606,
+        1088,
+        103
+      ],
+      [
+        13,
+        120,
+        331
+      ]
+    ],
+    "per_class": {
+      "0": {
+        "precision": 0.7433665008291874,
+        "recall": 0.8008039303260384,
+        "f1-score": 0.7710169855944958,
+        "support": 2239.0
+      },
+      "1": {
+        "precision": 0.6618004866180048,
+        "recall": 0.6054535336672231,
+        "f1-score": 0.6323743097936646,
+        "support": 1797.0
+      },
+      "2": {
+        "precision": 0.7454954954954955,
+        "recall": 0.7133620689655172,
+        "f1-score": 0.7290748898678414,
+        "support": 464.0
+      },
+      "accuracy": 0.7137777777777777,
+      "macro avg": {
+        "precision": 0.7168874943142294,
+        "recall": 0.7065398443195928,
+        "f1-score": 0.7108220617520006,
+        "support": 4500.0
+      },
+      "weighted avg": {
+        "precision": 0.7110139954931145,
+        "recall": 0.7137777777777777,
+        "f1-score": 0.7113276476319934,
+        "support": 4500.0
+      }
+    }
+  },
+  "development_removed_edges": {
+    "accuracy": 0.7137777777777777,
+    "macro_f1": 0.7108220617520006,
+    "log_loss": 0.6544898509124912,
+    "confusion_matrix": [
+      [
+        1793,
+        436,
+        10
+      ],
+      [
+        606,
+        1088,
+        103
+      ],
+      [
+        13,
+        120,
+        331
+      ]
+    ],
+    "per_class": {
+      "0": {
+        "precision": 0.7433665008291874,
+        "recall": 0.8008039303260384,
+        "f1-score": 0.7710169855944958,
+        "support": 2239.0
+      },
+      "1": {
+        "precision": 0.6618004866180048,
+        "recall": 0.6054535336672231,
+        "f1-score": 0.6323743097936646,
+        "support": 1797.0
+      },
+      "2": {
+        "precision": 0.7454954954954955,
+        "recall": 0.7133620689655172,
+        "f1-score": 0.7290748898678414,
+        "support": 464.0
+      },
+      "accuracy": 0.7137777777777777,
+      "macro avg": {
+        "precision": 0.7168874943142294,
+        "recall": 0.7065398443195928,
+        "f1-score": 0.7108220617520006,
+        "support": 4500.0
+      },
+      "weighted avg": {
+        "precision": 0.7110139954931145,
+        "recall": 0.7137777777777777,
+        "f1-score": 0.7113276476319934,
+        "support": 4500.0
+      }
+    }
+  },
+  "graph_coverage": {
+    "train": 0.8656,
+    "selection": 0.9506666666666667,
+    "calibration": 0.9533333333333334,
+    "development_test": 0.9493333333333334
+  },
+  "architecture": "one-hop incoming/outgoing relational GraphSAGE; target-cutoff features; no self-loop substitutes"
+}

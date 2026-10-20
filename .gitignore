@@ -32,6 +32,8 @@ ml/gnn/checkpoints/*
 !ml/gnn/checkpoints/text_encoder.joblib
 !ml/gnn/checkpoints/primary_model.joblib
 !ml/gnn/checkpoints/primary_model_meta.json
+!ml/gnn/checkpoints/forecast_v3.joblib
+!ml/gnn/checkpoints/FORECAST_CARD.json
 *.pt
 !ml/gnn/checkpoints/hetero_graphsage.pt
 *.pth
@@ -55,6 +57,9 @@ scigraph_project.zip
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+data/expanded_forecast/
+reports/*/*.joblib
+reports/forecast_training_kit.zip
 
 # OS specific
 .DS_Store

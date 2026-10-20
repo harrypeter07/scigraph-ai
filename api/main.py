@@ -163,11 +163,12 @@ def health_check():
     return {
         "status": "healthy" if primary_ready else "degraded",
         "service": "SciGraph AI 2.0",
-        "deployed_commit": "deploy-v9-high-contrast-ui",
+        "deployed_commit": os.environ.get("RAILWAY_GIT_COMMIT_SHA") or os.environ.get("SOURCE_VERSION"),
         "model_loaded": primary_ready,
         "primary_model_loaded": primary_ready,
-        "gnn_model_loaded": inference_service.model is not None,
-        "model_name": "M1_LogisticRegression",
+        "gnn_model_loaded": inference_service.model is not None or getattr(inference_service, "graph_predictor", None) is not None,
+        "model_name": inference_service.forecast_bundle["model_name"] if inference_service.forecast_bundle else "M1_LogisticRegression",
+        "forecast_bundle_sha256": getattr(inference_service, "forecast_bundle_sha256", None),
         "corpus_works_indexed": works_count,
         "polite_pool": settings.OPENALEX_POLITE_EMAIL,
         "data_snapshot": {

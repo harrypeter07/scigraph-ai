@@ -301,11 +301,11 @@ function renderPrediction(data) {
     const provPill = document.getElementById('forecastProvenancePill');
     if (provPill) {
         if (data.mode === 'G' || data.gemini_reasoning) {
-            provPill.textContent = 'Gemini 2.5 Flash (Mode G)';
+            provPill.textContent = `${data.model_version || 'Statistical model'} + AI commentary`;
             provPill.style.background = '#DBEAFE';
             provPill.style.color = '#1D4ED8';
         } else {
-            provPill.textContent = 'M1_LogisticRegression (Mode M)';
+            provPill.textContent = data.model_version || 'Statistical model';
             provPill.style.background = '';
             provPill.style.color = '';
         }
@@ -318,7 +318,7 @@ function renderPrediction(data) {
     if (geminiCard && geminiText) {
         if (data.gemini_reasoning) {
             geminiCard.style.display = 'block';
-            geminiText.textContent = data.gemini_reasoning;
+            geminiText.textContent = `AI-generated commentary; verify source claims. ${data.gemini_reasoning}`;
             if (geminiConf && data.confidence) {
                 geminiConf.textContent = `Confidence: ${(data.confidence * 100).toFixed(0)}%`;
             }
@@ -347,13 +347,13 @@ function renderDashboardWidgets(data) {
     safeSetText('kpiCutoffCitsVal', fmtNum(cutoffCits));
     const trendBadge = document.getElementById('kpiCutoffTrend');
     if (trendBadge) {
-        trendBadge.textContent = `+${velocity} cits/yr velocity`;
+        trendBadge.textContent = `${velocity} citations/calendar year on average`;
     }
 
     // 2. Top KPI: SCImago & DOAJ Access
     const v = data.venue || {};
-    const quartile = v.quartile || v.core_rank || 'Indexed';
-    safeSetText('kpiVenueQuartile', `${quartile} Verified`);
+    const quartile = v.quartile || v.core_rank;
+    safeSetText('kpiVenueQuartile', quartile ? `${quartile} (catalog)` : 'Rank unavailable');
     const econ = data.access_economics || {};
     const doajBadge = document.getElementById('kpiDoajBadge');
     if (doajBadge) {
@@ -364,12 +364,12 @@ function renderDashboardWidgets(data) {
     // 3. Segmented Level Comparison Gauges (Cutoff vs P90)
     const bt = data.backtest || {};
     const tProv = bt.threshold_provenance || {};
-    const p90 = typeof tProv.p90 === 'number' ? Math.round(tProv.p90) : 1264;
+    const p90 = typeof tProv.p90 === 'number' ? Math.round(tProv.p90) : null;
     safeSetText('gaugeValCutoff', fmtNum(cutoffCits));
     safeSetText('gaugeValP90', fmtNum(p90));
 
-    const cutoffRatio = Math.min(1, Math.max(0, cutoffCits / (p90 || 1)));
-    const litCount = Math.min(5, Math.max(1, Math.round(cutoffRatio * 5)));
+    const cutoffRatio = Number(data.model_insights?.early_citation_percentile || 0) / 100;
+    const litCount = Math.min(5, Math.max(0, Math.round(cutoffRatio * 5)));
     const cutoffBarsEl = document.getElementById('gaugeBarsCutoff');
     if (cutoffBarsEl) {
         cutoffBarsEl.innerHTML = '';
@@ -380,26 +380,27 @@ function renderDashboardWidgets(data) {
         }
     }
 
-    // 4. Discipline Citation Velocity Heatmap (7x6 Matrix = 42 cells)
+    // 4. Observed annual counts; no synthetic cohort-density heatmap.
     const heatGrid = document.getElementById('citationHeatmapGrid');
+    const annual = data.model_insights?.annual_citations;
     if (heatGrid) {
         heatGrid.innerHTML = '';
-        const predCls = data.predicted_impact_class;
-        for (let r = 0; r < 6; r++) {
-            for (let c = 0; c < 7; c++) {
+        heatGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        if (Array.isArray(annual) && annual.length === 3) {
+            annual.forEach((count, index) => {
                 const cell = document.createElement('div');
-                let lvl = 0;
-                const score = (c + 1) * 0.45 + (6 - r) * 0.35 + (predCls === 2 ? 1.5 : (predCls === 1 ? 0.7 : 0.1));
-                if (score > 4.2) lvl = 4;
-                else if (score > 3.0) lvl = 3;
-                else if (score > 2.0) lvl = 2;
-                else if (score > 1.0) lvl = 1;
-                cell.className = 'heatmap-cell lvl-' + lvl;
-                cell.title = `Cohort Trajectory: Window Y+${c + 1}, Bin ${r + 1}: Level ${lvl}`;
+                cell.className = 'heatmap-cell lvl-' + Math.round(4*count/Math.max(1, ...annual));
+                cell.style.height = '52px';
+                cell.textContent = `${pubY+index}: ${fmtNum(count)}`;
+                cell.title = `Observed citations in ${pubY+index}: ${count}`;
                 heatGrid.appendChild(cell);
-            }
+            });
+        } else {
+            heatGrid.textContent = 'Annual citation history unavailable';
         }
     }
+    ['heatStatPre', 'heatStatHorizon', 'heatStatOutlier'].forEach((id, index) => safeSetText(id, annual ? fmtNum(annual[index]) : '—'));
+    safeSetText('citationHeatmapNote', annual ? `Observed acceleration: ${annual[2]-2*annual[1]+annual[0]} citations per calendar-year step. This describes recorded counts, not future adoption.` : 'No measured annual profile is available.');
 
     // 5. Calibrated Probabilities Donut Chart
     const probs = data.calibrated_probabilities || data.class_probabilities || {};
@@ -442,22 +443,32 @@ function renderDashboardWidgets(data) {
     const hlEl = document.getElementById('luminousInsightHeadline');
     const bdEl = document.getElementById('luminousInsightBody');
     if (hlEl) {
-        hlEl.textContent = `${topTier} classification calibrated at ${maxP.toFixed(1)}% confidence.`;
+        hlEl.textContent = `${topTier}: estimated probability ${maxP.toFixed(1)}%.`;
     }
     if (bdEl) {
         const titleSnippet = data.title ? `"${data.title.slice(0, 42)}..."` : 'This paper';
         const vName = v.venue_name || 'peer-reviewed venue';
-        bdEl.textContent = `Conditioned strictly at cutoff t ≤ t_pub + 2y, ${titleSnippet} accumulated ${fmtNum(cutoffCits)} citations in ${vName} (${quartile}). Multi-relational GNN message passing synthesizes incoming citation momentum with precursor lineage.`;
+        const evidence = data.model_evidence || {};
+        bdEl.textContent = `${titleSnippet} has ${fmtNum(cutoffCits)} recorded early citations. Model: ${data.model_version || 'unavailable'}. ${evidence.gnn_used_for_tier ? 'Graph context contributes to this forecast; inspect the measured model sensitivity.' : 'The tier comes from paper features. The relationship graph provides descriptive context; predictive graph benefit has not been established.'} Citation impact does not measure scientific validity.`;
+        if (data.graph_evidence && evidence.gnn_used_for_tier) {
+            const delta = Number(data.graph_evidence.predicted_class_delta_percentage_points);
+            bdEl.textContent += ` Removing citation messages changes the predicted-tier probability by ${Math.abs(delta).toFixed(2)} percentage points (${delta >= 0 ? 'messages support this tier' : 'messages oppose this tier'}). This is model sensitivity, not causation.`;
+        }
+        const experimental = data.graph_evidence?.uncalibrated_experimental_gnn_probabilities;
+        if (experimental && !evidence.gnn_used_for_tier) {
+            bdEl.textContent += ` Experimental GNN output (uncalibrated): Low ${(experimental[0]*100).toFixed(1)}%, Medium ${(experimental[1]*100).toFixed(1)}%, High ${(experimental[2]*100).toFixed(1)}%. Validation retained the tabular forecast.`;
+            const graphDelta = Number(data.graph_evidence.experimental_gnn_message_delta_percentage_points);
+            bdEl.textContent += ` Removing messages changes the GNN's own predicted-tier probability by ${Math.abs(graphDelta).toFixed(2)} percentage points. This describes the experimental GNN, not the selected forecast.`;
+        }
+        if (data.prediction_reliability?.reasons?.length) {
+            bdEl.textContent += ` Evidence limitations: ${data.prediction_reliability.reasons.join(', ').replaceAll('_', ' ')}.`;
+        }
     }
 
     // 7. Empirical Velocity Speedometer Radial Arc
-    let cohortPct = 50;
-    if (bt.cohort_percentile != null) {
-        cohortPct = Math.round(Number(bt.cohort_percentile));
-    } else {
-        cohortPct = predCls === 2 ? 94 : (predCls === 1 ? 68 : 38);
-    }
-    safeSetText('speedometerVal', `${cohortPct}%`);
+    const observedPercentile = data.model_insights?.early_citation_percentile;
+    const cohortPct = observedPercentile == null ? null : Math.round(Number(observedPercentile));
+    safeSetText('speedometerVal', cohortPct == null ? 'Unavailable' : `${cohortPct}% early citations`);
     const speedoFill = document.getElementById('speedoArcFill');
     if (speedoFill) {
         const totalArc = 251.2;

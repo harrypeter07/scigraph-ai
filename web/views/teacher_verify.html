@@ -107,7 +107,7 @@
                                 <div>
                                     <div class="eval-header-row">
                                         <span class="eval-badge-label forecast">Predicted (model, cutoff only)</span>
-                                        <span class="provenance-pill">M1 live inference</span>
+                                        <span class="provenance-pill">Current model inference</span>
                                     </div>
                                     <div style="font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; font-family: var(--font-mono); margin-bottom: 0.35rem;">Predicted citations in years 3–5</div>
                                     <div class="pred-number" id="teacherPredWindowCits">—</div>
@@ -286,11 +286,11 @@
                 <div class="editorial-panel span-4">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
                         <div>
-                            <h3 class="section-title">6. Download all 4,500 test predictions (CSV)</h3>
+                            <h3 class="section-title">6. Download original 4,500 test predictions (CSV)</h3>
                             <p class="section-desc">Every single held-out test prediction with raw titles, cutoff inputs, citations in years 3-5 after publication, and model probabilities.</p>
                         </div>
                         <a href="/api/v1/verify/heldout.csv" class="btn-secondary" download="heldout_test_predictions.csv">
-                            📥 Download all 4,500 test predictions (CSV)
+                            📥 Download original 4,500 test predictions (CSV)
                         </a>
                     </div>
                 </div>
@@ -347,7 +347,7 @@
                 <!-- 8. Scoreboard -->
                 <div class="editorial-panel span-12">
                     <h3 class="section-title">8. Benchmark Scoreboard</h3>
-                    <p class="section-desc">Evaluated across all 4,500 held-out test papers (2018–2020).</p>
+                    <p class="section-desc">Current published evaluation: 5,933 held-out 2020 works. See Accuracy & Evidence for the protocol and runtime verification.</p>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
                         <!-- Model Card -->
@@ -356,7 +356,7 @@
                             <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-ink); margin-top: 0.25rem;" id="teacherScoreModelAcc">--%</div>
                             <div style="font-size: 0.8rem; color: var(--text-secondary);">Macro-F1: <strong id="teacherScoreModelF1">--</strong></div>
                             <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem;">
-                                Outperforms baselines by considering the paper's disciplinary field, open-access status, and author network alongside early citation count.
+                                The selected forecast uses paper features and early citation history. The experimental GNN did not improve the validation-selected ensemble.
                             </p>
                         </div>
 

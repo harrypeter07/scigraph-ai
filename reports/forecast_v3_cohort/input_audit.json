@@ -1,0 +1,25 @@
+{
+  "sizes": {
+    "train": 7500,
+    "selection": 750,
+    "calibration": 750,
+    "development_test": 4500
+  },
+  "annual_history_missing": {
+    "train": 0,
+    "validation": 0,
+    "development_test": 0
+  },
+  "feature_contract": "early-impact-v3-calendar",
+  "excluded_mutable_metadata": [
+    "current_OA",
+    "current_author_citations",
+    "current_venue_rank"
+  ],
+  "reference": "Unlabelled field/publication-year peers, each frozen at the shared year+2 cutoff; historical train-field fallback for unknown cohorts. Evaluation is cohort-assisted, not a new-cohort guarantee.",
+  "test_status": "Previously inspected development benchmark; a fresh mature temporal holdout is required for confirmation",
+  "data_sha256": {
+    "works.parquet": "319d8f7fbe2a8f5de8bb9b6941f64ce6eceb24866397fd2992a2c485cb8302b9",
+    "counts_by_year.parquet": "e55571b87c35da6a63bf47269c03002d1cd17bad218d40d593dea02ced7053a6"
+  }
+}

@@ -1,5 +1,11 @@
 # SciGraph AI 2.0 — Scientific Citation Impact Prediction & Independent Verification
 
+> **20 October 2026 update:** the expanded-corpus classifier measures **81.76% accuracy** (95% bootstrap CI 80.79–82.69%, macro-F1 0.7789) on 5,933 papers published in 2020. Their cutoff is 2022, when all training/selection/calibration labels have matured. The broader retrospective 2018–2020 result is 81.20%. These are sample-relative retrospective OpenAlex results, not a guarantee for new papers or proof of a complete point-in-time metadata audit. The original corpus and expanded random sample have different sampling distributions; scores are not directly comparable.
+>
+> The experimental citation GNN measures 80.70% on the eligible 2020 cohort; validation retains the stronger tabular forecast. See [implementation and measured results](reports/forecast_implementation_2026-10-20.md), [reproducible Colab notebook](notebooks/scigraph_verified_forecast_colab.ipynb), and [expanded evaluation](reports/expanded_forecast/evaluation.json). Historical benchmark tables below describe the original corpus.
+
+The overview and **Accuracy & Evidence** page read `web/data/forecast_evidence.json`, generated with `python scripts/publish_forecast_evidence.py`. The API verifies the loaded checkpoint checksum before identifying those results with the serving bundle. The selected `forecast_v3.joblib` and its model card are versioned for deployment. The larger experimental citation graph sidecar remains optional and requires PyTorch; production tabular serving does not require it. Reproduce or export the graph sidecar with the verified Colab workflow.
+
 > **Predicts whether an academic paper will achieve Low (<50th), Medium (50–90th), or High (≥90th) citation impact in its field and cohort, using only information available 2 years after publication ($T_{\text{cutoff}} = \text{pub\_year} + 2$).**
 
 ---

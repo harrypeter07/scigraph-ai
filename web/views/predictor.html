@@ -1,81 +1,36 @@
             <section id="viewPredictor" class="view-pane active">
                 <div class="bento">
                 
-                <!-- 1. Sleek Executive Header Row -->
-                <div class="dash-title-row span-12">
-                    <div>
-                        <h1 class="dash-title-main">Citation Impact &amp; Scientometric AI Overview</h1>
-                        <div class="dash-title-sub">HeteroSAGE GNN &bull; Temporal freeze at $t \le t_{\text{pub}} + 2\text{y}$ &bull; SCImago &bull; DOAJ</div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <div class="engine-segmented-control" role="tablist">
-                            <button type="button" class="seg-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">
-                                <span>Mode M <small class="seg-sub">(Scientometrics)</small></span>
-                            </button>
-                            <button type="button" class="seg-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">
-                                <span>Mode G <small class="seg-sub">(Gemini AI)</small></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- 2. Compact Search & Presets Toolbar -->
-                <div class="dash-search-toolbar span-12">
-                    <div class="search-bar-wrap" style="flex: 1; min-width: 280px;">
-                        <input type="text" id="paperInput" class="search-input" placeholder="Search OpenAlex Work ID (e.g. W4393188496), DOI, or title..." value="">
-                        <button class="btn-primary" id="btnRunPrediction" onclick="runPrediction()">Generate Forecast</button>
-                    </div>
-                    <div class="tier-quick-buttons" style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap;">
-                        <span style="font-size: 0.72rem; color: var(--text-tertiary); font-family: var(--font-mono); margin-right: 2px;">Presets:</span>
-                        <button type="button" class="tier-btn" style="background: rgba(139,92,246,0.18); color: #A78BFA; border-color: rgba(139,92,246,0.35);" onclick="loadSample('W4393188496')">AI Future (2024)</button>
-                        <button type="button" class="tier-btn high" onclick="loadSample('W2752782242')">High (≥90th)</button>
-                        <button type="button" class="tier-btn medium" onclick="loadSample('W2603777577')">Medium (50–90th)</button>
-                        <button type="button" class="tier-btn low" onclick="loadSample('W2580662672')">Low (&lt;50th)</button>
-                    </div>
-                    <select id="presetPaperSelect" class="preset-dropdown" style="display: none;" onchange="onPresetSelect(this.value)">
-                        <option value="W4393188496">AI: the future of humanity (2024, Soha Rawas)</option>
-                        <option value="W2752782242">High Impact (≥90th) — Squeeze-and-Excitation Networks (CVPR 2018)</option>
-                        <option value="W4386693657">Recent High Velocity (2023) — Generative AI (BISE Q1)</option>
-                        <option value="W2603777577">Medium Impact (50–90th) — Arbitrary Style Transfer (AdaIN) (ICCV 2017)</option>
-                        <option value="W2580662672">Low Impact (&lt;50th) — Gate-Variants of GRU Neural Networks (2017)</option>
-                    </select>
-                </div>
-
-                <!-- 3. Clean Standby State (Shown on Initial Load - Zero Fake Numbers) -->
-                <div id="predictionEmptyState" class="dash-empty-standby span-12">
-                    <div class="empty-standby-card">
-                        <div class="empty-standby-icon">✦</div>
-                        <h3 class="empty-standby-title">Ready to Forecast Citation Dynamics</h3>
-                        <p class="empty-standby-desc">Enter any scientific paper identifier above or click an evaluation preset to compute multi-relational citation trajectory, journal prestige, and calibrated 5-year impact.</p>
-                        <div class="empty-quick-pills">
-                            <button type="button" class="empty-quick-pill" onclick="loadSample('W4393188496')">
-                                <span style="color: #A78BFA; font-size: 1rem;">✦</span>
-                                <div>
-                                    <strong style="color: #FFFFFF; display: block;">AI: the future of humanity</strong>
-                                    <span style="color: var(--text-secondary); font-size: 0.72rem;">2024 &bull; Soha Rawas &bull; Discover Artificial Intelligence</span>
-                                </div>
-                                <span style="margin-left: auto; color: #A78BFA; font-size: 0.75rem; font-weight: 600;">Evaluate ↗</span>
-                            </button>
-                            <button type="button" class="empty-quick-pill" onclick="loadSample('W2752782242')">
-                                <span style="color: #10B981; font-size: 1rem;">✦</span>
-                                <div>
-                                    <strong style="color: #FFFFFF; display: block;">Squeeze-and-Excitation Networks</strong>
-                                    <span style="color: var(--text-secondary); font-size: 0.72rem;">CVPR 2018 &bull; High Tier Citation Outlier</span>
-                                </div>
-                                <span style="margin-left: auto; color: #10B981; font-size: 0.75rem; font-weight: 600;">Evaluate ↗</span>
-                            </button>
-                            <button type="button" class="empty-quick-pill" onclick="loadSample('W4386693657')">
-                                <span style="color: #3B82F6; font-size: 1rem;">✦</span>
-                                <div>
-                                    <strong style="color: #FFFFFF; display: block;">Generative AI in BISE</strong>
-                                    <span style="color: var(--text-secondary); font-size: 0.72rem;">2023 &bull; Q1 Journal &bull; Rapid Early Velocity</span>
-                                </div>
-                                <span style="margin-left: auto; color: #3B82F6; font-size: 0.75rem; font-weight: 600;">Evaluate ↗</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
+<div class="dash-title-row span-12">
+    <div><div class="eyebrow">Research with evidence</div><h1 class="dash-title-main">Understand a paper’s citation trajectory.</h1><p class="dash-title-sub">Explore early citation signals, an impact-tier forecast, and the evidence behind it.</p></div>
+    <div class="engine-segmented-control" role="group" aria-label="Explanation mode"><button type="button" class="seg-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">Model forecast</button><button type="button" class="seg-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">+ AI explanation</button></div>
+</div>
+<div class="overview-evidence" aria-label="Latest measured evaluation">
+    <article class="evidence-stat featured"><span class="evidence-stat-label">2020 test accuracy</span><strong class="evidence-stat-value" data-evidence="accuracy">—</strong><span class="evidence-stat-note"><span data-evidence="test-n">—</span> held-out works · sampled field/year tiers</span></article>
+    <article class="evidence-stat"><span class="evidence-stat-label">Macro-F1</span><strong class="evidence-stat-value" data-evidence="macro-f1">—</strong><span class="evidence-stat-note">Balances performance across all three tiers</span></article>
+    <article class="evidence-stat"><span class="evidence-stat-label">High-tier precision</span><strong class="evidence-stat-value" data-evidence="high-precision">—</strong><span class="evidence-stat-note">High predictions can still be wrong</span></article>
+    <article class="evidence-stat"><span class="evidence-stat-label">Experimental GNN accuracy</span><strong class="evidence-stat-value" data-evidence="gnn-accuracy">—</strong><span class="evidence-stat-note">Same 2020 cohort · not selected for serving</span></article>
+</div>
+<div class="evidence-context"><span>95% accuracy interval: <strong data-evidence="ci">—</strong></span><span>Retrospective OpenAlex evaluation</span><button type="button" onclick="switchTab('viewBenchmarks')">Explore results &amp; limitations ↗</button></div>
+<div class="dash-search-toolbar span-12">
+    <label class="search-label" for="paperInput">Which paper would you like to explore?</label>
+    <div class="search-bar-wrap"><input type="text" id="paperInput" class="search-input" placeholder="Paste a DOI, OpenAlex ID, or paper title" autocomplete="off" aria-describedby="paperSearchHelp"><button type="button" class="btn-primary" id="btnRunPrediction" onclick="runPrediction()">Analyze paper <span aria-hidden="true">↗</span></button></div>
+    <p class="search-helper" id="paperSearchHelp">Uses observations through <strong>publication year + 2</strong>. Incomplete history and uncertain forecasts are flagged.</p>
+    <select id="presetPaperSelect" hidden aria-label="Example papers" onchange="onPresetSelect(this.value)"></select>
+</div>
+<div id="predictionEmptyState" class="dash-empty-standby span-12">
+    <div class="research-start-grid">
+        <div><div class="eyebrow">From signal to understanding</div><h2>A forecast you can inspect.</h2><p>Citation impact describes how work is cited. Read the probabilities and observed evidence alongside the prediction.</p>
+            <div class="research-steps">
+                <div class="research-step"><span class="step-number">01</span><div><strong>Review early momentum</strong><p>See actual annual counts and your paper’s early-citation peer percentile.</p></div></div>
+                <div class="research-step"><span class="step-number">02</span><div><strong>Read all three probabilities</strong><p>Low, Medium, and High are uncertain citation-impact tiers, not scientific quality ratings.</p></div></div>
+                <div class="research-step"><span class="step-number">03</span><div><strong>Follow the evidence</strong><p>Inspect relationships, model sensitivities, and missing-data limitations.</p></div></div>
+            </div>
+        </div>
+        <div><div class="example-heading"><h3>Try a held-out example</h3><span>2020 · outcome hidden</span></div><div class="research-examples" id="forecastExamples"><p>Loading examples from the evaluated corpus…</p></div><p style="font-size:11px;margin-top:14px;">Examples come from the evaluated sample. They may behave differently from a recent or out-of-corpus paper.</p></div>
+    </div>
+</div>
                 <!-- Animated Skeleton Loading State -->
                 <div id="predictionSkeletonArea" class="editorial-panel span-12" style="display: none; padding: 1.5rem;">
                     <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
@@ -91,8 +46,8 @@
                 <!-- Async Loader Area -->
                 <div id="predictionLoadingArea" class="editorial-panel span-12" style="display: none; padding: 1.8rem; text-align: center;">
                     <div class="sg-spinner" style="margin: 0 auto 0.8rem; width: 32px; height: 32px; border: 3px solid rgba(139,92,246,0.2); border-top-color: var(--accent-purple); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-ink);" id="predictionLoadingTitle">Extracting 2-Hop Citation Graph &amp; Applying Temporal Cutoff...</div>
-                    <div style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 0.25rem;" id="predictionLoadingSubtitle">Conditioned strictly on t &le; t_pub + 2y. Verified via SCImago &amp; DOAJ.</div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-ink);" id="predictionLoadingTitle">Collecting citation history and preparing your forecast…</div>
+                    <div style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 0.25rem;" id="predictionLoadingSubtitle">Checking the observation window, available features, and evidence limitations.</div>
                 </div>
 
                 <!-- 4. Live Results Container (Executive Dark Dashboard) -->
@@ -269,9 +224,9 @@
                         <div style="padding: 0.85rem 1.15rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; background: #111723;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                                <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF; font-size: 0.95rem;">2-Hop HeteroSAGE GNN Knowledge Subgraph &amp; Message Passing</h3>
+                                <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF; font-size: 0.95rem;">Paper Relationships &amp; Evidence Context</h3>
                             </div>
-                            <span style="font-size: 0.72rem; color: #A78BFA; font-family: var(--font-mono);">Click any node to inspect GNN attribution</span>
+                            <span style="font-size: 0.72rem; color: #A78BFA; font-family: var(--font-mono);">Click a node to inspect its source; node influence is not measured</span>
                         </div>
 
                         <div class="bento" style="padding: 1rem 1.25rem;">
@@ -316,7 +271,7 @@
                         <!-- Connected Neighbors Influence Breakdown Table -->
                         <div style="padding: 0.75rem 1.25rem 1rem; border-top: 1px solid var(--border-subtle); background: var(--bg-surface-subtle);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                                <span style="font-size: 0.72rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.04em;">Connected Neighbors Influence Breakdown</span>
+                                <span style="font-size: 0.72rem; font-weight: 700; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.04em;">Connected Metadata &amp; Measurement Availability</span>
                                 <span style="font-size: 0.68rem; color: var(--text-tertiary); font-family: var(--font-mono);">Click row to focus node</span>
                             </div>
                             <div style="max-height: 160px; overflow-y: auto;">
@@ -392,32 +347,32 @@
                         <!-- Right Tile: Discipline Citation Velocity Heatmap (Span 4) -->
                         <div class="editorial-panel span-4 heatmap-tile">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                                <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Discipline Citation Matrix</h3>
+                                <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Observed Early Citation Profile</h3>
                                 <span style="font-size: 0.7rem; color: var(--text-tertiary); font-family: var(--font-mono);">OpenAlex • SCImago</span>
                             </div>
-                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.45rem;">Empirical cohort density distribution across temporal windows</div>
+                            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 0.45rem;">Recorded yearly counts through the observation cutoff</div>
 
                             <!-- Heatmap 7x6 Matrix -->
                             <div class="heatmap-matrix-grid" id="citationHeatmapGrid"></div>
 
                             <div style="display: flex; justify-content: space-between; margin-top: 0.65rem; padding-top: 0.65rem; border-top: 1px solid var(--border-subtle); font-size: 0.75rem;">
                                 <div>
-                                    <strong style="color: #10B981; display: block; font-size: 0.95rem;" id="heatStatPre">28%</strong>
-                                    <span style="color: var(--text-tertiary); font-size: 0.7rem;">Pre-Cutoff</span>
+                                    <strong style="color: #10B981; display: block; font-size: 0.95rem;" id="heatStatPre">—</strong>
+                                    <span style="color: var(--text-tertiary); font-size: 0.7rem;">Publication year</span>
                                 </div>
                                 <div>
-                                    <strong style="color: #8B5CF6; display: block; font-size: 0.95rem;" id="heatStatHorizon">60%</strong>
-                                    <span style="color: var(--text-tertiary); font-size: 0.7rem;">Window Horizon</span>
+                                    <strong style="color: #8B5CF6; display: block; font-size: 0.95rem;" id="heatStatHorizon">—</strong>
+                                    <span style="color: var(--text-tertiary); font-size: 0.7rem;">Year +1</span>
                                 </div>
                                 <div>
-                                    <strong style="color: #6366F1; display: block; font-size: 0.95rem;" id="heatStatOutlier">12%</strong>
-                                    <span style="color: var(--text-tertiary); font-size: 0.7rem;">Outlier Density</span>
+                                    <strong style="color: #6366F1; display: block; font-size: 0.95rem;" id="heatStatOutlier">—</strong>
+                                    <span style="color: var(--text-tertiary); font-size: 0.7rem;">Year +2</span>
                                 </div>
                             </div>
 
                             <div style="margin-top: 0.65rem; font-size: 0.72rem; color: var(--text-secondary); line-height: 1.4; display: flex; align-items: center; gap: 6px;">
                                 <span style="color: #A78BFA;">✦</span>
-                                <span id="citationHeatmapNote">Scientometric forecast: Based on multi-source lineage, early citation growth rate indicates stable middle-tier adoption.</span>
+                                <span id="citationHeatmapNote">Observed annual citation counts will appear when available.</span>
                             </div>
                         </div>
                     </div>

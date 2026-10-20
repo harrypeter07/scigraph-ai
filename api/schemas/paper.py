@@ -80,7 +80,7 @@ class BacktestComparison(BaseModel):
     predicted_label: Optional[str] = None
     is_correct_class: Optional[bool] = None
     actual_log_citations: Optional[float] = None
-    predicted_log_citations: float
+    predicted_log_citations: Optional[float] = None
     error_abs: Optional[float] = None
     error_log: Optional[float] = None
     absolute_error_log_citations: Optional[float] = None
@@ -105,7 +105,11 @@ class FeatureAttribution(BaseModel):
         "model | local_occlusion",
         "model | permutation",
         "model | linear_attribution",
+        "served_model | training_mean_occlusion",
+        "served_model | training_median_occlusion",
+        "served_graph_model | relation_removal_sensitivity",
     ] = "model | local_occlusion"
+    explained_class: Optional[int] = None
 
 
 class PaperPredictionResponse(BaseModel):
@@ -124,7 +128,7 @@ class PaperPredictionResponse(BaseModel):
     predicted_impact_label: Literal["Low (<50th)", "Medium (50-90th)", "High (>=90th)"]
     predicted_label: Optional[str] = None
     calibrated_probabilities: Dict[str, float]
-    predicted_future_citations_5y: float
+    predicted_future_citations_5y: Optional[float] = None
     citations_in_window: Optional[float] = None
     citations_window: Optional[float] = None
     split: Optional[str] = None
@@ -141,6 +145,10 @@ class PaperPredictionResponse(BaseModel):
     provenance: str = "openalex | scimago | core | model | computed"
     gemini_reasoning: Optional[str] = None
     mode: Optional[Literal["M", "G"]] = "M"
+    model_evidence: Optional[Dict[str, Any]] = None
+    model_insights: Optional[Dict[str, Any]] = None
+    graph_evidence: Optional[Dict[str, Any]] = None
+    prediction_reliability: Optional[Dict[str, Any]] = None
 
 
 class DatasetStatsResponse(BaseModel):

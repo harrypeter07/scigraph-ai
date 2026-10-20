@@ -16,7 +16,7 @@ let currentPredictionMode = 'M';
                 'viewTopicFeasibility': { link: 'tabLinkTopicFeasibility', title: 'Topic Feasibility & Success' },
                 'viewVerifyLab': { link: 'tabLinkVerify', title: 'Verification Lab' },
                 'viewAudit': { link: 'tabLinkAudit', title: 'Temporal & Leakage Audit' },
-                'viewBenchmarks': { link: 'tabLinkBenchmarks', title: 'Model Benchmarks' },
+                'viewBenchmarks': { link: 'tabLinkBenchmarks', title: 'Accuracy & Evidence' },
                 'viewCompare': { link: 'tabLinkCompare', title: 'Paper Comparison' }
             };
 

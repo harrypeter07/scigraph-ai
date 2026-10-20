@@ -1,8 +1,7 @@
 // SciGraph 2.4 PRO - Audit, Verification Lab & Paper Comparison
 
         async function loadBenchmarks() {
-            // Preserves the rigorous Slide 8 benchmark table rows already embedded in the HTML.
-            // Verified held-out dataset (N=4,500) results from PPT Slide 8.
+            if (typeof loadForecastEvidence === 'function') return loadForecastEvidence();
         }
 
         async function loadVerifySummary() {

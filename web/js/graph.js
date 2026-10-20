@@ -59,7 +59,7 @@ function updateNodeInspector(d) {
             const delta = d.attribution_delta || '0.0%';
             const dir = d.attribution_dir || 'neutral';
             aBadge.className = `insp-impact-badge ${dir}`;
-            aBadge.textContent = `${delta} (${dir === 'positive' ? 'Boosts High Tier' : (dir === 'negative' ? 'Drags to Low Tier' : 'Neutral')})`;
+            aBadge.textContent = `${delta} (${dir === 'positive' ? 'Supports predicted tier' : (dir === 'negative' ? 'Opposes predicted tier' : 'No measured effect')})`;
         } else {
             bBanner.style.display = 'none';
         }
@@ -82,7 +82,7 @@ function updateNodeInspector(d) {
 
     // Algorithmic Decision Insight
     if (inText) {
-        const narrative = d.insight || d.explanation || 'Structural node participating in multi-relational GNN message-passing aggregation.';
+        const narrative = d.insight || d.explanation || 'Observed relationship. Predictive influence has not been measured.';
         inText.innerHTML = narrative;
     }
 }
@@ -94,7 +94,8 @@ function renderSubgraph(data, containerId) {
 
     // Extract authentic model attributions
     const attributions = Array.isArray(data.attributions) ? data.attributions : [];
-    const findAttr = (kw) => attributions.find(a => (a.feature_name || '').toLowerCase().includes(kw)) || null;
+    // Feature occlusion is not an individual author's/venue node's influence.
+    const findAttr = () => null;
 
     const citationAttr = findAttr('citation') || findAttr('momentum');
     const authorAttr = findAttr('author');
@@ -105,25 +106,25 @@ function renderSubgraph(data, containerId) {
     // Empirical cohort reference thresholds
     const bTest = data.backtest || {};
     const tProv = bTest.threshold_provenance || {};
-    const p50 = typeof tProv.p50 === 'number' ? Math.round(tProv.p50) : 48;
-    const p90 = typeof tProv.p90 === 'number' ? Math.round(tProv.p90) : 320;
+    const p50 = typeof tProv.p50 === 'number' ? Math.round(tProv.p50) : 'Unavailable';
+    const p90 = typeof tProv.p90 === 'number' ? Math.round(tProv.p90) : 'Unavailable';
     const citsCutoff = Number(data.citations_at_cutoff ?? data.cutoff_citations ?? 0);
     const pubYr = data.publication_year || 2024;
     const cutoffYr = data.cutoff_year || (pubYr + 2);
     const predLabel = data.predicted_impact_label || data.predicted_label || '—';
-    const fieldName = data.primary_field || 'Computer Science';
+    const fieldName = data.primary_field || 'Unknown';
 
     // 1. Target Paper (Hop 0)
-    const cDelta = citationAttr ? `${citationAttr.direction === 'positive' ? '+' : '-'}${Math.abs(citationAttr.delta_percentage_points)}%` : '+0.0%';
+    const cDelta = citationAttr ? `${citationAttr.direction === 'positive' ? '+' : '-'}${Math.abs(citationAttr.delta_percentage_points)}%` : 'Not measured';
     const cDir = citationAttr ? citationAttr.direction : 'neutral';
 
     let targetInsight = '';
     if (predLabel.includes('Low')) {
-        targetInsight = `<strong>Decision Logic:</strong> With <strong>${citsCutoff.toLocaleString()} citations</strong> accumulated by cutoff (${cutoffYr}), this work performs below the field P90 threshold (<strong>${p90} cits</strong> in ${fieldName}). Despite early activity, the 2-year velocity confirms sub-outlier accumulation, focusing model probability into the Low (&lt;50th) tier.`;
+        targetInsight = `Recorded early citations: ${citsCutoff.toLocaleString()}. The classifier forecasts the Low tier. This is an uncertain citation-impact forecast, not a scientific quality judgment.`;
     } else if (predLabel.includes('High')) {
-        targetInsight = `<strong>Decision Logic:</strong> Accumulating <strong>${citsCutoff.toLocaleString()} citations</strong> by year ${cutoffYr} surpasses the empirical P90 threshold (<strong>${p90} cits</strong> in ${fieldName}). This rapid accumulation produces a <strong>${cDelta} probability lift</strong>, securing the High (≥90th) impact designation.`;
+        targetInsight = `Recorded early citations: ${citsCutoff.toLocaleString()}. The classifier forecasts the High tier. Early counts and future-window percentile thresholds measure different windows.`;
     } else {
-        targetInsight = `<strong>Decision Logic:</strong> With <strong>${citsCutoff.toLocaleString()} citations</strong> by cutoff (${cutoffYr}), early trajectory tracks between the P50 (<strong>${p50}</strong>) and P90 (<strong>${p90}</strong>) percentiles, yielding a balanced Medium (50–90th) forecast.`;
+        targetInsight = `Recorded early citations: ${citsCutoff.toLocaleString()}. The classifier forecasts the Medium tier. Inspect its probability distribution and historical evidence.`;
     }
 
     elements.push({
@@ -142,7 +143,7 @@ function renderSubgraph(data, containerId) {
                 { label: 'Cutoff Citations', val: `${citsCutoff.toLocaleString()} (t ≤ ${cutoffYr})` },
                 { label: 'Field P50 / P90', val: `${p50} / ${p90} cits` },
                 { label: 'Predicted Tier', val: predLabel },
-                { label: 'Split Invariance', val: data.in_train_split ? 'Train Set' : 'Held-Out Test' }
+                { label: 'Split Invariance', val: data.in_train_split ? 'Train Set' : 'Outside training / unknown' }
             ],
             insight: targetInsight
         }
@@ -157,15 +158,15 @@ function renderSubgraph(data, containerId) {
             institutions: []
         }));
 
-    const aDelta = authorAttr ? `${authorAttr.direction === 'positive' ? '+' : '-'}${Math.abs(authorAttr.delta_percentage_points)}%` : '+0.0%';
+    const aDelta = authorAttr ? `${authorAttr.direction === 'positive' ? '+' : '-'}${Math.abs(authorAttr.delta_percentage_points)}%` : 'Not measured';
     const aDir = authorAttr ? authorAttr.direction : 'neutral';
 
     authorList.slice(0, 3).forEach((auth, i) => {
         const aid = `auth_${i}`;
         const pos = auth.position || 'middle';
-        const posLabel = pos === 'first' ? 'Lead Author (1st)' : (pos === 'last' ? 'Senior / PI Author' : 'Co-Author');
+        const posLabel = pos === 'first' ? 'First-listed author' : (pos === 'last' ? 'Last-listed author' : 'Listed author');
 
-        const authInsight = `<strong>Message-Passing Flow:</strong> Author <strong>${auth.name}</strong> (${posLabel}) acts as a direct Hop 1 contributor. In HeteroSAGE, author historical citation velocity and co-authorship degree are aggregated with a <strong>${aDelta} feature attribution</strong>, providing foundational collaborative context.`;
+        const authInsight = `Authorship recorded for ${auth.name}. Authorship position is metadata; an individual author effect on the tier has not been measured.`;
 
         elements.push({
             data: {
@@ -194,7 +195,7 @@ function renderSubgraph(data, containerId) {
         const insts = (auth.institutions && auth.institutions.length > 0) ? auth.institutions.slice(0, 1) : [];
         insts.forEach((instName, j) => {
             const iid = `inst_${i}_${j}`;
-            const sDelta = structAttr ? `${structAttr.direction === 'positive' ? '+' : '-'}${Math.abs(structAttr.delta_percentage_points)}%` : '+0.0%';
+            const sDelta = structAttr ? `${structAttr.direction === 'positive' ? '+' : '-'}${Math.abs(structAttr.delta_percentage_points)}%` : 'Not measured';
             const sDir = structAttr ? structAttr.direction : 'neutral';
 
             elements.push({
@@ -213,9 +214,9 @@ function renderSubgraph(data, containerId) {
                         { label: 'Institution', val: instName },
                         { label: 'Affiliated Author', val: auth.name },
                         { label: 'Network Distance', val: 'Hop 2 (Structural Context)' },
-                        { label: 'Prestige Flow', val: 'Inst → Author → Paper' }
+                        { label: 'Prestige Flow', val: 'Recorded affiliation' }
                     ],
-                    insight: `<strong>Structural Endowment:</strong> <strong>${instName}</strong> supplies secondary structural regularization at Hop 2. Institutional co-author networks channel research infrastructure weight into the primary author embedding during GNN convolution.`
+                    insight: `Recorded affiliation: ${instName}. Institutional prestige or a causal effect on future citations is not established by this relationship.`
                 }
             });
             elements.push({ data: { source: aid, target: iid, label: 'affiliated_with' } });
@@ -226,14 +227,14 @@ function renderSubgraph(data, containerId) {
     if (data.venue) {
         const v = data.venue;
         const vName = v.venue_name || 'Academic Venue';
-        const vTier = v.quartile || v.core_rank || 'Peer-Reviewed';
-        const vDelta = venueAttr ? `${venueAttr.direction === 'positive' ? '+' : '-'}${Math.abs(venueAttr.delta_percentage_points)}%` : '+0.0%';
+        const vTier = v.quartile || v.core_rank || 'Rank unavailable';
+        const vDelta = venueAttr ? `${venueAttr.direction === 'positive' ? '+' : '-'}${Math.abs(venueAttr.delta_percentage_points)}%` : 'Not measured';
         const vDir = venueAttr ? venueAttr.direction : 'neutral';
 
         const isQ1 = (v.quartile === 'Q1' || v.core_rank === 'A*' || v.core_rank === 'A');
         const vInsight = isQ1
-            ? `<strong>Prestige Multiplier:</strong> Published in <strong>${vName}</strong> (${v.quartile || 'Elite'}, SJR ${v.sjr_score ? Number(v.sjr_score).toFixed(2) : 'Cataloged'}). Verified editorial selectivity provides a <strong>${vDelta} positive boost</strong> to high-impact likelihood.`
-            : `<strong>Standard Venue Context:</strong> <strong>${vName}</strong> (${v.quartile || 'Indexed'}, SJR ${v.sjr_score ? Number(v.sjr_score).toFixed(2) : '0.0'}) provides standard dissemination without outlier inflation, focusing model reliance on paper-level citation velocity.`;
+            ? `Recorded venue: ${vName}. Its catalog rank is descriptive metadata. A venue-specific probability boost has not been measured.`
+            : `Recorded venue: ${vName}. Missing ranking data is unknown; it does not imply poor scientific quality.`;
 
         elements.push({
             data: {
@@ -271,7 +272,7 @@ function renderSubgraph(data, containerId) {
                 hop_badge: 'HOP 1 (TOPIC)',
                 role_desc: 'Discipline & Topic Anchor',
                 attribution_name: 'Topic / Field Velocity Normalization',
-                attribution_delta: 'Calibrated',
+                attribution_delta: 'Not measured',
                 attribution_dir: 'neutral',
                 metrics: [
                     { label: 'Topic Concept', val: data.primary_topic },
@@ -279,7 +280,7 @@ function renderSubgraph(data, containerId) {
                     { label: 'Field P90 Threshold', val: `${p90} citations` },
                     { label: 'Dynamics Mode', val: 'Log-Growth Normalized' }
                 ],
-                insight: `<strong>Field Normalization:</strong> In <strong>${fieldName}</strong>, empirical citation cutpoints require <strong>${p90} citations</strong> to enter the 90th percentile, controlling for disciplinary citation velocity differences.`
+                insight: `Field/year early-citation ranks are model inputs when a matching reference is available. Future-window cutpoints describe sample-relative outcome labels; they do not measure early citation momentum.`
             }
         });
         elements.push({ data: { source: 'target', target: 'topic_node', label: 'has_topic' } });
@@ -288,15 +289,15 @@ function renderSubgraph(data, containerId) {
     // 5. Precursor References (Hop 1)
     const outflow = (data.lineage && Array.isArray(data.lineage.outflow_sample)) ? data.lineage.outflow_sample : [];
     const cdVal = Number((data.lineage && data.lineage.cd_index_5) || 0);
-    const lDelta = lineageAttr ? `${lineageAttr.direction === 'positive' ? '+' : '-'}${Math.abs(lineageAttr.delta_percentage_points)}%` : '+0.0%';
+    const lDelta = lineageAttr ? `${lineageAttr.direction === 'positive' ? '+' : '-'}${Math.abs(lineageAttr.delta_percentage_points)}%` : 'Not measured';
     const lDir = lineageAttr ? lineageAttr.direction : 'neutral';
 
     outflow.slice(0, 3).forEach((r, idx) => {
         const rid = `ref_${idx}`;
-        const refTitle = r.title || `Foundational Reference ${idx + 1}`;
+        const refTitle = r.title || `Reference ${idx + 1}`;
         const isConsolidating = cdVal <= 0;
 
-        const refInsight = `<strong>Lineage Impact:</strong> Cites precursor work <em>"${refTitle}"</em> (${(r.citation_count || 0).toLocaleString()} cits). The Wu et al. CD index of <strong>${cdVal.toFixed(4)}</strong> reflects a <strong>${isConsolidating ? 'consolidating paradigm' : 'disruptive branch'}</strong>, shifting the lineage attribution by <strong>${lDelta}</strong>.`;
+        const refInsight = `Recorded reference: ${refTitle}. A citation link alone does not establish disruption, scientific validity, or a measured contribution to the impact forecast.`;
 
         elements.push({
             data: {
@@ -306,7 +307,7 @@ function renderSubgraph(data, containerId) {
                 type: 'precursor',
                 hop: 1,
                 hop_badge: 'HOP 1 (PRECURSOR REF)',
-                role_desc: 'Foundational Precursor Reference',
+                role_desc: 'Recorded reference',
                 attribution_name: 'Lineage & Disruption (CD Index)',
                 attribution_delta: lDelta,
                 attribution_dir: lDir,
@@ -322,7 +323,31 @@ function renderSubgraph(data, containerId) {
         elements.push({ data: { source: 'target', target: rid, label: 'cites' } });
     });
 
-    // Populate Connected Neighbors Influence Breakdown Table
+    // Actual sampled neighbors used by the experimental citation predictor.
+    (data.graph_evidence?.neighbors || []).forEach((neighbor, index) => {
+        const id = `measured_neighbor_${index}`;
+        elements.push({ data: {
+            id, label: (neighbor.title || neighbor.work_id).slice(0, 24), full_label: neighbor.title || neighbor.work_id,
+            type: 'paper', hop: 1, hop_badge: 'SAMPLED CITATION NEIGHBOR',
+            role_desc: neighbor.relation === 'cited_by' ? 'Early citing paper' : 'Referenced paper',
+            metrics: [
+                { label: 'OpenAlex ID', val: neighbor.work_id },
+                { label: 'Publication year', val: neighbor.publication_year },
+                { label: 'Features observed through', val: neighbor.feature_cutoff },
+                { label: 'Individual node effect', val: 'Not measured' }
+            ],
+            insight: data.model_evidence?.gnn_used_for_tier
+                ? 'This paper supplies a sampled citation message. Relation-removal sensitivities describe complete relation groups, not individual node effects.'
+                : 'This is observed citation context. Validation did not select graph messages for this forecast; an individual node effect is not claimed.'
+        }});
+        elements.push({ data: {
+            source: neighbor.relation === 'cited_by' ? id : 'target',
+            target: neighbor.relation === 'cited_by' ? 'target' : id,
+            label: 'cites'
+        }});
+    });
+
+    // Populate connected metadata table.
     const tableBody = document.getElementById('connectedImpactTableBody');
     if (tableBody) {
         const influenceRows = [
@@ -341,7 +366,7 @@ function renderSubgraph(data, containerId) {
                 entity: data.venue.venue_name ? (data.venue.venue_name.slice(0, 28) + '...') : 'Venue',
                 type: 'Venue (Hop 1)',
                 signal: `${data.venue.quartile || 'Indexed'} (SJR: ${data.venue.sjr_score ? Number(data.venue.sjr_score).toFixed(2) : '—'})`,
-                delta: venueAttr ? `${venueAttr.direction === 'positive' ? '+' : '-'}${Math.abs(venueAttr.delta_percentage_points)}%` : '+0.0%',
+                delta: venueAttr ? `${venueAttr.direction === 'positive' ? '+' : '-'}${Math.abs(venueAttr.delta_percentage_points)}%` : 'Not measured',
                 dir: venueAttr ? venueAttr.direction : 'neutral'
             });
         }

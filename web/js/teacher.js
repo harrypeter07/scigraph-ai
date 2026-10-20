@@ -512,29 +512,7 @@
 
         async function loadTeacherScoreboardAndFooter() {
             try {
-                const bResp = await fetch('/api/v1/papers/benchmark');
-                if (bResp.ok) {
-                    const bData = await bResp.json();
-                    const summary = bData.summary || {};
-                    const m1 = summary.M1_LogisticRegression || {};
-                    const m0 = summary.M0_Majority || {};
-                    const b1 = summary.B1_EarlyCitationsOnly || {};
-
-                    if (m1.micro_f1_mean !== undefined) {
-                        const acc = (m1.micro_f1_mean * 100).toFixed(1) + '%';
-                        safeSetText('teacherScoreModelAcc', acc);
-                        safeSetText('teacherScoreModelF1', m1.macro_f1_mean.toFixed(4));
-                        safeSetText('topbarHeldoutAcc', acc + ' Acc');
-                    }
-                    if (m0.micro_f1_mean !== undefined) {
-                        safeSetText('teacherScoreMajAcc', (m0.micro_f1_mean * 100).toFixed(1) + '%');
-                        safeSetText('teacherScoreMajF1', m0.macro_f1_mean.toFixed(4));
-                    }
-                    if (b1.micro_f1_mean !== undefined) {
-                        safeSetText('teacherScoreEarlyAcc', (b1.micro_f1_mean * 100).toFixed(1) + '%');
-                        safeSetText('teacherScoreEarlyF1', b1.macro_f1_mean.toFixed(4));
-                    }
-                }
+                if (typeof loadForecastEvidence === 'function') await loadForecastEvidence();
             } catch (ignore) {}
 
             try {

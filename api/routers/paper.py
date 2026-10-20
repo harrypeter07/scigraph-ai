@@ -117,6 +117,16 @@ def get_benchmark_report():
     raise HTTPException(status_code=503, detail="Benchmark report is not generated yet.")
 
 
+@router.get("/forecast-evidence")
+def get_current_forecast_evidence():
+    """Published evaluation metrics, kept distinct from runtime verification."""
+    from api.forecast_evidence import get_forecast_evidence
+    try:
+        return get_forecast_evidence(settings.BASE_DIR, settings.CHECKPOINTS_DIR, inference_service)
+    except (OSError, ValueError, KeyError):
+        raise HTTPException(status_code=503, detail="Current evaluation evidence is unavailable.")
+
+
 @router.get("/corpus-sample")
 def get_corpus_sample(limit: int = Query(30, ge=1, le=100), randomize: bool = Query(False)):
     """Return diverse sample papers from local 16,500 works dataset for demonstration."""
@@ -363,25 +373,9 @@ async def predict_paper_impact(
                     cohort_info=t_info,
                     m1_prediction=prediction_dict
                 )
-                # Seamlessly update prediction payload with Gemini's intelligence
-                prediction_dict["predicted_impact_class"] = gemini_res["predicted_impact_class"]
-                prediction_dict["predicted_impact_label"] = gemini_res["predicted_impact_label"]
-                prediction_dict["predicted_label"] = gemini_res["predicted_label"]
-                prediction_dict["calibrated_probabilities"] = gemini_res["calibrated_probabilities"]
-                if gemini_res.get("predicted_future_citations_5y") is not None:
-                    prediction_dict["predicted_future_citations_5y"] = gemini_res["predicted_future_citations_5y"]
-                    prediction_dict["citations_in_window"] = gemini_res["predicted_future_citations_5y"]
-                    prediction_dict["citations_window"] = gemini_res["predicted_future_citations_5y"]
+                # LLM prose is commentary, not a calibrated replacement classifier.
                 prediction_dict["gemini_reasoning"] = gemini_res.get("gemini_reasoning")
                 prediction_dict["mode"] = "G"
-                prediction_dict["model_version"] = gemini_res.get("model_version", "Gemini (Mode G)")
-                if prediction_dict.get("backtest"):
-                    prediction_dict["backtest"]["predicted_impact_class"] = gemini_res["predicted_impact_class"]
-                    prediction_dict["backtest"]["predicted_label"] = gemini_res["predicted_label"]
-                    if prediction_dict["backtest"].get("has_ground_truth"):
-                        prediction_dict["backtest"]["is_correct_class"] = bool(
-                            gemini_res["predicted_impact_class"] == prediction_dict["backtest"].get("actual_impact_class")
-                        )
             except Exception as g_err:
                 logger.warning(f"Gemini evaluation failed, falling back to local M1: {g_err}")
                 prediction_dict["mode"] = "M"

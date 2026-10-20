@@ -230,15 +230,9 @@ async def compare_predicted_and_actual(
                     cohort_info=t_info,
                     m1_prediction=prediction
                 )
-                prediction["predicted_impact_class"] = gemini_res["predicted_impact_class"]
-                prediction["predicted_impact_label"] = gemini_res["predicted_impact_label"]
-                prediction["predicted_label"] = gemini_res["predicted_label"]
-                prediction["calibrated_probabilities"] = gemini_res["calibrated_probabilities"]
-                if gemini_res.get("predicted_future_citations_5y") is not None:
-                    prediction["predicted_future_citations_5y"] = gemini_res["predicted_future_citations_5y"]
+                # Preserve measured classifier output; attach prose separately.
                 prediction["gemini_reasoning"] = gemini_res.get("gemini_reasoning")
                 prediction["mode"] = "G"
-                prediction["model_version"] = gemini_res.get("model_version", "Gemini 2.5 Flash (Mode G)")
             except Exception as e:
                 logger.warning(f"Gemini compare fallback: {e}")
                 mode_clean = "M"

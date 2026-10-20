@@ -127,6 +127,19 @@ def get_current_forecast_evidence():
         raise HTTPException(status_code=503, detail="Current evaluation evidence is unavailable.")
 
 
+@router.get("/replay-sample")
+def get_replay_sample():
+    """Uniform random eligible 2020 example, without revealing its outcome."""
+    df = inference_service.df_works
+    if df is None or inference_service.forecast_bundle is None:
+        raise HTTPException(status_code=503, detail="Evaluated forecast corpus is unavailable.")
+    eligible = df[df["publication_year"] == 2020]
+    if eligible.empty:
+        raise HTTPException(status_code=503, detail="No eligible held-out examples available.")
+    row = eligible.sample(n=1).iloc[0]
+    return {"paper_id": str(row["work_id"]).split("/")[-1], "publication_year": 2020, "split": "test"}
+
+
 @router.get("/corpus-sample")
 def get_corpus_sample(limit: int = Query(30, ge=1, le=100), randomize: bool = Query(False)):
     """Return diverse sample papers from local 16,500 works dataset for demonstration."""

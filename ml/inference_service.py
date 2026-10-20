@@ -487,7 +487,7 @@ class ModelInferenceService:
             if stored_rows is not None and len(stored_rows) > 0 and "impact_class" in stored_rows.columns and pd.notnull(stored_rows.iloc[0]["impact_class"]):
                 actual_cls = int(stored_rows.iloc[0]["impact_class"])
                 actual_lbl = label_map[actual_cls]
-                provenance_str = "ground truth from corpus (works.parquet)"
+                provenance_str = "stored outcome from selected model evaluation corpus" if self.forecast_bundle is not None else "stored outcome from original works.parquet corpus"
                 if pd.notnull(stored_rows.iloc[0].get("future_citations_5y")):
                     actual_window = int(stored_rows.iloc[0]["future_citations_5y"])
                     actual_log = float(np.log1p(actual_window))

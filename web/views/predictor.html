@@ -78,10 +78,21 @@
                         <div id="econAdvCol"><span id="econAdvVal">—</span></div>
                         <span id="econDisruptionVal">—</span>
                         <div id="geminiReasoningCard"><div id="geminiConfidenceScore"></div><p id="geminiReasoningText"></p></div>
-                        <div id="sideBySideTruthPanel"></div>
-                        <div id="activeHorizonTruthPanel"></div>
                     </div>
 
+                    <section id="historicalReplay" class="replay-panel span-12" aria-labelledby="replayHeading">
+                        <div class="eyebrow">Historical backtest · prediction vs reality</div>
+                        <h2 id="replayHeading">Freeze the inputs. Reveal what happened.</h2>
+                        <p id="replayTimeline"></p><p id="replayMembership"></p>
+                        <div class="replay-columns">
+                            <div><span class="eyebrow">Model prediction</span><h3 id="replayPrediction"></h3><p id="replayProbabilities"></p><p id="replayModel"></p></div>
+                            <div><span class="eyebrow">Recorded outcome</span><button id="revealOutcomeButton" type="button" class="btn btn-primary" aria-expanded="false" aria-controls="replayActual">Reveal actual outcome</button><div id="replayActual" hidden aria-live="polite"><h3 id="replayActualTier"></h3><p id="replayActualCount"></p><p id="replayVerdict"></p><p id="replaySource"></p><a id="replaySourceLink" target="_blank" rel="noopener noreferrer">View OpenAlex record ↗</a></div><p id="replayUnavailable"></p></div>
+                        </div>
+                        <p class="replay-note">Retrospective replay using recorded citation histories, not a prediction saved at that historical date. Citation tiers describe sampled peers, not scientific truth or research quality. The model predicts a tier, not an exact citation count.</p>
+                        <button id="downloadReplayButton" type="button" class="btn">Download prediction and verification record</button>
+                        <button type="button" onclick="analyzeRandomReplay(this)">Analyze a random held-out 2020 paper</button>
+                        <p id="randomReplayStatus" aria-live="polite"></p>
+                    </section>
                     <!-- UPPER ROW: PREDICTED IMPACT & CALIBRATED PROBABILITIES (HIGH / MEDIUM / LOW TIERS SHOWN UPPER) -->
                     <div class="upper-decision-grid span-12">
                         <!-- Upper Left: Vibrant Illuminated Insight Card -->
@@ -108,7 +119,7 @@
                             <div class="editorial-panel donut-widget-tile">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
                                     <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Calibrated Probabilities</h3>
-                                    <span style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">Softmax</span>
+                                    <span style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">Tier probabilities</span>
                                 </div>
                                 <div class="donut-inner-flex">
                                     <div class="donut-svg-wrap" style="position: relative; width: 105px; height: 105px; flex-shrink: 0; margin: 0 auto;">
@@ -136,7 +147,7 @@
                                             <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #64748B;"></span><span style="color: var(--text-secondary);">Low (&lt;50th)</span></div>
                                             <strong style="color: #FFFFFF;" id="probLowVal">—</strong>
                                         </div>
-                                        <div style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 2px;">Calibrated (T = 1.11)</div>
+                                        <div style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 2px;">Selected model calibration</div>
                                     </div>
                                 </div>
                             </div>
@@ -144,7 +155,7 @@
                             <!-- Upper Right: Radial Speedometer Arc Gauge -->
                             <div class="editorial-panel speedometer-widget-tile">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                                    <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Discipline Percentile Score</h3>
+                                    <h3 class="section-title" style="margin-bottom: 0; color: #FFFFFF;">Early Citation Peer Percentile</h3>
                                     <div class="dash-kpi-arrow-btn">↗</div>
                                 </div>
                                 <div class="speedometer-container">
@@ -165,7 +176,7 @@
                                     </div>
                                 </div>
                                 <div style="font-size: 0.7rem; color: var(--text-secondary); text-align: center;">
-                                    Relative to empirical cohort distribution ($N = 16,500$ works)
+                                    Relative to available sampled field/year peers; not a population-wide percentile.
                                 </div>
                             </div>
                         </div>
@@ -297,7 +308,7 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
                                 <div>
                                     <h3 class="section-title" style="margin-bottom: 0.15rem; color: #FFFFFF;">Active Citations Trajectory &amp; Level Dynamics</h3>
-                                    <p class="section-desc" style="margin-bottom: 0;">Multi-year citation curve up to the 5-year observation horizon.</p>
+                                    <p class="section-desc" style="margin-bottom: 0;">Recorded early citation history through the input cutoff.</p>
                                 </div>
                                 <div style="display: flex; gap: 8px; font-size: 0.72rem; color: var(--text-secondary);">
                                     <span style="display: inline-flex; align-items: center; gap: 4px;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981;"></span> Ingested</span>

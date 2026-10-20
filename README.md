@@ -165,3 +165,5 @@ scigraph/
 │   └── verify_sample.py        ← Independent external batch spot-checking
 └── tests/                      ← Comprehensive test suite (48/48 passing)
 ```
+
+Historical replay: each analysis now separates the frozen input years from the outcome window, labels train/validation/test membership, and lets users reveal verified stored outcomes. Unverified outcomes receive no correctness verdict. The JSON export preserves model, probabilities, dates, provenance, and limitations. Random replay samples are drawn uniformly from the eligible 2020 evaluation corpus without sending outcomes in the sample response. Run UI contract checks with `node --test tests/test_replay_ui.cjs`.

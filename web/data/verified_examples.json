@@ -1,0 +1,66 @@
+{
+  "forecast_bundle_sha256": "6d182c0f5ea8ba14257e6a18783d751ccdaf062b7ef07e60931d227833cc2fe0",
+  "selection": "Curated correct predictions; not a representative accuracy sample.",
+  "examples": [
+    {
+      "paper_id": "W3092589148",
+      "title": "Electronic and magnetic properties of $\\alpha$-FeGe$_2$ films embedded in vertical spin valve devices",
+      "publication_year": 2020,
+      "field": "Physics and Astronomy",
+      "predicted_label": "Low (<50th)",
+      "actual_label": "Low (<50th)",
+      "actual_citations_window": 0,
+      "verified_correct": true
+    },
+    {
+      "paper_id": "W3135037428",
+      "title": "Quantum supremacy in end-to-end intelligent IT. Pt. 2: State -of -art of quantum SW/HW computational gate-model toolkit",
+      "publication_year": 2020,
+      "field": "Computer Science",
+      "predicted_label": "Low (<50th)",
+      "actual_label": "Low (<50th)",
+      "actual_citations_window": 0,
+      "verified_correct": true
+    },
+    {
+      "paper_id": "W3016589751",
+      "title": "Thermal Method for Non-Destructive Control of Actual Coolant Mass Flow through a Heating Device",
+      "publication_year": 2020,
+      "field": "Engineering",
+      "predicted_label": "Medium (50-90th)",
+      "actual_label": "Medium (50-90th)",
+      "actual_citations_window": 1,
+      "verified_correct": true
+    },
+    {
+      "paper_id": "W3025210288",
+      "title": "Nature of the spin resonance mode in CeCoIn5",
+      "publication_year": 2020,
+      "field": "Physics and Astronomy",
+      "predicted_label": "Medium (50-90th)",
+      "actual_label": "Medium (50-90th)",
+      "actual_citations_window": 10,
+      "verified_correct": true
+    },
+    {
+      "paper_id": "W3004297764",
+      "title": "Requirements for Gravitational Collapse in Planetesimal Formation\u2014The Impact of Scales Set by Kelvin\u2013Helmholtz and Nonlinear Streaming Instability",
+      "publication_year": 2020,
+      "field": "Physics and Astronomy",
+      "predicted_label": "High (>=90th)",
+      "actual_label": "High (>=90th)",
+      "actual_citations_window": 26,
+      "verified_correct": true
+    },
+    {
+      "paper_id": "W3087680391",
+      "title": "Domain Decomposition with Local Impedance Conditions for the Helmholtz Equation with Absorption",
+      "publication_year": 2020,
+      "field": "Engineering",
+      "predicted_label": "High (>=90th)",
+      "actual_label": "High (>=90th)",
+      "actual_citations_window": 16,
+      "verified_correct": true
+    }
+  ]
+}

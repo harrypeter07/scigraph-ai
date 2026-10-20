@@ -7,6 +7,20 @@ from api.forecast_evidence import get_forecast_evidence
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_curated_examples_are_labeled_and_match_evaluated_bundle():
+    examples = json.loads((ROOT / "web/data/verified_examples.json").read_text())
+    evidence = json.loads((ROOT / "web/data/forecast_evidence.json").read_text())
+    assert examples["forecast_bundle_sha256"] == evidence["forecast_bundle_sha256"]
+    assert "not a representative" in examples["selection"]
+    assert len(examples["examples"]) == 6
+    assert len({r["predicted_label"] for r in examples["examples"]}) == 3
+    for row in examples["examples"]:
+        assert row["publication_year"] == 2020
+        assert row["verified_correct"] is True
+        assert row["predicted_label"] == row["actual_label"]
+        assert row["actual_citations_window"] >= 0
+
+
 def service(checksum=None, loaded=True, graph_weight=0):
     return SimpleNamespace(forecast_bundle={"model_name": "hist_leaves=31_weight=None"} if loaded else None,
                            forecast_bundle_sha256=checksum,

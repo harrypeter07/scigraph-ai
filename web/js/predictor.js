@@ -116,6 +116,7 @@ async function runPrediction() {
         if (skeleton) skeleton.style.display = 'none';
         if (loader) loader.style.display = 'none';
         renderPrediction(data);
+        document.getElementById('historicalReplay')?.scrollIntoView({behavior:'smooth', block:'start'});
     } catch (err) {
         console.error('Network error connecting to API:', err);
         if (skeleton) skeleton.style.display = 'none';

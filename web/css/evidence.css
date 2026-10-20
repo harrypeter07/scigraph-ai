@@ -136,3 +136,5 @@ body { background: #0b1018; }
 @media(max-width:640px){.replay-columns{grid-template-columns:1fr}.replay-panel{padding:18px}}
 
 .replay-panel button{border:1px solid #456b78;border-radius:8px;background:#183b49;color:#e5f4f4;padding:11px 16px;cursor:pointer;font:inherit}.replay-panel button:disabled{opacity:.75;cursor:default}.replay-panel a{color:#8fe5cc}.replay-columns .eyebrow{display:block;margin-bottom:12px}
+
+.verified-example-picker{margin-top:20px;padding:18px;border:1px solid #315457;border-radius:12px;background:#10252b}.verified-example-picker label{display:block;color:#8fe5cc;font-weight:600;margin-bottom:10px}.verified-example-picker select{width:100%;min-width:0;padding:12px;background:#101b29;color:#e4eeee;border:1px solid #456b78;border-radius:8px;font:inherit}.verified-example-picker p{font-size:12px;color:#b7cbd1;line-height:1.6;margin:10px 0 0}

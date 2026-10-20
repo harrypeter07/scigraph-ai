@@ -84,6 +84,7 @@ function renderForecastEvidence(data) {
         limitations.replaceChildren();
         (data.limitations || []).forEach(text => { const li = document.createElement('li'); li.textContent = text; limitations.appendChild(li); });
     }
+    loadVerifiedExamplePresets(data);
     const examples = document.getElementById('forecastExamples');
     if (examples) {
         examples.replaceChildren();
@@ -106,6 +107,32 @@ function renderForecastEvidence(data) {
     safeSetText('teacherScoreEarlyAcc', 'Not evaluated');
     safeSetText('teacherScoreEarlyF1', '—');
     safeSetText('evidenceLoadError', servingVerified ? '' : 'These are published evaluation results. The current server’s model bundle could not be verified.');
+}
+
+async function loadVerifiedExamplePresets(evidence) {
+    const select = document.getElementById('presetPaperSelect');
+    if (!select) return;
+    for (const path of ['/data/verified_examples.json', '/static/data/verified_examples.json']) {
+        try {
+            const response = await fetch(path, {cache:'no-store'});
+            if (!response.ok) continue;
+            const manifest = await response.json();
+            if (manifest.forecast_bundle_sha256 !== evidence.forecast_bundle_sha256) continue;
+            select.replaceChildren();
+            const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = 'Choose a verified correct example (2020)…'; select.appendChild(placeholder);
+            for (const example of manifest.examples || []) {
+                if (example.verified_correct !== true) continue;
+                const option = document.createElement('option');
+                option.value = example.paper_id;
+                option.textContent = `${example.predicted_label} · ${example.field} · ${example.title}`;
+                select.appendChild(option);
+            }
+            select.disabled = select.options.length < 2;
+            return;
+        } catch (_) { /* Try the other supported static mount. */ }
+    }
+    select.replaceChildren();
+    const option = document.createElement('option'); option.textContent = 'Verified examples unavailable on this server'; select.appendChild(option); select.disabled = true;
 }
 
 async function loadForecastEvidence() {

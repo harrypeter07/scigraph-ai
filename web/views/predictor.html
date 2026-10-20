@@ -17,7 +17,11 @@
     <label class="search-label" for="paperInput">Which paper would you like to explore?</label>
     <div class="search-bar-wrap"><input type="text" id="paperInput" class="search-input" placeholder="Paste a DOI, OpenAlex ID, or paper title" autocomplete="off" aria-describedby="paperSearchHelp"><button type="button" class="btn-primary" id="btnRunPrediction" onclick="runPrediction()">Analyze paper <span aria-hidden="true">↗</span></button></div>
     <p class="search-helper" id="paperSearchHelp">Uses observations through <strong>publication year + 2</strong>. Incomplete history and uncertain forecasts are flagged.</p>
-    <select id="presetPaperSelect" hidden aria-label="Example papers" onchange="onPresetSelect(this.value)"></select>
+    <div class="verified-example-picker">
+        <label for="presetPaperSelect">Verified demonstration papers · selected correct predictions</label>
+        <select id="presetPaperSelect" aria-describedby="verifiedExampleNote" onchange="onPresetSelect(this.value)" disabled><option value="">Loading verified examples…</option></select>
+        <p id="verifiedExampleNote">These are curated successes with recorded outcomes, not a representative accuracy sample. Use random held-out papers to examine failures too. Reveal the actual result after analysis.</p>
+    </div>
 </div>
 <div id="predictionEmptyState" class="dash-empty-standby span-12">
     <div class="research-start-grid">

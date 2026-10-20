@@ -45,7 +45,7 @@ function renderForecastEvidence(data) {
         [
             ['Gradient boosting', 'Selected forecast', primary.accuracy, primary.macro_f1, true],
             ['Citation GraphSAGE', 'Experimental · same cohort', data.gnn?.accuracy, data.gnn?.macro_f1, false],
-            ['Majority class', 'Always predicts Low', data.baseline?.accuracy, data.baseline?.macro_f1, false]
+            ['Majority class', 'Always predicts the lower peer tier', data.baseline?.accuracy, data.baseline?.macro_f1, false]
         ].forEach(([name, role, accuracy, f1, selected]) => {
             const row = document.createElement('tr');
             if (selected) row.className = 'selected';
@@ -75,7 +75,7 @@ function renderForecastEvidence(data) {
         ['Low', 'Medium', 'High'].forEach((name, index) => {
             const stats = primary.per_class?.[String(index)] || {};
             const row = document.createElement('tr');
-            [name, evidencePercent(stats.precision), evidencePercent(stats.recall), evidenceNumber(stats.support)].forEach(value => evidenceCell(row, value));
+            [peerTierLabel(name), evidencePercent(stats.precision), evidencePercent(stats.recall), evidenceNumber(stats.support)].forEach(value => evidenceCell(row, value));
             classes.appendChild(row);
         });
     }
@@ -124,7 +124,7 @@ async function loadVerifiedExamplePresets(evidence) {
                 if (example.verified_correct !== true) continue;
                 const option = document.createElement('option');
                 option.value = example.paper_id;
-                option.textContent = `${example.predicted_label} · ${example.field} · ${example.title}`;
+                option.textContent = `${peerTierLabel(example.predicted_label)} · ${example.field} · ${example.title}`;
                 select.appendChild(option);
             }
             select.disabled = select.options.length < 2;

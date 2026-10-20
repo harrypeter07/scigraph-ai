@@ -191,7 +191,7 @@ class ModelInferenceService:
                 vals = group["future_citations_5y"].dropna().to_numpy()
                 self.cohort_reference["by_field_year"][f"{field_name}::{year}"] = {
                     "p50": float(np.percentile(vals, 50)), "p90": float(np.percentile(vals, 90)),
-                    "cohort_level": "model_sample_field_year"
+                    "cohort_level": "model_sample_field_year", "n": int(len(vals))
                 }
 
     def get_cohort_threshold(self, field_name: Optional[str], pub_year: int) -> Dict[str, Any]:
@@ -204,7 +204,7 @@ class ModelInferenceService:
                 return {
                     "cohort_level": info.get("cohort_level", "field_year"),
                     "p50": float(info["p50"]),
-                    "p90": float(info["p90"])
+                    "p90": float(info["p90"]), "n": info.get("n")
                 }
 
             by_field = self.cohort_reference.get("by_field", {})

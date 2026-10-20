@@ -111,7 +111,7 @@ function renderSubgraph(data, containerId) {
     const citsCutoff = Number(data.citations_at_cutoff ?? data.cutoff_citations ?? 0);
     const pubYr = data.publication_year || 2024;
     const cutoffYr = data.cutoff_year || (pubYr + 2);
-    const predLabel = data.predicted_impact_label || data.predicted_label || '—';
+    const predLabel = peerTierLabel(data.predicted_impact_label || data.predicted_label || '—');
     const fieldName = data.primary_field || 'Unknown';
 
     // 1. Target Paper (Hop 0)

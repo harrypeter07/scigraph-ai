@@ -32,3 +32,10 @@ test('training examples explicitly disclose membership',()=>{
     const {nodes,render}=fixture(); render({...paper,split:'train'});
     assert.match(nodes.replayMembership.textContent,/cannot demonstrate unseen-paper accuracy/);
 });
+test('peer wording explains small counts with the matching outcome thresholds',()=>{
+    const {nodes,render}=fixture();
+    render({...paper,primary_field:'Engineering',backtest:{...paper.backtest,actual_label:'Medium (50-90th)',actual_citations_window:1,threshold_provenance:{cohort_level:'model_sample_field_year',p50:1,p90:16,n:1193}}});
+    assert.match(nodes.replayActualTier.textContent,/Middle citation tier \(sampled peers\)/);
+    assert.match(nodes.replayThresholds.textContent,/peer median 1 citations; top-tier threshold 16/);
+    assert.match(nodes.replayActualCount.textContent,/1 recorded citations/);
+});

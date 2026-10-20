@@ -3,13 +3,13 @@
                 
 
 <div class="dash-title-row span-12">
-    <div><div class="eyebrow">Research with evidence</div><h1 class="dash-title-main">Understand a paper’s citation trajectory.</h1><p class="dash-title-sub">Explore early citation signals, an impact-tier forecast, and the evidence behind it.</p></div>
+    <div><div class="eyebrow">Research with evidence</div><h1 class="dash-title-main">Understand a paper’s citation trajectory.</h1><p class="dash-title-sub">Explore early citation signals, a peer-relative citation-tier forecast, and the evidence behind it.</p></div>
     <div class="engine-segmented-control" role="group" aria-label="Explanation mode"><button type="button" class="seg-btn active" id="predModeBtnM" onclick="setPredictionMode('M')">Model forecast</button><button type="button" class="seg-btn mode-g" id="predModeBtnG" onclick="setPredictionMode('G')">+ AI explanation</button></div>
 </div>
 <div class="overview-evidence" aria-label="Latest measured evaluation">
     <article class="evidence-stat featured"><span class="evidence-stat-label">2020 test accuracy</span><strong class="evidence-stat-value" data-evidence="accuracy">—</strong><span class="evidence-stat-note"><span data-evidence="test-n">—</span> held-out works · sampled field/year tiers</span></article>
     <article class="evidence-stat"><span class="evidence-stat-label">Macro-F1</span><strong class="evidence-stat-value" data-evidence="macro-f1">—</strong><span class="evidence-stat-note">Balances performance across all three tiers</span></article>
-    <article class="evidence-stat"><span class="evidence-stat-label">High-tier precision</span><strong class="evidence-stat-value" data-evidence="high-precision">—</strong><span class="evidence-stat-note">High predictions can still be wrong</span></article>
+    <article class="evidence-stat"><span class="evidence-stat-label">Top-peer-tier precision</span><strong class="evidence-stat-value" data-evidence="high-precision">—</strong><span class="evidence-stat-note">Top-tier predictions can still be wrong</span></article>
     <article class="evidence-stat"><span class="evidence-stat-label">Experimental GNN accuracy</span><strong class="evidence-stat-value" data-evidence="gnn-accuracy">—</strong><span class="evidence-stat-note">Same 2020 cohort · not selected for serving</span></article>
 </div>
 <div class="evidence-context"><span>95% accuracy interval: <strong data-evidence="ci">—</strong></span><span>Retrospective OpenAlex evaluation</span><button type="button" onclick="switchTab('viewBenchmarks')">Explore results &amp; limitations ↗</button></div>
@@ -28,7 +28,7 @@
         <div><div class="eyebrow">From signal to understanding</div><h2>A forecast you can inspect.</h2><p>Citation impact describes how work is cited. Read the probabilities and observed evidence alongside the prediction.</p>
             <div class="research-steps">
                 <div class="research-step"><span class="step-number">01</span><div><strong>Review early momentum</strong><p>See actual annual counts and your paper’s early-citation peer percentile.</p></div></div>
-                <div class="research-step"><span class="step-number">02</span><div><strong>Read all three probabilities</strong><p>Low, Medium, and High are uncertain citation-impact tiers, not scientific quality ratings.</p></div></div>
+                <div class="research-step"><span class="step-number">02</span><div><strong>Read all three probabilities</strong><p>Lower, middle, and top tiers compare sampled peers. They do not mean tens, hundreds, or thousands of citations.</p></div></div>
                 <div class="research-step"><span class="step-number">03</span><div><strong>Follow the evidence</strong><p>Inspect relationships, model sensitivities, and missing-data limitations.</p></div></div>
             </div>
         </div>
@@ -90,7 +90,7 @@
                         <p id="replayTimeline"></p><p id="replayMembership"></p>
                         <div class="replay-columns">
                             <div><span class="eyebrow">Model prediction</span><h3 id="replayPrediction"></h3><p id="replayProbabilities"></p><p id="replayModel"></p></div>
-                            <div><span class="eyebrow">Recorded outcome</span><button id="revealOutcomeButton" type="button" class="btn btn-primary" aria-expanded="false" aria-controls="replayActual">Reveal actual outcome</button><div id="replayActual" hidden aria-live="polite"><h3 id="replayActualTier"></h3><p id="replayActualCount"></p><p id="replayVerdict"></p><p id="replaySource"></p><a id="replaySourceLink" target="_blank" rel="noopener noreferrer">View OpenAlex record ↗</a></div><p id="replayUnavailable"></p></div>
+                            <div><span class="eyebrow">Recorded outcome</span><button id="revealOutcomeButton" type="button" class="btn btn-primary" aria-expanded="false" aria-controls="replayActual">Reveal actual outcome</button><div id="replayActual" hidden aria-live="polite"><h3 id="replayActualTier"></h3><p id="replayActualCount"></p><p id="replayThresholds" class="replay-note"></p><p id="replayVerdict"></p><p id="replaySource"></p><a id="replaySourceLink" target="_blank" rel="noopener noreferrer">View OpenAlex record ↗</a></div><p id="replayUnavailable"></p></div>
                         </div>
                         <p class="replay-note">Retrospective replay using recorded citation histories, not a prediction saved at that historical date. Citation tiers describe sampled peers, not scientific truth or research quality. The model predicts a tier, not an exact citation count.</p>
                         <button id="downloadReplayButton" type="button" class="btn">Download prediction and verification record</button>
@@ -140,15 +140,15 @@
                                     </div>
                                     <div class="donut-legend-list">
                                         <div class="donut-legend-item">
-                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #10B981;"></span><span style="color: var(--text-secondary);">High (≥90th)</span></div>
+                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #10B981;"></span><span style="color: var(--text-secondary);">Top peer tier</span></div>
                                             <strong style="color: #FFFFFF;" id="probHighVal">—</strong>
                                         </div>
                                         <div class="donut-legend-item">
-                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #8B5CF6;"></span><span style="color: var(--text-secondary);">Medium (50–90th)</span></div>
+                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #8B5CF6;"></span><span style="color: var(--text-secondary);">Middle peer tier</span></div>
                                             <strong style="color: #FFFFFF;" id="probMedVal">—</strong>
                                         </div>
                                         <div class="donut-legend-item">
-                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #64748B;"></span><span style="color: var(--text-secondary);">Low (&lt;50th)</span></div>
+                                            <div style="display: flex; align-items: center;"><span class="donut-legend-dot" style="background: #64748B;"></span><span style="color: var(--text-secondary);">Lower peer tier</span></div>
                                             <strong style="color: #FFFFFF;" id="probLowVal">—</strong>
                                         </div>
                                         <div style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 2px;">Selected model calibration</div>

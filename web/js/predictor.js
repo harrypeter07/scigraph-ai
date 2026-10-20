@@ -1,5 +1,11 @@
 // SciGraph 2.4 PRO - Predictor View Logic
 
+function peerTierLabel(label) {
+    return String(label || '').replace(/High\s*(?:Impact|Tier)?\s*(?:\([^)]*\))?/gi, 'Top citation tier (sampled peers)')
+        .replace(/Medium\s*(?:Impact|Tier)?\s*(?:\([^)]*\))?/gi, 'Middle citation tier (sampled peers)')
+        .replace(/Low\s*(?:Impact|Tier)?\s*(?:\([^)]*\))?/gi, 'Lower citation tier (sampled peers)');
+}
+
 async function analyzeRandomReplay(button) {
     button.disabled = true;
     const status = document.getElementById('randomReplayStatus');
@@ -24,9 +30,9 @@ function renderHistoricalReplay(data) {
     safeSetText('replayTimeline', `Inputs: ${data.publication_year}–${data.cutoff_year} (publication year plus two calendar years). Outcome: ${start}–${end}. Later citation counts are excluded from forecast inputs.`);
     const membership = data.split === 'test' ? 'Held-out test paper: not used to fit the selected model.' : data.split === 'train' ? 'Training paper: this example cannot demonstrate unseen-paper accuracy.' : data.split === 'val' ? 'Validation paper: used for selection or calibration, not an independent test.' : 'Outside the evaluated corpus: independent outcome verification may be unavailable.';
     safeSetText('replayMembership', membership);
-    safeSetText('replayPrediction', data.predicted_label || data.predicted_impact_label || 'Unavailable');
+    safeSetText('replayPrediction', peerTierLabel(data.predicted_label || data.predicted_impact_label || 'Unavailable'));
     const probs = data.calibrated_probabilities || {};
-    safeSetText('replayProbabilities', Object.entries(probs).map(([tier, value]) => `${tier}: ${(Number(value)*100).toFixed(1)}%`).join(' · '));
+    safeSetText('replayProbabilities', Object.entries(probs).map(([tier, value]) => `${peerTierLabel(tier)}: ${(Number(value)*100).toFixed(1)}%`).join(' · '));
     safeSetText('replayModel', `Model: ${data.model_version || 'Unavailable'}`);
     const button = document.getElementById('revealOutcomeButton');
     const actual = document.getElementById('replayActual');
@@ -45,7 +51,12 @@ function renderHistoricalReplay(data) {
             safeSetText('randomReplayStatus', 'Outcome revealed for this selection.');
         };
     }
-    safeSetText('replayActualTier', verified ? bt.actual_label : '');
+    safeSetText('replayActualTier', verified ? peerTierLabel(bt.actual_label) : '');
+    const thresholds = bt.threshold_provenance || {};
+    const matching = thresholds.cohort_level === 'model_sample_field_year' || thresholds.cohort_level === 'field_year';
+    safeSetText('replayThresholds', verified && matching && Number.isFinite(thresholds.p50) && Number.isFinite(thresholds.p90)
+        ? `Comparison group: ${data.primary_field || 'field'} works published in ${data.publication_year}${thresholds.n ? ` · ${thresholds.n.toLocaleString()} sampled works` : ''}. Outcome window ${start}–${end}: peer median ${thresholds.p50} citations; top-tier threshold ${thresholds.p90}. Lower tier: below ${thresholds.p50}; middle tier: at least ${thresholds.p50} and below ${thresholds.p90}; top tier: at least ${thresholds.p90}. Small counts can rank in the middle when peers also receive few citations. Ties share a tier, so tier sizes need not equal exact percentile bands.`
+        : verified ? 'Matching field/year thresholds unavailable; do not interpret this category as an absolute citation-count band.' : '');
     safeSetText('replayActualCount', verified ? `${fmtNum(bt.actual_citations_window)} recorded citations during ${start}–${end}. Window total, not lifetime citations.` : '');
     safeSetText('replayVerdict', verified ? (bt.is_correct_class === true ? 'Matched: predicted and recorded citation tiers agree.' : bt.is_correct_class === false ? 'Did not match: predicted and recorded citation tiers differ.' : 'Match status unavailable.') : '');
     safeSetText('replaySource', verified ? `Source: ${bt.class_provenance || bt.provenance || 'Evaluation corpus'}. Stored snapshot; the live record can change.` : '');
@@ -315,11 +326,11 @@ function renderPrediction(data) {
     if (badgeEl) {
         badgeEl.className = 'dash-kpi-badge ' + (predCls === 2 ? 'positive' : (predCls === 1 ? 'purple' : 'dim'));
         if (predCls === 2) {
-            badgeEl.textContent = 'High Impact (≥90th)';
+            badgeEl.textContent = 'Top citation tier · sampled peers';
         } else if (predCls === 1) {
-            badgeEl.textContent = 'Medium Impact (50–90th)';
+            badgeEl.textContent = 'Middle citation tier · sampled peers';
         } else {
-            badgeEl.textContent = 'Low Impact (<50th)';
+            badgeEl.textContent = 'Lower citation tier · sampled peers';
         }
     }
 
@@ -471,7 +482,7 @@ function renderDashboardWidgets(data) {
     const pMed = pickP(['Medium (50-90th)', 'Medium']);
     const pLow = pickP(['Low (<50th)', 'Low']);
     const maxP = Math.max(pHigh, pMed, pLow);
-    const topTier = maxP === pHigh ? 'High Tier' : (maxP === pMed ? 'Medium Tier' : 'Low Tier');
+    const topTier = maxP === pHigh ? 'Top peer tier' : (maxP === pMed ? 'Middle peer tier' : 'Lower peer tier');
     const predCls = data.predicted_impact_class;
 
     safeSetText('donutCenterPct', `${maxP.toFixed(1)}%`);

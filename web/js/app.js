@@ -17,9 +17,9 @@ async function loadViewTemplates() {
     try {
         const responses = await Promise.all(
             viewList.map(async (v) => {
-                let res = await fetch(`/views/${v}?v=20261020-evidence1`);
+                let res = await fetch(`/views/${v}?v=20261020-replay3`);
                 if (!res.ok) {
-                    res = await fetch(`/static/views/${v}?v=20261020-evidence1`);
+                    res = await fetch(`/static/views/${v}?v=20261020-replay3`);
                 }
                 if (!res.ok) throw new Error(`HTTP ${res.status} fetching view ${v}`);
                 return res.text();

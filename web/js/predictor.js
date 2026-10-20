@@ -1,5 +1,66 @@
 // SciGraph 2.4 PRO - Predictor View Logic
 
+async function analyzeRandomReplay(button) {
+    button.disabled = true;
+    const status = document.getElementById('randomReplayStatus');
+    if (status) status.textContent = 'Selecting a random held-out 2020 work…';
+    try {
+        const response = await fetch('/api/v1/papers/replay-sample', {cache:'no-store'});
+        if (!response.ok) throw new Error('Eligible examples are unavailable on this server.');
+        const sample = await response.json();
+        document.getElementById('paperInput').value = sample.paper_id;
+        await runPrediction();
+        if (status) status.textContent = `Random selection: ${sample.paper_id}. Outcome hidden.`;
+    } catch (error) {
+        if (status) status.textContent = error.message;
+    } finally { button.disabled = false; }
+}
+
+function renderHistoricalReplay(data) {
+    const bt = data.backtest || {};
+    const verified = bt.has_ground_truth === true && bt.actual_label != null && bt.actual_citations_window != null;
+    const start = bt.window_start ?? Number(data.cutoff_year) + 1;
+    const end = bt.window_end ?? Number(data.publication_year) + 5;
+    safeSetText('replayTimeline', `Inputs: ${data.publication_year}–${data.cutoff_year} (publication year plus two calendar years). Outcome: ${start}–${end}. Later citation counts are excluded from forecast inputs.`);
+    const membership = data.split === 'test' ? 'Held-out test paper: not used to fit the selected model.' : data.split === 'train' ? 'Training paper: this example cannot demonstrate unseen-paper accuracy.' : data.split === 'val' ? 'Validation paper: used for selection or calibration, not an independent test.' : 'Outside the evaluated corpus: independent outcome verification may be unavailable.';
+    safeSetText('replayMembership', membership);
+    safeSetText('replayPrediction', data.predicted_label || data.predicted_impact_label || 'Unavailable');
+    const probs = data.calibrated_probabilities || {};
+    safeSetText('replayProbabilities', Object.entries(probs).map(([tier, value]) => `${tier}: ${(Number(value)*100).toFixed(1)}%`).join(' · '));
+    safeSetText('replayModel', `Model: ${data.model_version || 'Unavailable'}`);
+    const button = document.getElementById('revealOutcomeButton');
+    const actual = document.getElementById('replayActual');
+    if (actual) actual.hidden = true;
+    if (button) {
+        button.hidden = !verified;
+        button.disabled = false;
+        button.textContent = 'Reveal actual outcome';
+        button.setAttribute('aria-expanded', 'false');
+        button.onclick = () => {
+            actual.hidden = false;
+            button.setAttribute('aria-expanded', 'true');
+            button.textContent = 'Outcome revealed';
+            button.disabled = true;
+            safeSetText('replayUnavailable', '');
+            safeSetText('randomReplayStatus', 'Outcome revealed for this selection.');
+        };
+    }
+    safeSetText('replayActualTier', verified ? bt.actual_label : '');
+    safeSetText('replayActualCount', verified ? `${fmtNum(bt.actual_citations_window)} recorded citations during ${start}–${end}. Window total, not lifetime citations.` : '');
+    safeSetText('replayVerdict', verified ? (bt.is_correct_class === true ? 'Matched: predicted and recorded citation tiers agree.' : bt.is_correct_class === false ? 'Did not match: predicted and recorded citation tiers differ.' : 'Match status unavailable.') : '');
+    safeSetText('replaySource', verified ? `Source: ${bt.class_provenance || bt.provenance || 'Evaluation corpus'}. Stored snapshot; the live record can change.` : '');
+    const source = document.getElementById('replaySourceLink');
+    const cleanId = String(data.paper_id || '').split('/').pop();
+    if (source) { source.hidden = !/^W\d+$/.test(cleanId); source.href = /^W\d+$/.test(cleanId) ? `https://openalex.org/${cleanId}` : '#'; }
+    safeSetText('replayUnavailable', verified ? 'Outcome hidden until you choose to reveal it.' : `Actual outcome unavailable. ${bt.warning || 'No verified matching outcome exists in the evaluation corpus.'} No correctness verdict can be made.`);
+    const download = document.getElementById('downloadReplayButton');
+    if (download) download.onclick = () => {
+        const record = {replay_type:'retrospective_backtest', paper_id:data.paper_id, title:data.title, input_years:[data.publication_year,data.cutoff_year], outcome_years:[start,end], split:data.split, model_version:data.model_version, prediction:data.predicted_label || data.predicted_impact_label, probabilities:probs, verification:bt, limitations:data.prediction_reliability, exported_at:new Date().toISOString()};
+        const url = URL.createObjectURL(new Blob([JSON.stringify(record,null,2)], {type:'application/json'}));
+        const a = document.createElement('a'); a.href = url; a.download = `scigraph-verification-${cleanId || 'paper'}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url),1000);
+    };
+}
+
 function loadSample(id) {
     const input = document.getElementById('paperInput');
     if (input) input.value = id;
@@ -287,15 +348,10 @@ function renderPrediction(data) {
     const predWindow = data.predicted_future_citations_5y != null ? data.predicted_future_citations_5y : data.citations_in_window;
     safeSetText('resPredWindowCits', fmtNum(predWindow));
 
-    // Dual Verification Engine state preservation
-    const bt = data.backtest || {};
-    const historicalPanel = document.getElementById('sideBySideTruthPanel');
-    const activeHorizonPanel = document.getElementById('activeHorizonTruthPanel');
-    if (historicalPanel) historicalPanel.style.display = bt.has_ground_truth ? 'flex' : 'none';
-    if (activeHorizonPanel) activeHorizonPanel.style.display = bt.has_ground_truth ? 'none' : 'flex';
+    renderHistoricalReplay(data);
 
     // Glowing continuous spline wave curve
-    renderSplineWave(data.trajectory, data.cutoff_year, data.publication_year);
+    renderSplineWave((data.trajectory || []).filter(point => Number(point.year) <= Number(data.cutoff_year)), data.cutoff_year, data.publication_year);
 
     // Update Provenance Pill for Mode M vs Mode G
     const provPill = document.getElementById('forecastProvenancePill');
